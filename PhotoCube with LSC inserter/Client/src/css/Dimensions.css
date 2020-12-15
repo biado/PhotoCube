@@ -1,0 +1,15 @@
+.Container{
+    padding: 5px;
+}
+
+.displayInline{
+    display: inline-block;
+}
+
+.width50{
+    width: 50%;
+}
+
+.width100{
+    width: 100%;
+}

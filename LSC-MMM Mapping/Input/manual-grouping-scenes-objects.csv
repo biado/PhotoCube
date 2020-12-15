@@ -1,0 +1,183 @@
+Tag,ParentTag,PPTag,PPPTag,Tagset
+boating,transporting,Functions/affordances,,Attributes
+driving,transporting,Functions/affordances,,Attributes
+biking,transporting,Functions/affordances,,Attributes
+transporting,transporting,Functions/affordances,,Attributes
+sunbathing,beach activity,Functions/affordances,,Attributes
+touring,other,Functions/affordances,,Attributes
+hiking,mountain activity,Functions/affordances,,Attributes
+climbing,mountain activity,Functions/affordances,,Attributes
+camping,mountain activity,Functions/affordances,,Attributes
+reading,learning activity,Functions/affordances,,Attributes
+studying,learning activity,Functions/affordances,,Attributes
+training,learning activity,Functions/affordances,,Attributes
+research,learning activity,Functions/affordances,,Attributes
+diving,beach activity,Functions/affordances,,Attributes
+swimming,beach activity,Functions/affordances,,Attributes
+bathing,daily activity,Functions/affordances,,Attributes
+eating,daily activity,Functions/affordances,,Attributes
+cleaning,daily activity,Functions/affordances,,Attributes
+socializing,daily activity,Functions/affordances,,Attributes
+congregating,other,Functions/affordances,,Attributes
+waiting in line,daily activity,Functions/affordances,,Attributes
+competing,sports activity,Functions/affordances,,Attributes
+sports,sports activity,Functions/affordances,,Attributes
+exercise,sports activity,Functions/affordances,,Attributes
+playing,sports activity,Functions/affordances,,Attributes
+gaming,sports activity,Functions/affordances,,Attributes
+spectating,sports activity,Functions/affordances,,Attributes
+farming,other,Functions/affordances,,Attributes
+constructing,construction activity,Functions/affordances,,Attributes
+shopping,daily activity,Functions/affordances,,Attributes
+medical activity,other,Functions/affordances,,Attributes
+working,daily activity,Functions/affordances,,Attributes
+using tools,construction activity,Functions/affordances,,Attributes
+digging,construction activity,Functions/affordances,,Attributes
+conducting business,other,Functions/affordances,,Attributes
+praying,religious activity,Functions/affordances,,Attributes
+fencing,rails,Materials,,Attributes
+railing,rails,Materials,,Attributes
+wire,rails,Materials,,Attributes
+railroad,rails,Materials,,Attributes
+trees,vegetation,Materials,,Attributes
+grass,vegetation,Materials,,Attributes
+vegetation,vegetation,Materials,,Attributes
+shrubbery,vegetation,Materials,,Attributes
+foliage,vegetation,Materials,,Attributes
+leaves,vegetation,Materials,,Attributes
+flowers,vegetation,Materials,,Attributes
+asphalt,street,Materials,,Attributes
+pavement,street,Materials,,Attributes
+shingles,material,Materials,,Attributes
+carpet,material,Materials,,Attributes
+brick,material,Materials,,Attributes
+tiles,material,Materials,,Attributes
+concrete,material,Materials,,Attributes
+metal,material,Materials,,Attributes
+paper,material,Materials,,Attributes
+wood,material,Materials,,Attributes
+vinyl,material,Materials,,Attributes
+plastic,material,Materials,,Attributes
+cloth,material,Materials,,Attributes
+sand,material,Materials,,Attributes
+rock,material,Materials,,Attributes
+dirt,material,Materials,,Attributes
+marble,material,Materials,,Attributes
+glass,material,Materials,,Attributes
+surf,water,Materials,,Attributes
+ocean,water,Materials,,Attributes
+running water,water,Materials,,Attributes
+still water,water,Materials,,Attributes
+ice,water,Materials,,Attributes
+snow,weather,Materials,,Attributes
+clouds,weather,Materials,,Attributes
+smoke,other,Materials,,Attributes
+fire,other,Materials,,Attributes
+natural light,,Lighting,,Attributes
+sunny,,Lighting,,Attributes
+indoor lighting,,Lighting,,Attributes
+aged,,Surface properties,,Attributes
+glossy,,Surface properties,,Attributes
+matte,,Surface properties,,Attributes
+sterile,,Surface properties,,Attributes
+moist,,Surface properties,,Attributes
+dry,,Surface properties,,Attributes
+dirty,,Surface properties,,Attributes
+rusty,,Surface properties,,Attributes
+warm,,Surface properties,,Attributes
+cold,,Surface properties,,Attributes
+natural,scenery,Spatial envelope,,Attributes
+man-made,scenery,Spatial envelope,,Attributes
+open area,scenery,Spatial envelope,,Attributes
+semi-enclosed area,scenery,Spatial envelope,,Attributes
+enclosed area,scenery,Spatial envelope,,Attributes
+far-away horizon,scenery,Spatial envelope,,Attributes
+no horizon,scenery,Spatial envelope,,Attributes
+rugged scene,scenery,Spatial envelope,,Attributes
+vertical components,space,Spatial envelope,,Attributes
+horizontal components,space,Spatial envelope,,Attributes
+symmetrical,space,Spatial envelope,,Attributes
+cluttered space,space,Spatial envelope,,Attributes
+scary,mood,Spatial envelope,,Attributes
+soothing,mood,Spatial envelope,,Attributes
+stressful,mood,Spatial envelope,,Attributes
+person,,person,Organism,Concept
+bicycle,,vehicle,Item,Concept
+car,,vehicle,Item,Concept
+motorcycle,,vehicle,Item,Concept
+airplane,,vehicle,Item,Concept
+bus,,vehicle,Item,Concept
+train,,vehicle,Item,Concept
+truck,,vehicle,Item,Concept
+boat,,vehicle,Item,Concept
+traffic light,,outdoor,Item,Concept
+fire hydrant,,outdoor,Item,Concept
+stop sign,,outdoor,Item,Concept
+parking meter,,outdoor,Item,Concept
+bench,,outdoor,Item,Concept
+bird,,animal,Organism,Concept
+cat,,animal,Organism,Concept
+dog,,animal,Organism,Concept
+horse,,animal,Organism,Concept
+sheep,,animal,Organism,Concept
+cow,,animal,Organism,Concept
+elephant,,animal,Organism,Concept
+bear,,animal,Organism,Concept
+zebra,,animal,Organism,Concept
+giraffe,,animal,Organism,Concept
+backpack,bag,accessory,Item,Concept
+umbrella,other,accessory,Item,Concept
+handbag,bag,accessory,Item,Concept
+tie,other,accessory,Item,Concept
+suitcase,bag,accessory,Item,Concept
+frisbee,equipment,sports,Item,Concept
+skis,equipment,sports,Item,Concept
+snowboard,equipment,sports,Item,Concept
+sports ball,equipment,sports,Item,Concept
+kite,equipment,sports,Item,Concept
+baseball bat,equipment,sports,Item,Concept
+baseball glove,equipment,sports,Item,Concept
+skateboard,equipment,sports,Item,Concept
+surfboard,equipment,sports,Item,Concept
+tennis racket,equipment,sports,Item,Concept
+bottle,utensils,kitchen,Item,Concept
+wine glass,utensils,kitchen,Item,Concept
+cup,utensils,kitchen,Item,Concept
+fork,utensils,kitchen,Item,Concept
+knife,utensils,kitchen,Item,Concept
+spoon,utensils,kitchen,Item,Concept
+bowl,utensils,kitchen,Item,Concept
+banana,fruit,food,Item,Concept
+apple,fruit,food,Item,Concept
+sandwich,savory,food,Item,Concept
+orange,fruit,food,Item,Concept
+broccoli,vegetables,food,Item,Concept
+carrot,vegetables,food,Item,Concept
+hot dog,savory,food,Item,Concept
+pizza,savory,food,Item,Concept
+donut,sweet,food,Item,Concept
+cake,sweet,food,Item,Concept
+chair,,furniture,Item,Concept
+couch,,furniture,Item,Concept
+potted plant,,furniture,Item,Concept
+bed,,furniture,Item,Concept
+dining table,,furniture,Item,Concept
+toilet,,furniture,Item,Concept
+tv,,electronic,Item,Concept
+laptop,,electronic,Item,Concept
+mouse,,electronic,Item,Concept
+remote,,electronic,Item,Concept
+keyboard,,electronic,Item,Concept
+cell phone,,electronic,Item,Concept
+microwave,,appliance,Item,Concept
+oven,,appliance,Item,Concept
+toaster,,appliance,Item,Concept
+sink,,appliance,Item,Concept
+refrigerator,,appliance,Item,Concept
+book,,indoor,Item,Concept
+clock,,indoor,Item,Concept
+vase,,indoor,Item,Concept
+scissors,,indoor,Item,Concept
+teddy bear,,indoor,Item,Concept
+hair drier,,indoor,Item,Concept
+toothbrush,,indoor,Item,Concept
