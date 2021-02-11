@@ -10,13 +10,9 @@ This repository contains 3 directories:
 
 ## LSC-MMM Mapping
 
-This directory contains Java programs and its input/output files. It transforms Lifelog Search Challenge (LSC) dataset so that it can be mapped to Multi-dimensional Media Model (M-cube).
+This directory contains Java programs, that transform Lifelog Search Challenge (LSC) dataset. The goal is to map the LSC data to Multi-dimensional Media Model (M-cube).
 
-Note that some files are not uploaded here due to the size. The excluded files are:
-- LSC Visual Concept
-- LSC Metadata
-- lscImageTags.csv (output from Java program)
-- lscImageTags_No_Metadata.csv (output from Java program)
+The input files are deleted based on the LSC data usage terms.
 
 ## PhotoCube with LSC inserter
 
