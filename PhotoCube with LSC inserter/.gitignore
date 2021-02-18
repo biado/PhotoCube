@@ -1,3 +1,6 @@
+# Configuration file
+App.config
+
 # Binaries for programs and plugins
 *.exe
 *.dll
