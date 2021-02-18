@@ -9,6 +9,8 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using ObjectCubeServer;
 using SixLabors.ImageSharp;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
@@ -16,15 +18,18 @@ namespace ConsoleAppForInteractingWithDatabase
     /// Program that parses and adds the LSC data to the database.
     /// </summary>
     class Program
+
     {
+        private static NameValueCollection sAll = ConfigurationManager.AppSettings;
+
         static void Main(string[] args)
         {
             Console.WriteLine("Started up!");
 
-            int[] N = new int[] { 1000, 2000, 3000, 4000, 5000 }; // 191418 = Total number of LSC images, based on VisualConcept file.
-            string[] DB = new string[] { "LSC1KRefactor", "LSC2KRefactor", "LSC3KRefactor", "LSC4KRefactor", "LSC5KRefactor" };
+            int[] N = new int[] { 50 }; // 191418 = Total number of LSC images, based on VisualConcept file.
+            string[] DB = new string[] { "lsc50" };
 
-            string resultPath = "C:\\LSCImportExp\\Result_Doubling_No_Metadata.csv";
+            string resultPath = sAll.Get("resultPath");
             string experimentResult = "DB Name,Number of Images,Elapsed Time\n";
 
             for (int i = 0; i < N.Length; i++)
@@ -32,10 +37,9 @@ namespace ConsoleAppForInteractingWithDatabase
                 int num = N[i];
                 string dbName = DB[i];
 
-                string connectionString = "Server = (localdb)\\mssqllocaldb; Database = " + dbName +
-                                          "; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\" + dbName + ".mdf";
+                string connectionString = sAll.Get("connectionStringWithoutDB") + "Database = " + dbName + ";";
 
-                Console.WriteLine("Inserting " + num + " images into " + dbName);
+                Console.WriteLine("Inserting " + num + " images into " + dbName + " with RefactoredLSCInserter.");
 
                 // Starting the timer
                 Stopwatch stopWatch = new Stopwatch();
@@ -56,6 +60,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
                 Console.WriteLine("Done! Inserted " + num + " images to " + dbName + " database.");
                 Console.WriteLine("Took: " + elapsedTime + " in format: hh:mm:ss\n");
+
             }
 
             Console.WriteLine("Experiment results are saved at: " + resultPath);

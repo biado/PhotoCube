@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
@@ -21,26 +23,17 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToTagFile;
         private string pathToHierarchiesFile;
         private string pathToErrorLogFile;
+        private NameValueCollection sAll = ConfigurationManager.AppSettings;
 
         public LSCDatasetInsertExperimenterRefactored(int numOfImages, string connectionString)
         {
             this.numOfImages = numOfImages;
             this.connectionString = connectionString;
-            string computerName = System.Environment.MachineName;
-            switch (computerName)
-            {
-                case "DESKTOP-9RO8H19": // Laptop
-                    this.pathToDataset = @"C:\lsc2020";
-                    break;
-                default:
-                    throw new Exception("ComputerName is unknown, please specify path to dataset!");
-                    this.pathToDataset = @"?";
-                    break;
-            }
-
-            this.pathToTagFile = Path.Combine(pathToDataset, @"tags-and-hierarchies\PlanB_No_Metadata\lscImageTags_No_Metadata.csv");
-            this.pathToHierarchiesFile = Path.Combine(pathToDataset, @"tags-and-hierarchies\PlanB_No_Metadata\lscHierarchies_No_Metadata.csv");
-            this.pathToErrorLogFile = Path.Combine(pathToDataset, @"ErrorLogFiles\FileLoadError.txt");
+            this.pathToDataset = sAll.Get("pathToLscData");
+      
+            this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
+            this.pathToHierarchiesFile = Path.Combine(pathToDataset, @sAll.Get("LscHierarchiesFilePath"));
+            this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
         }
@@ -351,6 +344,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
             using (var context = new ObjectContext(connectionString))
             {
+                var rootNodes = new Dictionary<string, Node>();
                 try
                 {
                     using (StreamReader reader = new StreamReader(pathToHierarchiesFile))
@@ -400,9 +394,12 @@ namespace ConsoleAppForInteractingWithDatabase
                                 context.Update(hierarchyFromDb);
                                 context.SaveChanges();
 
-                                hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
-                                context.Update(hierarchyFromDb);
-                                context.SaveChanges();
+                                if (hierarchyName.Equals(parentTagName))
+                                {
+                                    hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
+                                    context.Update(hierarchyFromDb);
+                                    context.SaveChanges();
+                                }
                             }
 
                             //Adding child nodes:
@@ -424,12 +421,27 @@ namespace ConsoleAppForInteractingWithDatabase
                                     context.SaveChanges();
                                 }
 
-                                Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
-                                parentNodeFromDb.Children.Add(newChildNode);
-                                hierarchyFromDb.Nodes.Add(newChildNode);
-                                context.Update(parentNodeFromDb);
-                                context.Update(hierarchyFromDb);
-                                context.SaveChanges();
+                                //Finding child node:
+                                Node childNodeFromDb = context.Nodes
+                                    .Include(n => n.Children)
+                                    .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == childTagFromDb.Id)
+                                    .FirstOrDefault();
+
+                                if (childNodeFromDb == null)
+                                {
+                                    Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
+                                    parentNodeFromDb.Children.Add(newChildNode);
+                                    hierarchyFromDb.Nodes.Add(newChildNode);
+                                    context.Update(parentNodeFromDb);
+                                    context.Update(hierarchyFromDb);
+                                    context.SaveChanges();
+                                }
+                                else
+                                {
+                                    parentNodeFromDb.Children.Add(childNodeFromDb);
+                                    context.Update(parentNodeFromDb);
+                                    context.SaveChanges();
+                                }
                             }
 
                             lineCount++;
