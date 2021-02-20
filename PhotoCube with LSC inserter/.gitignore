@@ -1,5 +1,5 @@
 # Configuration file
-App.config
+Server/ObjectCubeServer/App.config
 
 # Binaries for programs and plugins
 *.exe
