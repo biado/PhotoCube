@@ -120,35 +120,13 @@ namespace ConsoleAppForInteractingWithDatabase
                                     //Thumbnails needs to be power of two in width and height to avoid extra image manipulation client side.
                                     if (image.Width > image.Height)
                                     {
-                                        int destinationHeight = 1024; //1024px
-                                        decimal downscaleFactor = Decimal.Parse(destinationHeight + "") /
-                                                                  Decimal.Parse(image.Height + "");
-                                        int newWidth = (int)(image.Width * downscaleFactor);
-                                        int newHeight = (int)(image.Height * downscaleFactor);
-                                        image.Mutate(i => i
-                                                .Resize(newWidth, newHeight) //Scale
-                                                .Crop(destinationHeight, destinationHeight) //Crop
-                                        );
+                                        resizeOriginalImageToMakeThumbnails(image, image.Height);
                                     }
                                     else
                                     {
-                                        int destinationWidth = 1024; //1024px
-                                        decimal downscaleFactor = Decimal.Parse(destinationWidth + "") /
-                                                                  Decimal.Parse(image.Width + "");
-                                        int newWidth = (int)(image.Width * downscaleFactor);
-                                        int newHeight = (int)(image.Height * downscaleFactor);
-                                        image.Mutate(i => i
-                                                .Resize(newWidth, newHeight) //Scale
-                                                .Crop(destinationWidth, destinationWidth) //Crop
-                                        );
+                                        resizeOriginalImageToMakeThumbnails(image, image.Width);
                                     }
 
-                                    //int destinationWidth = 1024; //1024px
-                                    //decimal downscaleFactor = Decimal.Parse(destinationWidth+"") / Decimal.Parse(image.Width+"");
-                                    //int newWidth = (int)(image.Width * downscaleFactor);
-                                    //int newHeight = (int)(image.Height * downscaleFactor);
-                                    //image.Mutate(i => i
-                                    //    .Resize(newWidth, newHeight));
                                     using (MemoryStream ms2 = new MemoryStream())
                                     {
                                         image.SaveAsJpeg(ms2); //Copy to ms
@@ -173,6 +151,19 @@ namespace ConsoleAppForInteractingWithDatabase
                 }
             }
 
+        }
+
+        private void resizeOriginalImageToMakeThumbnails(Image<Rgba32> image, int shortSide)
+        {
+            int destinationShortSide = 1024; //1024px
+            decimal downscaleFactor = Decimal.Parse(destinationShortSide + "") /
+                                      Decimal.Parse(shortSide + "");
+            int newWidth = (int)(image.Width * downscaleFactor);
+            int newHeight = (int)(image.Height * downscaleFactor);
+            image.Mutate(i => i
+                    .Resize(newWidth, newHeight) //Scale
+                    .Crop(destinationShortSide, destinationShortSide) //Crop
+            );
         }
 
         /// <summary>
@@ -374,7 +365,7 @@ namespace ConsoleAppForInteractingWithDatabase
                             }
 
                             //Finding parent tag:
-                            Tag parentTagFromDb = selectParentTagWithTagsetIdAndParentTagName(context, tagsetFromDb, parentTagName);
+                            Tag parentTagFromDb = selectTagWithTagsetIdAndTagName(context, tagsetFromDb, parentTagName);
 
                             //If parentTag does not exist, create it:
                             if (parentTagFromDb == null)
@@ -383,22 +374,17 @@ namespace ConsoleAppForInteractingWithDatabase
                             }
 
                             //Finding parent node:
-                            Node parentNodeFromDb = selectParentNodeWithChildrenAndHierarchyIdAndParentTagId(hierarchyFromDb, parentTagFromDb, context);
+                            Node parentNodeFromDb = selectNodeWithChildrenAndHierarchyIdAndTagId(hierarchyFromDb, parentTagFromDb, context);
 
                             //If parent node does not exist, create it:
                             if (parentNodeFromDb == null)
                             {
                                 //Probably root node:
-                                parentNodeFromDb = DomainClassFactory.NewNode(parentTagFromDb, hierarchyFromDb);
-                                hierarchyFromDb.Nodes.Add(parentNodeFromDb);
-                                context.Update(hierarchyFromDb);
-                                context.SaveChanges();
+                                parentNodeFromDb = createParentNodeAndSaveInDB(parentTagFromDb, hierarchyFromDb, context);
 
                                 if (hierarchyName.Equals(parentTagName))
                                 {
-                                    hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
-                                    context.Update(hierarchyFromDb);
-                                    context.SaveChanges();
+                                    addRootNodeIdToHierarchyAndSaveInDB(hierarchyFromDb, parentNodeFromDb, context);
                                 }
                             }
 
@@ -407,40 +393,24 @@ namespace ConsoleAppForInteractingWithDatabase
                             {
                                 string childTagName = split[i];
 
-                                Tag childTagFromDb = context.Tags
-                                    .Where(t => t.TagsetId == tagsetFromDb.Id && t.Name.Equals(childTagName))
-                                    .FirstOrDefault();
+                                Tag childTagFromDb = selectTagWithTagsetIdAndTagName(context, tagsetFromDb, childTagName);
 
                                 //If child tag does not exist, create it:
                                 if (childTagFromDb == null)
                                 {
-                                    childTagFromDb = DomainClassFactory.NewTag(childTagName, tagsetFromDb);
-                                    childTagFromDb.Tagset = tagsetFromDb;
-                                    tagsetFromDb.Tags.Add(childTagFromDb);
-                                    context.Update(tagsetFromDb);
-                                    context.SaveChanges();
+                                    childTagFromDb = createNewChildTagAndSaveInDB(childTagName, tagsetFromDb, context);
                                 }
 
                                 //Finding child node:
-                                Node childNodeFromDb = context.Nodes
-                                    .Include(n => n.Children)
-                                    .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == childTagFromDb.Id)
-                                    .FirstOrDefault();
+                                Node childNodeFromDb = selectNodeWithChildrenAndHierarchyIdAndTagId(hierarchyFromDb, childTagFromDb, context);
 
                                 if (childNodeFromDb == null)
                                 {
-                                    Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
-                                    parentNodeFromDb.Children.Add(newChildNode);
-                                    hierarchyFromDb.Nodes.Add(newChildNode);
-                                    context.Update(parentNodeFromDb);
-                                    context.Update(hierarchyFromDb);
-                                    context.SaveChanges();
+                                    createNewChildNodeAndSaveInDB(childTagFromDb, hierarchyFromDb, parentNodeFromDb, context);
                                 }
                                 else
                                 {
-                                    parentNodeFromDb.Children.Add(childNodeFromDb);
-                                    context.Update(parentNodeFromDb);
-                                    context.SaveChanges();
+                                    addChildNodeToParentNodeAndSaveInDB(parentNodeFromDb, childNodeFromDb, context);
                                 }
                             }
 
@@ -456,11 +426,54 @@ namespace ConsoleAppForInteractingWithDatabase
             }
         }
 
-        private Node selectParentNodeWithChildrenAndHierarchyIdAndParentTagId(Hierarchy hierarchyFromDb, Tag parentTagFromDb, ObjectContext context)
+        private void addChildNodeToParentNodeAndSaveInDB(Node parentNodeFromDb, Node childNodeFromDb, ObjectContext context)
+        {
+            parentNodeFromDb.Children.Add(childNodeFromDb);
+            context.Update(parentNodeFromDb);
+            context.SaveChanges();
+        }
+
+        private void createNewChildNodeAndSaveInDB(Tag childTagFromDb, Hierarchy hierarchyFromDb, Node parentNodeFromDb, ObjectContext context)
+        {
+            Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
+            parentNodeFromDb.Children.Add(newChildNode);
+            hierarchyFromDb.Nodes.Add(newChildNode);
+            context.Update(parentNodeFromDb);
+            context.Update(hierarchyFromDb);
+            context.SaveChanges();
+        }
+
+        private Tag createNewChildTagAndSaveInDB(string childTagName, Tagset tagsetFromDb, ObjectContext context)
+        {
+            Tag childTagFromDb = DomainClassFactory.NewTag(childTagName, tagsetFromDb);
+            childTagFromDb.Tagset = tagsetFromDb;
+            tagsetFromDb.Tags.Add(childTagFromDb);
+            context.Update(tagsetFromDb);
+            context.SaveChanges();
+            return childTagFromDb;
+        }
+
+        private void addRootNodeIdToHierarchyAndSaveInDB(Hierarchy hierarchyFromDb, Node parentNodeFromDb, ObjectContext context)
+        {
+            hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
+            context.Update(hierarchyFromDb);
+            context.SaveChanges();
+        }
+
+        private Node createParentNodeAndSaveInDB(Tag parentTagFromDb, Hierarchy hierarchyFromDb, ObjectContext context)
+        {
+            Node parentNodeFromDb = DomainClassFactory.NewNode(parentTagFromDb, hierarchyFromDb);
+            hierarchyFromDb.Nodes.Add(parentNodeFromDb);
+            context.Update(hierarchyFromDb);
+            context.SaveChanges();
+            return parentNodeFromDb;
+        }
+
+        private Node selectNodeWithChildrenAndHierarchyIdAndTagId(Hierarchy hierarchyFromDb, Tag tagFromDb, ObjectContext context)
         {
             return context.Nodes
                 .Include(n => n.Children)
-                .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == parentTagFromDb.Id)
+                .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == tagFromDb.Id)
                 .FirstOrDefault();
         }
 
@@ -474,10 +487,10 @@ namespace ConsoleAppForInteractingWithDatabase
             return parentTagFromDb;
         }
 
-        private Tag selectParentTagWithTagsetIdAndParentTagName(ObjectContext context, Tagset tagsetFromDb, string parentTagName)
+        private Tag selectTagWithTagsetIdAndTagName(ObjectContext context, Tagset tagsetFromDb, string tagName)
         {
             return context.Tags
-                .Where(t => t.TagsetId == tagsetFromDb.Id && t.Name.Equals(parentTagName))
+                .Where(t => t.TagsetId == tagsetFromDb.Id && t.Name.Equals(tagName))
                 .FirstOrDefault();
         }
 

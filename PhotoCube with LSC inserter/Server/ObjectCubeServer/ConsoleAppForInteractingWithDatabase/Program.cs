@@ -37,7 +37,23 @@ namespace ConsoleAppForInteractingWithDatabase
                 int num = N[i];
                 string dbName = DB[i];
 
-                string connectionString = sAll.Get("connectionStringWithoutDB") + "Database = " + dbName + ";";
+                OperatingSystem OS = Environment.OSVersion;
+                PlatformID platformId = OS.Platform;
+                string connectionString;
+
+                switch (platformId)
+                {
+                    case PlatformID.Unix: //Mac 
+                        connectionString = sAll.Get("connectionStringWithoutDB") + "Database = " + dbName + ";";
+                        break;
+                    case PlatformID.Win32NT: //Windows
+                        string[] splitConnectionStringFormat = sAll.Get("connectionStringWithoutDB").Split("***");
+                        connectionString = splitConnectionStringFormat[0] + dbName + splitConnectionStringFormat[1] +
+                                           dbName + splitConnectionStringFormat[2];
+                        break;
+                    default:
+                        throw new System.Exception("Connection String is not defined");
+                }
 
                 Console.WriteLine("Inserting " + num + " images into " + dbName + " with RefactoredLSCInserter.");
 
