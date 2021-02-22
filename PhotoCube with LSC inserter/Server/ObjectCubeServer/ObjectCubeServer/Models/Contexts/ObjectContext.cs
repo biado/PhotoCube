@@ -152,13 +152,11 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSC5KSQL; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSC5KSQL.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSC150Debug; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSC150Debug.mdf");
                     }
                     break;
                 default:
                     throw new System.Exception("Please specify the path to the database");
-                    optionsBuilder.UseSqlServer("?");
-                    break;
             }
         }
     }

@@ -1,3 +1,6 @@
+# Configuration file
+Server/ObjectCubeServer/App.config
+
 # Binaries for programs and plugins
 *.exe
 *.dll

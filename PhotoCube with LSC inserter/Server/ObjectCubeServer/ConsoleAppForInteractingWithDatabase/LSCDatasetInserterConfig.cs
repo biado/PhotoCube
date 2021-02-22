@@ -15,7 +15,7 @@ using System.Collections.Specialized;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
-    public class LSCDatasetInsertExperimenterRefactored
+    public class LSCDatasetInserterConfig
     {
         private int numOfImages;
         private string connectionString;
@@ -25,12 +25,12 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToErrorLogFile;
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
 
-        public LSCDatasetInsertExperimenterRefactored(int numOfImages, string connectionString)
+        public LSCDatasetInserterConfig(int numOfImages, string connectionString)
         {
             this.numOfImages = numOfImages;
             this.connectionString = connectionString;
             this.pathToDataset = sAll.Get("pathToLscData");
-      
+
             this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
             this.pathToHierarchiesFile = Path.Combine(pathToDataset, @sAll.Get("LscHierarchiesFilePath"));
             this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
@@ -120,13 +120,35 @@ namespace ConsoleAppForInteractingWithDatabase
                                     //Thumbnails needs to be power of two in width and height to avoid extra image manipulation client side.
                                     if (image.Width > image.Height)
                                     {
-                                        resizeOriginalImageToMakeThumbnails(image, image.Height);
+                                        int destinationHeight = 1024; //1024px
+                                        decimal downscaleFactor = Decimal.Parse(destinationHeight + "") /
+                                                                  Decimal.Parse(image.Height + "");
+                                        int newWidth = (int)(image.Width * downscaleFactor);
+                                        int newHeight = (int)(image.Height * downscaleFactor);
+                                        image.Mutate(i => i
+                                                .Resize(newWidth, newHeight) //Scale
+                                                .Crop(destinationHeight, destinationHeight) //Crop
+                                        );
                                     }
                                     else
                                     {
-                                        resizeOriginalImageToMakeThumbnails(image, image.Width);
+                                        int destinationWidth = 1024; //1024px
+                                        decimal downscaleFactor = Decimal.Parse(destinationWidth + "") /
+                                                                  Decimal.Parse(image.Width + "");
+                                        int newWidth = (int)(image.Width * downscaleFactor);
+                                        int newHeight = (int)(image.Height * downscaleFactor);
+                                        image.Mutate(i => i
+                                                .Resize(newWidth, newHeight) //Scale
+                                                .Crop(destinationWidth, destinationWidth) //Crop
+                                        );
                                     }
 
+                                    //int destinationWidth = 1024; //1024px
+                                    //decimal downscaleFactor = Decimal.Parse(destinationWidth+"") / Decimal.Parse(image.Width+"");
+                                    //int newWidth = (int)(image.Width * downscaleFactor);
+                                    //int newHeight = (int)(image.Height * downscaleFactor);
+                                    //image.Mutate(i => i
+                                    //    .Resize(newWidth, newHeight));
                                     using (MemoryStream ms2 = new MemoryStream())
                                     {
                                         image.SaveAsJpeg(ms2); //Copy to ms
@@ -153,19 +175,6 @@ namespace ConsoleAppForInteractingWithDatabase
 
         }
 
-        private void resizeOriginalImageToMakeThumbnails(Image<Rgba32> image, int shortSide)
-        {
-            int destinationShortSide = 1024; //1024px
-            decimal downscaleFactor = Decimal.Parse(destinationShortSide + "") /
-                                      Decimal.Parse(shortSide + "");
-            int newWidth = (int)(image.Width * downscaleFactor);
-            int newHeight = (int)(image.Height * downscaleFactor);
-            image.Mutate(i => i
-                    .Resize(newWidth, newHeight) //Scale
-                    .Crop(destinationShortSide, destinationShortSide) //Crop
-            );
-        }
-
         /// <summary>
         /// Parses and inserts tags and tagsets. Also tags Photos.
         /// </summary>
@@ -190,7 +199,11 @@ namespace ConsoleAppForInteractingWithDatabase
                             string[] split = line.Split(":");
                             string fileName = Path.Combine(pathToDataset, split[0]);
 
-                            CubeObject cubeObjectFromDb = selectCubeObjectWithFilenameAndPhotoAndOTRelations(context, fileName);
+                            CubeObject cubeObjectFromDb = context.CubeObjects
+                                .Where(co => co.Photo.FileName.Equals(fileName))
+                                .Include(co => co.Photo)
+                                .Include(co => co.ObjectTagRelations)
+                                .FirstOrDefault();
 
                             int numTagPairs = (split.Length - 2) / 2;
                             //Looping over each pair of tags:
@@ -202,14 +215,20 @@ namespace ConsoleAppForInteractingWithDatabase
                                 Tagset tagsetFromDb;
                                 if (!tagsetSeen.ContainsKey(tagsetName))
                                 {
-                                    tagsetFromDb = createNewTagsetAndSaveInDB(tagsetName, tagsetSeen, context);
+                                    tagsetFromDb = DomainClassFactory.NewTagSet(tagsetName);
+                                    tagsetSeen.Add(tagsetName, tagsetFromDb);
+                                    context.Tagsets.Add(tagsetFromDb);
+                                    context.SaveChanges();
 
                                     //Also creates a tag with same name:
                                     Tag tagWithSameNameAsTagset = DomainClassFactory.NewTag(tagsetName, tagsetFromDb);
                                     //Add tag to tagset:
-                                    addTagAndTagsetToEachOther(tagWithSameNameAsTagset, tagsetFromDb);
+                                    tagWithSameNameAsTagset.Tagset = tagsetFromDb;
+                                    tagsetFromDb.Tags.Add(tagWithSameNameAsTagset);
                                     //Add and update changes:
-                                    updateTagMapAndSaveChangedTagAndTagSetInDB(tagSeen, tagsetName, tagWithSameNameAsTagset, context);
+                                    tagSeen.Add(tagsetName, tagWithSameNameAsTagset);
+                                    context.Tags.Add(tagWithSameNameAsTagset);
+                                    context.SaveChanges();
                                 }
                                 else
                                 {
@@ -220,7 +239,10 @@ namespace ConsoleAppForInteractingWithDatabase
                                 Tag tagFromDb;
                                 if (!tagSeen.ContainsKey(tagName))
                                 {
-                                    tagFromDb = createNewTagAndSaveInDB(tagName, tagsetFromDb, context, tagSeen);
+                                    tagFromDb = DomainClassFactory.NewTag(tagName, tagsetFromDb);
+                                    tagSeen.Add(tagName, tagFromDb);
+                                    context.Tags.Add(tagFromDb);
+                                    context.SaveChanges();
                                 }
                                 else
                                 {
@@ -230,8 +252,11 @@ namespace ConsoleAppForInteractingWithDatabase
                                 //Add tag to tagset if tagset doesn't have it:
                                 if (!tagsetFromDb.Tags.Contains(tagFromDb))
                                 {
-                                    addTagAndTagsetToEachOther(tagFromDb, tagsetFromDb);
-                                    updateContextAndSaveInDB(context, tagsetFromDb, tagFromDb);
+                                    tagsetFromDb.Tags.Add(tagFromDb);
+                                    tagFromDb.Tagset = tagsetFromDb;
+                                    context.Update(tagsetFromDb);
+                                    context.Update(tagFromDb);
+                                    context.SaveChanges();
                                 }
 
                                 if (cubeObjectFromDb == null)
@@ -242,10 +267,13 @@ namespace ConsoleAppForInteractingWithDatabase
                                 }
                                 else
                                 {
-                                    if (!containsTagInObjectTagRelation(cubeObjectFromDb, tagFromDb)) 
-                                        //If Cubeobject does not already have tag asscociated with it, add it
+                                    if (cubeObjectFromDb.ObjectTagRelations
+                                            .FirstOrDefault(otr => otr.TagId == tagFromDb.Id) ==
+                                        null) //If Cubeobject does not already have tag asscociated with it, add it
                                     {
-                                        createNewObjectTagRelationAndAddToContext(tagFromDb, cubeObjectFromDb, context);
+                                        ObjectTagRelation newObjectTagRelation =
+                                            DomainClassFactory.NewObjectTagRelation(tagFromDb, cubeObjectFromDb);
+                                        context.ObjectTagRelations.Add(newObjectTagRelation);
                                     }
                                 }
                             }
@@ -262,68 +290,6 @@ namespace ConsoleAppForInteractingWithDatabase
                     Console.WriteLine(e.InnerException.Message);
                 }
             }
-        }
-
-        private void createNewObjectTagRelationAndAddToContext(Tag tagFromDb, CubeObject cubeObjectFromDb, ObjectContext context)
-        {
-            ObjectTagRelation newObjectTagRelation =
-                DomainClassFactory.NewObjectTagRelation(tagFromDb, cubeObjectFromDb);
-            context.ObjectTagRelations.Add(newObjectTagRelation);
-        }
-
-        private bool containsTagInObjectTagRelation(CubeObject cubeObjectFromDb, Tag tagFromDb)
-        {
-            return cubeObjectFromDb.ObjectTagRelations
-                       .FirstOrDefault(otr => otr.TagId == tagFromDb.Id) 
-                   != null;
-        }
-
-        private void updateContextAndSaveInDB(ObjectContext context, Tagset tagsetFromDb, Tag tagFromDb)
-        {
-            context.Update(tagsetFromDb);
-            context.Update(tagFromDb);
-            context.SaveChanges();
-        }
-
-        private Tag createNewTagAndSaveInDB(string tagName, Tagset tagsetFromDb, ObjectContext context, Dictionary<string, Tag> tagSeen)
-        {
-            Tag tagFromDb = DomainClassFactory.NewTag(tagName, tagsetFromDb);
-            tagSeen.Add(tagName, tagFromDb);
-            context.Tags.Add(tagFromDb);
-            context.SaveChanges();
-            return tagFromDb;
-        }
-
-        private void updateTagMapAndSaveChangedTagAndTagSetInDB(Dictionary<string, Tag> tagSeen, string tagsetName, Tag tagWithSameNameAsTagset, ObjectContext context)
-        {
-            tagSeen.Add(tagsetName, tagWithSameNameAsTagset);
-            context.Tags.Add(tagWithSameNameAsTagset);
-            context.SaveChanges();
-        }
-
-        private void addTagAndTagsetToEachOther(Tag tag, Tagset tagset)
-        {
-            tag.Tagset = tagset;
-            tagset.Tags.Add(tag);
-        }
-
-        private Tagset createNewTagsetAndSaveInDB(string tagsetName, Dictionary<string, Tagset> tagsetSeen, ObjectContext context)
-        {
-            Tagset tagsetFromDb = DomainClassFactory.NewTagSet(tagsetName);
-            tagsetSeen.Add(tagsetName, tagsetFromDb);
-            context.Tagsets.Add(tagsetFromDb);
-            context.SaveChanges();
-            return tagsetFromDb;
-        }
-
-        private CubeObject selectCubeObjectWithFilenameAndPhotoAndOTRelations(ObjectContext context, string fileName)
-        {
-            CubeObject cubeObjectFromDb = context.CubeObjects
-                .Where(co => co.Photo.FileName.Equals(fileName))
-                .Include(co => co.Photo)
-                .Include(co => co.ObjectTagRelations)
-                .FirstOrDefault();
-            return cubeObjectFromDb;
         }
 
         /// <summary>
@@ -353,38 +319,64 @@ namespace ConsoleAppForInteractingWithDatabase
                             string parentTagName = split[2];
 
                             //Finding tagset:
-                            Tagset tagsetFromDb = selectTagsetWithTagsetNameAndTagsAndHierarchies(context, tagsetName);
+                            Tagset tagsetFromDb = context.Tagsets
+                                .Where(ts => ts.Name.Equals(tagsetName))
+                                .Include(ts => ts.Tags)
+                                .Include(ts => ts.Hierarchies)
+                                .FirstOrDefault();
 
                             //See if hierarchy exists:
-                            Hierarchy hierarchyFromDb = selectHierarchyWithNodesAndHierarchyName(context, hierarchyName);
+                            Hierarchy hierarchyFromDb = context.Hierarchies
+                                .Include(h => h.Nodes)
+                                .Where(h => h.Name.Equals(hierarchyName))
+                                .FirstOrDefault();
 
                             //If hierarchyFromDb does not exist, create it:
                             if (hierarchyFromDb == null)
                             {
-                                hierarchyFromDb = createNewHierarchyAndSaveInDB(tagsetFromDb, context);
+                                hierarchyFromDb = DomainClassFactory.NewHierarchy(tagsetFromDb);
+                                tagsetFromDb.Hierarchies.Add(hierarchyFromDb);
+                                //hierarchyFromDb.Tagset = tagsetFromDb;
+                                context.Update(tagsetFromDb);
+                                context.Update(hierarchyFromDb);
+                                context.SaveChanges();
                             }
 
                             //Finding parent tag:
-                            Tag parentTagFromDb = selectTagWithTagsetIdAndTagName(context, tagsetFromDb, parentTagName);
+                            Tag parentTagFromDb = context.Tags
+                                .Where(t => t.TagsetId == tagsetFromDb.Id && t.Name.Equals(parentTagName))
+                                .FirstOrDefault();
 
                             //If parentTag does not exist, create it:
                             if (parentTagFromDb == null)
                             {
-                                parentTagFromDb = createNewParentTagAndSaveInDB(parentTagName, tagsetFromDb, context);
+                                parentTagFromDb = DomainClassFactory.NewTag(parentTagName, tagsetFromDb);
+                                tagsetFromDb.Tags.Add(parentTagFromDb);
+                                context.Tags.Add(parentTagFromDb);
+                                context.Update(tagsetFromDb);
+                                context.SaveChanges();
                             }
 
                             //Finding parent node:
-                            Node parentNodeFromDb = selectNodeWithChildrenAndHierarchyIdAndTagId(hierarchyFromDb, parentTagFromDb, context);
+                            Node parentNodeFromDb = context.Nodes
+                                .Include(n => n.Children)
+                                .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == parentTagFromDb.Id)
+                                .FirstOrDefault();
 
                             //If parent node does not exist, create it:
                             if (parentNodeFromDb == null)
                             {
                                 //Probably root node:
-                                parentNodeFromDb = createParentNodeAndSaveInDB(parentTagFromDb, hierarchyFromDb, context);
+                                parentNodeFromDb = DomainClassFactory.NewNode(parentTagFromDb, hierarchyFromDb);
+                                hierarchyFromDb.Nodes.Add(parentNodeFromDb);
+                                context.Update(hierarchyFromDb);
+                                context.SaveChanges();
 
                                 if (hierarchyName.Equals(parentTagName))
                                 {
-                                    addRootNodeIdToHierarchyAndSaveInDB(hierarchyFromDb, parentNodeFromDb, context);
+                                    hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
+                                    context.Update(hierarchyFromDb);
+                                    context.SaveChanges();
                                 }
                             }
 
@@ -393,24 +385,40 @@ namespace ConsoleAppForInteractingWithDatabase
                             {
                                 string childTagName = split[i];
 
-                                Tag childTagFromDb = selectTagWithTagsetIdAndTagName(context, tagsetFromDb, childTagName);
+                                Tag childTagFromDb = context.Tags
+                                    .Where(t => t.TagsetId == tagsetFromDb.Id && t.Name.Equals(childTagName))
+                                    .FirstOrDefault();
 
                                 //If child tag does not exist, create it:
                                 if (childTagFromDb == null)
                                 {
-                                    childTagFromDb = createNewChildTagAndSaveInDB(childTagName, tagsetFromDb, context);
+                                    childTagFromDb = DomainClassFactory.NewTag(childTagName, tagsetFromDb);
+                                    childTagFromDb.Tagset = tagsetFromDb;
+                                    tagsetFromDb.Tags.Add(childTagFromDb);
+                                    context.Update(tagsetFromDb);
+                                    context.SaveChanges();
                                 }
 
                                 //Finding child node:
-                                Node childNodeFromDb = selectNodeWithChildrenAndHierarchyIdAndTagId(hierarchyFromDb, childTagFromDb, context);
+                                Node childNodeFromDb = context.Nodes
+                                    .Include(n => n.Children)
+                                    .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == childTagFromDb.Id)
+                                    .FirstOrDefault();
 
                                 if (childNodeFromDb == null)
                                 {
-                                    createNewChildNodeAndSaveInDB(childTagFromDb, hierarchyFromDb, parentNodeFromDb, context);
+                                    Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
+                                    parentNodeFromDb.Children.Add(newChildNode);
+                                    hierarchyFromDb.Nodes.Add(newChildNode);
+                                    context.Update(parentNodeFromDb);
+                                    context.Update(hierarchyFromDb);
+                                    context.SaveChanges();
                                 }
                                 else
                                 {
-                                    addChildNodeToParentNodeAndSaveInDB(parentNodeFromDb, childNodeFromDb, context);
+                                    parentNodeFromDb.Children.Add(childNodeFromDb);
+                                    context.Update(parentNodeFromDb);
+                                    context.SaveChanges();
                                 }
                             }
 
@@ -424,102 +432,6 @@ namespace ConsoleAppForInteractingWithDatabase
                     Console.WriteLine(e.Message);
                 }
             }
-        }
-
-        private void addChildNodeToParentNodeAndSaveInDB(Node parentNodeFromDb, Node childNodeFromDb, ObjectContext context)
-        {
-            parentNodeFromDb.Children.Add(childNodeFromDb);
-            context.Update(parentNodeFromDb);
-            context.SaveChanges();
-        }
-
-        private void createNewChildNodeAndSaveInDB(Tag childTagFromDb, Hierarchy hierarchyFromDb, Node parentNodeFromDb, ObjectContext context)
-        {
-            Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
-            parentNodeFromDb.Children.Add(newChildNode);
-            hierarchyFromDb.Nodes.Add(newChildNode);
-            context.Update(parentNodeFromDb);
-            context.Update(hierarchyFromDb);
-            context.SaveChanges();
-        }
-
-        private Tag createNewChildTagAndSaveInDB(string childTagName, Tagset tagsetFromDb, ObjectContext context)
-        {
-            Tag childTagFromDb = DomainClassFactory.NewTag(childTagName, tagsetFromDb);
-            childTagFromDb.Tagset = tagsetFromDb;
-            tagsetFromDb.Tags.Add(childTagFromDb);
-            context.Update(tagsetFromDb);
-            context.SaveChanges();
-            return childTagFromDb;
-        }
-
-        private void addRootNodeIdToHierarchyAndSaveInDB(Hierarchy hierarchyFromDb, Node parentNodeFromDb, ObjectContext context)
-        {
-            hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
-            context.Update(hierarchyFromDb);
-            context.SaveChanges();
-        }
-
-        private Node createParentNodeAndSaveInDB(Tag parentTagFromDb, Hierarchy hierarchyFromDb, ObjectContext context)
-        {
-            Node parentNodeFromDb = DomainClassFactory.NewNode(parentTagFromDb, hierarchyFromDb);
-            hierarchyFromDb.Nodes.Add(parentNodeFromDb);
-            context.Update(hierarchyFromDb);
-            context.SaveChanges();
-            return parentNodeFromDb;
-        }
-
-        private Node selectNodeWithChildrenAndHierarchyIdAndTagId(Hierarchy hierarchyFromDb, Tag tagFromDb, ObjectContext context)
-        {
-            return context.Nodes
-                .Include(n => n.Children)
-                .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == tagFromDb.Id)
-                .FirstOrDefault();
-        }
-
-        private Tag createNewParentTagAndSaveInDB(string parentTagName, Tagset tagsetFromDb, ObjectContext context)
-        {
-            Tag parentTagFromDb = DomainClassFactory.NewTag(parentTagName, tagsetFromDb);
-            tagsetFromDb.Tags.Add(parentTagFromDb);
-            context.Tags.Add(parentTagFromDb);
-            context.Update(tagsetFromDb);
-            context.SaveChanges();
-            return parentTagFromDb;
-        }
-
-        private Tag selectTagWithTagsetIdAndTagName(ObjectContext context, Tagset tagsetFromDb, string tagName)
-        {
-            return context.Tags
-                .Where(t => t.TagsetId == tagsetFromDb.Id && t.Name.Equals(tagName))
-                .FirstOrDefault();
-        }
-
-        private Hierarchy createNewHierarchyAndSaveInDB(Tagset tagsetFromDb, ObjectContext context)
-        {
-            Hierarchy hierarchyFromDb = DomainClassFactory.NewHierarchy(tagsetFromDb);
-            tagsetFromDb.Hierarchies.Add(hierarchyFromDb);
-            //hierarchyFromDb.Tagset = tagsetFromDb;
-            context.Update(tagsetFromDb);
-            context.Update(hierarchyFromDb);
-            context.SaveChanges();
-            return hierarchyFromDb;
-        }
-
-        private Hierarchy selectHierarchyWithNodesAndHierarchyName(ObjectContext context, string hierarchyName)
-        {
-            return context.Hierarchies
-                .Include(h => h.Nodes)
-                .Where(h => h.Name.Equals(hierarchyName))
-                .FirstOrDefault();
-        }
-
-        private Tagset selectTagsetWithTagsetNameAndTagsAndHierarchies(ObjectContext context, string tagsetName)
-        {
-            return context.Tagsets
-                .Where(ts => ts.Name.Equals(tagsetName))
-                .Include(ts => ts.Tags)
-                .Include(ts => ts.Hierarchies)
-                .FirstOrDefault();
         }
     }
 }
