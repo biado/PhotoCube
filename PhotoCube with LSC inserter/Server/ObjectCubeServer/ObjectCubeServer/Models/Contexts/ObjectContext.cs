@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using ObjectCubeServer.Models.DomainClasses;
+using System;
+using System.Configuration;
 
 namespace ObjectCubeServer.Models.DataAccess
 {
@@ -129,29 +131,32 @@ namespace ObjectCubeServer.Models.DataAccess
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //base.OnConfiguring(optionsBuilder);
-            string computerName = System.Environment.MachineName;
-            switch (computerName)
+            OperatingSystem OS = Environment.OSVersion;
+            PlatformID platformId = OS.Platform;
+            switch (platformId)
             {
-                case "DESKTOP-T7BC3Q4": //Desktop
-                    optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = ObjectData; Trusted_Connection = True; AttachDbFileName=D:\\Databases\\ObjectDB.mdf");
+                case PlatformID.Unix: //Mac 
+                    if (connectionString != null)
+                    {
+                        optionsBuilder.UseNpgsql(connectionString);
+                    }
+                    else
+                    {
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc50; User Id = photocube; Password = postgres;");
+                    }
                     break;
-                case "DESKTOP-EO6T94J": //Laptop
-                    optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = ObjectData; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\ObjectDB.mdf");
-                    break;
-                case "DESKTOP-9RO8H19": // Laptop
+                case PlatformID.Win32NT: //Windows
                     if (connectionString != null)
                     {
                         optionsBuilder.UseSqlServer(connectionString);
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSC5KSQL; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSC5KSQL.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSC150Debug; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSC150Debug.mdf");
                     }
                     break;
                 default:
                     throw new System.Exception("Please specify the path to the database");
-                    optionsBuilder.UseSqlServer("?");
-                    break;
             }
         }
     }

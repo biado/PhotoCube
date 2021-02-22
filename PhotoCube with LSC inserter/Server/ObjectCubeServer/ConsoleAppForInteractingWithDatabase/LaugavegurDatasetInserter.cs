@@ -8,39 +8,26 @@ using SixLabors.ImageSharp.Processing;
 using System;
 using System.IO;
 using System.Linq;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
     public class LaugavegurDatasetInserter
     {
+        private static NameValueCollection sAll = ConfigurationManager.AppSettings;
+
         public static void InsertLaugavegurDataset()
         {
-            string pathToDataset;
             string pathToTagFile;
             string pathToHierarchiesFile;
             string pathToErrorLogFile;
 
-            string computerName = System.Environment.MachineName;
-            switch (computerName)
-            {
-                case "DESKTOP-T7BC3Q4": //Desktop
-                    pathToDataset = @"D:\LaugavegurData";
-                    break;
-                case "DESKTOP-EO6T94J": //Laptop
-                    pathToDataset = @"C:\LaugavegurData2\LaugavegurData";
-                    break;
-                case "DESKTOP-9RO8H19": //Jihye Laptop
-                    pathToDataset = @"C:\LaugavegurData";
-                    break;
-                default:
-                    throw new Exception("ComputerName is unknown, please specify path to dataset!");
-                    pathToDataset = @"?";
-                    break;
-            }
-
-            pathToTagFile = Path.Combine(pathToDataset, @"LaugavegurImageTags.csv");
-            pathToHierarchiesFile = Path.Combine(pathToDataset, @"LaugavegurHierarchiesV2.csv");
-            pathToErrorLogFile = Path.Combine(pathToDataset, @"ErrorLogFiles\FileLoadError.txt");
+            string pathToDataset = @sAll.Get("pathToLaugavegurData");
+           
+            pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LaugavegurTagFilePath"));
+            pathToHierarchiesFile = Path.Combine(pathToDataset, @sAll.Get("LaugavegurHierarchiesV2.csv"));
+            pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("ErrorLogFiles/FileLoadError.txt"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
             

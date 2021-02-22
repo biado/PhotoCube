@@ -10,10 +10,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
-    public class LSCDatasetInsertExperimenter
+    public class LSCDatasetInserterConfig
     {
         private int numOfImages;
         private string connectionString;
@@ -21,26 +23,17 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToTagFile;
         private string pathToHierarchiesFile;
         private string pathToErrorLogFile;
+        private NameValueCollection sAll = ConfigurationManager.AppSettings;
 
-        public LSCDatasetInsertExperimenter(int numOfImages, string connectionString)
+        public LSCDatasetInserterConfig(int numOfImages, string connectionString)
         {
             this.numOfImages = numOfImages;
             this.connectionString = connectionString;
-            string computerName = System.Environment.MachineName;
-            switch (computerName)
-            {
-                case "DESKTOP-9RO8H19": // Laptop
-                    this.pathToDataset = @"C:\lsc2020";
-                    break;
-                default:
-                    throw new Exception("ComputerName is unknown, please specify path to dataset!");
-                    this.pathToDataset = @"?";
-                    break;
-            }
+            this.pathToDataset = sAll.Get("pathToLscData");
 
-            this.pathToTagFile = Path.Combine(pathToDataset, @"tags-and-hierarchies\lscImageTags.csv");
-            this.pathToHierarchiesFile = Path.Combine(pathToDataset, @"tags-and-hierarchies\lscHierarchies.csv");
-            this.pathToErrorLogFile = Path.Combine(pathToDataset, @"ErrorLogFiles\FileLoadError.txt");
+            this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
+            this.pathToHierarchiesFile = Path.Combine(pathToDataset, @sAll.Get("LscHierarchiesFilePath"));
+            this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
         }
@@ -48,7 +41,7 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             var insertCubeObjects = true;
             var insertTags = true;
-            var insertHierarchies = false;
+            var insertHierarchies = true;
 
             if (insertCubeObjects)
             {
@@ -191,6 +184,8 @@ namespace ConsoleAppForInteractingWithDatabase
 
             using (var context = new ObjectContext(connectionString))
             {
+                var tagsetSeen = new Dictionary<string, Tagset>();
+                var tagSeen = new Dictionary<string, Tag>();
                 try
                 {
                     using (StreamReader reader = new StreamReader(pathToTagFile))
@@ -203,6 +198,13 @@ namespace ConsoleAppForInteractingWithDatabase
                             //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
                             string[] split = line.Split(":");
                             string fileName = Path.Combine(pathToDataset, split[0]);
+
+                            CubeObject cubeObjectFromDb = context.CubeObjects
+                                .Where(co => co.Photo.FileName.Equals(fileName))
+                                .Include(co => co.Photo)
+                                .Include(co => co.ObjectTagRelations)
+                                .FirstOrDefault();
+
                             int numTagPairs = (split.Length - 2) / 2;
                             //Looping over each pair of tags:
                             for (int i = 0; i < numTagPairs; i++)
@@ -210,16 +212,11 @@ namespace ConsoleAppForInteractingWithDatabase
                                 string tagsetName = split[(i * 2) + 1];
                                 string tagName = split[(i * 2) + 2];
 
-                                //Adding tagset to db:
-                                Tagset tagsetFromDb = context.Tagsets
-                                    .Where(ts => ts.Name.Equals(tagsetName))
-                                    .Include(ts => ts.Tags)
-                                    .FirstOrDefault();
-
-                                //If tagset doesn't exist in db, add it:
-                                if (tagsetFromDb == null)
+                                Tagset tagsetFromDb;
+                                if (!tagsetSeen.ContainsKey(tagsetName))
                                 {
                                     tagsetFromDb = DomainClassFactory.NewTagSet(tagsetName);
+                                    tagsetSeen.Add(tagsetName, tagsetFromDb);
                                     context.Tagsets.Add(tagsetFromDb);
                                     context.SaveChanges();
 
@@ -229,27 +226,31 @@ namespace ConsoleAppForInteractingWithDatabase
                                     tagWithSameNameAsTagset.Tagset = tagsetFromDb;
                                     tagsetFromDb.Tags.Add(tagWithSameNameAsTagset);
                                     //Add and update changes:
+                                    tagSeen.Add(tagsetName, tagWithSameNameAsTagset);
                                     context.Tags.Add(tagWithSameNameAsTagset);
                                     context.SaveChanges();
                                 }
+                                else
+                                {
+                                    tagsetFromDb = tagsetSeen[tagsetName];
+                                }
 
                                 //Checking if tag exists, and creates it if it doesn't exist.
-                                Tag tagFromDb = context.Tags
-                                    .Where(t => t.TagsetId == tagsetFromDb.Id && t.Name.Equals(tagName))
-                                    .Include(t => t.ObjectTagRelations)
-                                    .FirstOrDefault();
-
-                                //If tag doesn't exist in db, add it
-                                if (tagFromDb == null)
+                                Tag tagFromDb;
+                                if (!tagSeen.ContainsKey(tagName))
                                 {
                                     tagFromDb = DomainClassFactory.NewTag(tagName, tagsetFromDb);
+                                    tagSeen.Add(tagName, tagFromDb);
                                     context.Tags.Add(tagFromDb);
                                     context.SaveChanges();
                                 }
+                                else
+                                {
+                                    tagFromDb = tagSeen[tagName];
+                                }
 
                                 //Add tag to tagset if tagset doesn't have it:
-                                if (!tagsetFromDb.Tags
-                                    .Any(t => t.TagsetId == tagFromDb.Id)) //If tag does not exist in tagset, add it
+                                if (!tagsetFromDb.Tags.Contains(tagFromDb))
                                 {
                                     tagsetFromDb.Tags.Add(tagFromDb);
                                     tagFromDb.Tagset = tagsetFromDb;
@@ -257,13 +258,6 @@ namespace ConsoleAppForInteractingWithDatabase
                                     context.Update(tagFromDb);
                                     context.SaveChanges();
                                 }
-
-                                //Adding tag to cube object with FileName:
-                                CubeObject cubeObjectFromDb = context.CubeObjects
-                                    .Where(co => co.Photo.FileName.Equals(fileName))
-                                    .Include(co => co.Photo)
-                                    .Include(co => co.ObjectTagRelations)
-                                    .FirstOrDefault();
 
                                 if (cubeObjectFromDb == null)
                                 {
@@ -280,12 +274,12 @@ namespace ConsoleAppForInteractingWithDatabase
                                         ObjectTagRelation newObjectTagRelation =
                                             DomainClassFactory.NewObjectTagRelation(tagFromDb, cubeObjectFromDb);
                                         context.ObjectTagRelations.Add(newObjectTagRelation);
-                                        context.SaveChanges();
                                     }
                                 }
                             }
 
                             lineCount++;
+                            context.SaveChanges(); // to save the updated cubeobject
                         }
                     }
                 }
@@ -293,6 +287,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 {
                     Console.WriteLine("File could not be read to insert the tags.");
                     Console.WriteLine(e.Message);
+                    Console.WriteLine(e.InnerException.Message);
                 }
             }
         }
@@ -306,6 +301,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
             using (var context = new ObjectContext(connectionString))
             {
+                var rootNodes = new Dictionary<string, Node>();
                 try
                 {
                     using (StreamReader reader = new StreamReader(pathToHierarchiesFile))
@@ -376,9 +372,12 @@ namespace ConsoleAppForInteractingWithDatabase
                                 context.Update(hierarchyFromDb);
                                 context.SaveChanges();
 
-                                hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
-                                context.Update(hierarchyFromDb);
-                                context.SaveChanges();
+                                if (hierarchyName.Equals(parentTagName))
+                                {
+                                    hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
+                                    context.Update(hierarchyFromDb);
+                                    context.SaveChanges();
+                                }
                             }
 
                             //Adding child nodes:
@@ -400,12 +399,27 @@ namespace ConsoleAppForInteractingWithDatabase
                                     context.SaveChanges();
                                 }
 
-                                Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
-                                parentNodeFromDb.Children.Add(newChildNode);
-                                hierarchyFromDb.Nodes.Add(newChildNode);
-                                context.Update(parentNodeFromDb);
-                                context.Update(hierarchyFromDb);
-                                context.SaveChanges();
+                                //Finding child node:
+                                Node childNodeFromDb = context.Nodes
+                                    .Include(n => n.Children)
+                                    .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == childTagFromDb.Id)
+                                    .FirstOrDefault();
+
+                                if (childNodeFromDb == null)
+                                {
+                                    Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
+                                    parentNodeFromDb.Children.Add(newChildNode);
+                                    hierarchyFromDb.Nodes.Add(newChildNode);
+                                    context.Update(parentNodeFromDb);
+                                    context.Update(hierarchyFromDb);
+                                    context.SaveChanges();
+                                }
+                                else
+                                {
+                                    parentNodeFromDb.Children.Add(childNodeFromDb);
+                                    context.Update(parentNodeFromDb);
+                                    context.SaveChanges();
+                                }
                             }
 
                             lineCount++;
