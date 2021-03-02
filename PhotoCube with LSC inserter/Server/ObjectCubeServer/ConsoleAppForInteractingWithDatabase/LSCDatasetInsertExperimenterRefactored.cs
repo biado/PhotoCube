@@ -182,6 +182,8 @@ namespace ConsoleAppForInteractingWithDatabase
                     using (StreamReader reader = new StreamReader(pathToTagFile))
                     {
                         int lineCount = 1;
+                        int insertCount = 0;
+
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
                         {
@@ -231,7 +233,7 @@ namespace ConsoleAppForInteractingWithDatabase
                                 if (!tagsetFromDb.Tags.Contains(tagFromDb))
                                 {
                                     addTagAndTagsetToEachOther(tagFromDb, tagsetFromDb);
-                                    updateContextAndSaveInDB(context, tagsetFromDb, tagFromDb);
+                                    //updateContextAndSaveInDB(context, tagsetFromDb, tagFromDb);
                                 }
 
                                 if (cubeObjectFromDb == null)
@@ -251,7 +253,13 @@ namespace ConsoleAppForInteractingWithDatabase
                             }
 
                             lineCount++;
-                            context.SaveChanges(); // to save the updated cubeobject
+                            insertCount++;
+                            if (insertCount == 500)
+                            {
+                                context.SaveChanges(); // to save the updated cubeobject
+                                insertCount = 0;
+                            }
+                            
                         }
                     }
                 }
@@ -282,7 +290,7 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             context.Update(tagsetFromDb);
             context.Update(tagFromDb);
-            context.SaveChanges();
+            //context.SaveChanges();
         }
 
         private Tag createNewTagAndSaveInDB(string tagName, Tagset tagsetFromDb, ObjectContext context, Dictionary<string, Tag> tagSeen)
@@ -290,7 +298,7 @@ namespace ConsoleAppForInteractingWithDatabase
             Tag tagFromDb = DomainClassFactory.NewTag(tagName, tagsetFromDb);
             tagSeen.Add(tagName, tagFromDb);
             context.Tags.Add(tagFromDb);
-            context.SaveChanges();
+            //context.SaveChanges();
             return tagFromDb;
         }
 
@@ -298,7 +306,7 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             tagSeen.Add(tagsetName, tagWithSameNameAsTagset);
             context.Tags.Add(tagWithSameNameAsTagset);
-            context.SaveChanges();
+            //context.SaveChanges();
         }
 
         private void addTagAndTagsetToEachOther(Tag tag, Tagset tagset)
@@ -312,7 +320,7 @@ namespace ConsoleAppForInteractingWithDatabase
             Tagset tagsetFromDb = DomainClassFactory.NewTagSet(tagsetName);
             tagsetSeen.Add(tagsetName, tagsetFromDb);
             context.Tagsets.Add(tagsetFromDb);
-            context.SaveChanges();
+            //context.SaveChanges();
             return tagsetFromDb;
         }
 

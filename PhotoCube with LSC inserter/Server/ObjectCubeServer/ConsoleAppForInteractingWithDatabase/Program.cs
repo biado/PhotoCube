@@ -26,8 +26,8 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             Console.WriteLine("Started up!");
 
-            int[] N = new int[] { 50 }; // 191418 = Total number of LSC images, based on VisualConcept file.
-            string[] DB = new string[] { "lsc50" };
+            int[] N = new int[] { 1000 }; // 191418 = Total number of LSC images, based on VisualConcept file.
+            string[] DB = new string[] { "lsc1000sc" };
 
             string resultPath = sAll.Get("resultPath");
             string experimentResult = "DB Name,Number of Images,Elapsed Time\n";
