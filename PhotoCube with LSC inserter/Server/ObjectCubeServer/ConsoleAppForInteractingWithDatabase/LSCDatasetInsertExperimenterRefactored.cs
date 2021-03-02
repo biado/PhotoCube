@@ -12,6 +12,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Configuration;
 using System.Collections.Specialized;
+using System.Diagnostics;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
@@ -23,6 +24,8 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToTagFile;
         private string pathToHierarchiesFile;
         private string pathToErrorLogFile;
+        private Stopwatch stopwatch;
+        private string resultSCPath;
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
 
         public LSCDatasetInsertExperimenterRefactored(int numOfImages, string connectionString)
@@ -30,13 +33,15 @@ namespace ConsoleAppForInteractingWithDatabase
             this.numOfImages = numOfImages;
             this.connectionString = connectionString;
             this.pathToDataset = sAll.Get("pathToLscData");
-      
+            this.resultSCPath = sAll.Get("resultSCPath");
+
             this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
             this.pathToHierarchiesFile = Path.Combine(pathToDataset, @sAll.Get("LscHierarchiesFilePath"));
             this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
         }
+
         public void InsertLSCDataset()
         {
             var insertCubeObjects = true;
@@ -54,6 +59,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
             if (insertTags)
             {
+                stopwatch = new Stopwatch();
                 InsertTags();
             }
             else
@@ -183,6 +189,7 @@ namespace ConsoleAppForInteractingWithDatabase
                     {
                         int lineCount = 1;
                         int insertCount = 0;
+                        string experimentResult = "Rows,Elapsed Time\n";
 
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
@@ -254,9 +261,18 @@ namespace ConsoleAppForInteractingWithDatabase
 
                             lineCount++;
                             insertCount++;
-                            if (insertCount == 500)
+                            if (insertCount == 10)
                             {
+                                stopwatch.Start();
                                 context.SaveChanges(); // to save the updated cubeobject
+                                TimeSpan ts = stopwatch.Elapsed;
+                                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
+                                    ts.Hours, ts.Minutes, ts.Seconds);
+                                stopwatch.Stop();
+
+                                experimentResult += string.Join(",",lineCount-1, elapsedTime) + "\n";
+                                File.AppendAllText(resultSCPath, experimentResult);
+                                experimentResult = "";
                                 insertCount = 0;
                             }
                             
