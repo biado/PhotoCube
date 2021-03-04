@@ -28,6 +28,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private Stopwatch stopwatch;
         private string resultSCPath;
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
+        private int batchSize = 1000;
 
         public LSCDatasetInsertExperimenterRefactored(int numOfImages, string connectionString)
         {
@@ -91,9 +92,10 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 try
                 {
+                    int fileCount = 1;
+                    int insertCount = 0;
                     using (StreamReader reader = new StreamReader(pathToTagFile))
                     {
-                        int fileCount = 1;
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && fileCount <= numOfImages)
                         {
@@ -140,16 +142,24 @@ namespace ConsoleAppForInteractingWithDatabase
                                         fileURI,
                                         FileType.Photo,
                                         thumbnailURI);
-
-                                    //Save cube object: 
                                     context.CubeObjects.Add(cubeObject);
-                                    context.SaveChanges();
                                 }
                             }
                             fileCount++;
+                            insertCount++;
+                            if (insertCount == batchSize)
+                            {
+                                //Save cube object: 
+                                context.SaveChanges();
+                                insertCount = 0;
+                            }
                         }
                     }
 
+                    if (insertCount != 0)
+                    {
+                        context.SaveChanges();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -197,10 +207,10 @@ namespace ConsoleAppForInteractingWithDatabase
                 var tagSeen = new Dictionary<string, Tag>();
                 try
                 {
+                    int lineCount = 1;
+                    int insertCount = 0;
                     using (StreamReader reader = new StreamReader(pathToTagFile))
                     {
-                        int lineCount = 1;
-                        int insertCount = 0;
                         string experimentResult = "Rows,Elapsed Time\n";
 
                         string line = reader.ReadLine(); // Skipping the first line
@@ -273,7 +283,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
                             lineCount++;
                             insertCount++;
-                            if (insertCount == 10)
+                            if (insertCount == batchSize)
                             {
                                 stopwatch.Start();
                                 context.SaveChanges(); // to save the updated cubeobject
@@ -287,8 +297,12 @@ namespace ConsoleAppForInteractingWithDatabase
                                 experimentResult = "";
                                 insertCount = 0;
                             }
-                            
                         }
+                    }
+
+                    if (insertCount != 0)
+                    {
+                        context.SaveChanges();
                     }
                 }
                 catch (Exception e)
