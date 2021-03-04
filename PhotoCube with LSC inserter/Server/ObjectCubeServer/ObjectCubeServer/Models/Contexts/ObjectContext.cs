@@ -50,8 +50,6 @@ namespace ObjectCubeServer.Models.DataAccess
          * Exposing which DBSets are available to get, add, update and delete from:
          */
         public DbSet<CubeObject> CubeObjects { get; set; }
-        public DbSet<Photo> Photos { get; set; }
-        public DbSet<Thumbnail> Thumbnails { get; set; }
         public DbSet<Tagset> Tagsets { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ObjectTagRelation> ObjectTagRelations { get; set; }
@@ -64,16 +62,6 @@ namespace ObjectCubeServer.Models.DataAccess
             //If CubeObject is deleted, then photo is also deleted.
             //This is called "fluent API": https://docs.microsoft.com/en-us/ef/core/modeling/
             //And is a way to specify database relations explicitly for Entity Framework CORE (EF CORE)
-            modelBuilder.Entity<CubeObject>()
-                .HasOne<Photo>(co => co.Photo)
-                .WithOne(p => p.CubeObject)
-                .HasForeignKey<CubeObject>(co => co.PhotoId);
-
-            //One to one:
-            modelBuilder.Entity<CubeObject>()
-                .HasOne<Thumbnail>(co => co.Thumbnail)
-                .WithOne(t => t.CubeObject)
-                .HasForeignKey<CubeObject>(co => co.ThumbnailId);
 
             //Tells EF CORE that ObjectTag's primary key is composed of ObjectId and TagId:
             modelBuilder.Entity<ObjectTagRelation>()
@@ -117,7 +105,7 @@ namespace ObjectCubeServer.Models.DataAccess
                 .WithOne(n => n.Hierarchy)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //Node has a refference to a tag, but a tag has no refference to the nodes.
+            //Node has a reference to a tag, but a tag has no reference to the nodes.
             //If a Node is deleted the tag is not deleted.
             modelBuilder.Entity<Node>()
                 .HasOne(n => n.Tag)
@@ -152,7 +140,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSC150Debug; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSC150Debug.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = RemoveImage; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\RemoveImage.mdf");
                     }
                     break;
                 default:

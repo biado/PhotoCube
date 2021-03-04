@@ -21,11 +21,6 @@ namespace ObjectDBTests
             {
                 context.CubeObjects.Add(new CubeObject() {
                     FileType = FileType.Photo,
-                    Photo = new Photo()
-                    {
-                        FileName = "testImage",
-                        Image = new byte[0]
-                    },
                     ObjectTagRelations = new List<ObjectTagRelation>(),
                 });
                 context.SaveChanges();

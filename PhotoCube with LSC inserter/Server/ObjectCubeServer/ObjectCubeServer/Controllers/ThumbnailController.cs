@@ -18,14 +18,15 @@ namespace ObjectCubeServer.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            List<Thumbnail> allThumbnails;
+            List<string> allThumbnailURIs;
             using (var context = new ObjectContext())
             {
-                allThumbnails = context.Thumbnails.ToList();
+                allThumbnailURIs = context.CubeObjects.Select(co => co.ThumbnailURI).ToList();
             }
-            if (allThumbnails != null)
+            if (allThumbnailURIs != null)
             {
-                return Ok(JsonConvert.SerializeObject(allThumbnails)); //Does not return file!
+                var data = new { thumbnailURIs = allThumbnailURIs };
+                return Ok(JsonConvert.SerializeObject(data)); //Does not return file!
             }
             else return NotFound();
         }
@@ -34,16 +35,17 @@ namespace ObjectCubeServer.Controllers
         [HttpGet("{id}", Name = "GetThumbnail")]
         public IActionResult Get(int id)
         {
-            Thumbnail thumbnailFound;
+            string thumbnailURI;
             using (var context = new ObjectContext())
             {
-                thumbnailFound = context.Thumbnails.Where(t => t.Id == id).FirstOrDefault();
+                CubeObject cubeObject = context.CubeObjects.Where(co => co.Id == id).FirstOrDefault();
+                thumbnailURI = cubeObject.ThumbnailURI;
             }
-            if (thumbnailFound != null)
+            if (thumbnailURI == null)
             {
-                return File(thumbnailFound.Image, "image/jpeg");
-            }
-            else return NotFound();
+                return NotFound();
+            } 
+            return Ok(thumbnailURI);
         }
     }
 }

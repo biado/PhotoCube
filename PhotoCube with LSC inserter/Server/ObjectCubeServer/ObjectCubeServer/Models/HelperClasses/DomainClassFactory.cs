@@ -13,27 +13,15 @@ namespace ObjectCubeServer.Models
     /// </summary>
     public class DomainClassFactory
     {
-        public static CubeObject NewCubeObject(string fileName, FileType fileType, Photo photo)
+        public static CubeObject NewCubeObject(string fileURI, FileType fileType, string thumbnailURI)
         {
-            if (fileName == null) { throw new Exception("Given fileName was null."); }
-            if (photo == null) { throw new Exception("Given photo  was null."); }
+            if (fileURI == null) { throw new Exception("Given fileURI was null."); }
             return new CubeObject()
             {
-                FileName = fileName,
+                FileURI = fileURI,
                 FileType = fileType,
-                Photo = photo,
+                ThumbnailURI =  thumbnailURI,
                 ObjectTagRelations = new List<ObjectTagRelation>()
-            };
-        }
-
-        public static Photo NewPhoto(byte[] image, string fileName)
-        {
-            if (image == null) { throw new Exception("Given image was null."); }
-            if (fileName == null) { throw new Exception("Given fileName was null."); }
-            return new Photo()
-            {
-                Image = image,
-                FileName = fileName
             };
         }
 
