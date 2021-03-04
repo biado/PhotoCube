@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Query.ExpressionTranslators;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
@@ -97,54 +98,54 @@ namespace ConsoleAppForInteractingWithDatabase
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && fileCount <= numOfImages)
                         {
                             //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
-                            String filename = Path.Combine(pathToDataset, line.Split(":")[0]);
+                            string filename = line.Split(":")[0];
+                            string fileURI = Path.Combine(pathToDataset, filename);
                             Console.WriteLine("Saving file: " + fileCount +
                                               " out of " + numOfImages + " files. " +
-                                              "Filename: " + filename +
+                                              "Filename: " + fileURI +
                                               ". (" +
                                               (((double)fileCount / (double)numOfImages) * 100).ToString("0.0") +
                                               @"%)");
 
+                            // If Image is already in database(Assuming no two file has the same name):
+                            if (context.CubeObjects
+                                .FirstOrDefault(co => co.FileURI.Equals(fileURI)) != null)
+                            {
+                                //Don't add it again.
+                                Console.WriteLine("Image " + fileURI + " is already in the database");
+                            }
+
                             //Loading and saving image:
-                            using (Image<Rgba32> image = SixLabors.ImageSharp.Image.Load(filename))
+                            using (Image<Rgba32> image = SixLabors.ImageSharp.Image.Load(fileURI))
                             {
                                 using (MemoryStream ms = new MemoryStream())
                                 {
                                     image.SaveAsJpeg(ms); //Copy to ms
 
-                                    //Create Cube and Photo objects:
-                                    CubeObject cubeObject = DomainClassFactory.NewCubeObject(
-                                        filename,
-                                        FileType.Photo,
-                                        DomainClassFactory.NewPhoto(
-                                            ms.ToArray(),
-                                            filename
-                                        )
-                                    );
-
+                                    bool modified = false;
                                     //Creating and saving thumbnail:
                                     //Thumbnails needs to be power of two in width and height to avoid extra image manipulation client side.
                                     if (image.Width > image.Height)
                                     {
-                                        resizeOriginalImageToMakeThumbnails(image, image.Height);
+                                        modified = resizeOriginalImageToMakeThumbnails(image, image.Height);
                                     }
                                     else
                                     {
-                                        resizeOriginalImageToMakeThumbnails(image, image.Width);
+                                        modified = resizeOriginalImageToMakeThumbnails(image, image.Width);
                                     }
 
-                                    using (MemoryStream ms2 = new MemoryStream())
-                                    {
-                                        image.SaveAsJpeg(ms2); //Copy to ms
-                                        cubeObject.Thumbnail = new Thumbnail() { Image = ms2.ToArray() };
-                                    }
+                                    string thumbnailURI = modified ? saveThumbnail(image, filename) : fileURI;
+
+                                    CubeObject cubeObject = DomainClassFactory.NewCubeObject(
+                                        fileURI,
+                                        FileType.Photo,
+                                        thumbnailURI);
 
                                     //Save cube object: 
                                     context.CubeObjects.Add(cubeObject);
                                     context.SaveChanges();
                                 }
                             }
-
                             fileCount++;
                         }
                     }
@@ -159,17 +160,28 @@ namespace ConsoleAppForInteractingWithDatabase
 
         }
 
-        private void resizeOriginalImageToMakeThumbnails(Image<Rgba32> image, int shortSide)
+        private string saveThumbnail(Image<Rgba32> image, string filename)
         {
-            int destinationShortSide = 1024; //1024px
-            decimal downscaleFactor = Decimal.Parse(destinationShortSide + "") /
-                                      Decimal.Parse(shortSide + "");
-            int newWidth = (int)(image.Width * downscaleFactor);
-            int newHeight = (int)(image.Height * downscaleFactor);
-            image.Mutate(i => i
-                    .Resize(newWidth, newHeight) //Scale
-                    .Crop(destinationShortSide, destinationShortSide) //Crop
-            );
+            string thumbnailURI = Path.Combine(pathToDataset, "Thumbnails", filename);
+            image.Save(thumbnailURI + ".jpg");
+            return thumbnailURI;
+        }
+
+        private bool resizeOriginalImageToMakeThumbnails(Image<Rgba32> image, int shortSide)
+        {
+            if (shortSide > 1024)
+            {
+                int destinationShortSide = 1024; //1024px
+                double downscaleFactor = Convert.ToDouble(destinationShortSide) / image.Height;
+                int newWidth = (int)(image.Width * downscaleFactor);
+                int newHeight = (int)(image.Height * downscaleFactor);
+                image.Mutate(i => i
+                        .Resize(newWidth, newHeight) //Scale
+                        .Crop(destinationShortSide, destinationShortSide) //Crop
+                );
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -199,7 +211,7 @@ namespace ConsoleAppForInteractingWithDatabase
                             string[] split = line.Split(":");
                             string fileName = Path.Combine(pathToDataset, split[0]);
 
-                            CubeObject cubeObjectFromDb = selectCubeObjectWithFilenameAndPhotoAndOTRelations(context, fileName);
+                            CubeObject cubeObjectFromDb = selectCubeObjectWithFilenameOTRelations(context, fileName);
 
                             int numTagPairs = (split.Length - 2) / 2;
                             //Looping over each pair of tags:
@@ -340,11 +352,10 @@ namespace ConsoleAppForInteractingWithDatabase
             return tagsetFromDb;
         }
 
-        private CubeObject selectCubeObjectWithFilenameAndPhotoAndOTRelations(ObjectContext context, string fileName)
+        private CubeObject selectCubeObjectWithFilenameOTRelations(ObjectContext context, string fileName)
         {
             CubeObject cubeObjectFromDb = context.CubeObjects
-                .Where(co => co.Photo.FileName.Equals(fileName))
-                .Include(co => co.Photo)
+                .Where(co => co.FileURI.Equals(fileName))
                 .Include(co => co.ObjectTagRelations)
                 .FirstOrDefault();
             return cubeObjectFromDb;

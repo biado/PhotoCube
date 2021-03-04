@@ -19,16 +19,17 @@ namespace ObjectCubeServer.Controllers
         [HttpGet("{id}", Name = "GetPhoto")]
         public IActionResult Get(int id)
         {
-            Photo photo;
+            string fileURI;
             using (var context = new ObjectContext())
             {
-                photo = context.Photos.Where(p => p.Id == id).FirstOrDefault();
-                if(photo == null)
+                CubeObject cubeObject = context.CubeObjects.Where(co => co.Id == id).FirstOrDefault();
+                fileURI = cubeObject.FileURI;
+                if(fileURI == null)
                 {
                     return NotFound();
                 }
             }
-            return File(photo.Image, "image/jpeg"); //Notice it returns a file and not an OK result!
+            return Ok(fileURI);
         }
     }
 }
