@@ -101,24 +101,24 @@ namespace ConsoleAppForInteractingWithDatabase
                         {
                             //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
                             string filename = line.Split(":")[0];
-                            string fileURI = Path.Combine(pathToDataset, filename);
+                            string filepath = Path.Combine(pathToDataset, filename);
                             Console.WriteLine("Saving file: " + fileCount +
                                               " out of " + numOfImages + " files. " +
-                                              "Filename: " + fileURI +
+                                              "Filename: " + filename +
                                               ". (" +
                                               (((double)fileCount / (double)numOfImages) * 100).ToString("0.0") +
                                               @"%)");
 
                             // If Image is already in database(Assuming no two file has the same name):
                             if (context.CubeObjects
-                                .FirstOrDefault(co => co.FileURI.Equals(fileURI)) != null)
+                                .FirstOrDefault(co => co.FileURI.Equals(filename)) != null)
                             {
                                 //Don't add it again.
-                                Console.WriteLine("Image " + fileURI + " is already in the database");
+                                Console.WriteLine("Image " + filename + " is already in the database");
                             }
 
                             //Loading and saving image:
-                            using (Image<Rgba32> image = SixLabors.ImageSharp.Image.Load(fileURI))
+                            using (Image<Rgba32> image = SixLabors.ImageSharp.Image.Load(filepath))
                             {
                                 using (MemoryStream ms = new MemoryStream())
                                 {
@@ -136,10 +136,10 @@ namespace ConsoleAppForInteractingWithDatabase
                                         modified = resizeOriginalImageToMakeThumbnails(image, image.Width);
                                     }
 
-                                    string thumbnailURI = modified ? saveThumbnail(image, filename) : fileURI;
+                                    string thumbnailURI = modified ? saveThumbnail(image, filename) : filename;
 
                                     CubeObject cubeObject = DomainClassFactory.NewCubeObject(
-                                        fileURI,
+                                        filename,
                                         FileType.Photo,
                                         thumbnailURI);
                                     context.CubeObjects.Add(cubeObject);
