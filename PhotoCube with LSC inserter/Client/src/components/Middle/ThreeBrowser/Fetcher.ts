@@ -8,8 +8,7 @@ import { Filter } from "../../LeftDock/FacetedSearcher";
  * Method calls are reused, and if the server address changes, we only need the change the baseUrl.
  */
 export default class Fetcher{
-    static baseUrl: string = "https://localhost:44317/api/";
-
+    static baseUrl = process.env.REACT_APP_BASE_URL;
     /**
      * Fetches Cells from the PhotoCube Server. See CellController.cs in server implementation.
      * @param xAxis
@@ -22,7 +21,7 @@ export default class Fetcher{
         let yDefined: boolean = yAxis !== null;
         let zDefined: boolean = zAxis !== null;
         
-        let queryString: string = this.baseUrl + "cell/?";
+        let queryString: string = this.baseUrl + "/cell/?";
         if(xDefined) { queryString += "xAxis=" + this.parseAxis(xAxis!)}
         if(yDefined) { queryString += "&yAxis=" + this.parseAxis(yAxis!)}
         if(zDefined) { queryString += "&zAxis=" + this.parseAxis(zAxis!)}
@@ -95,11 +94,12 @@ export default class Fetcher{
     }
 
     /**
-     * Returns an url to the photo with id photoId.
+     * Returns an uri to the photo with the cubeobjectId
      * @param photoId 
      */
-    static GetPhotoURL(photoId: number) : string{
-        return Fetcher.baseUrl + "/photo/" + photoId;
+    //Not in use:
+    static GetPhotoURI(CubeObjectId: number) : string{
+        return Fetcher.baseUrl + "/photo/" + CubeObjectId;
     }
 
     /**

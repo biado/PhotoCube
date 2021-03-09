@@ -4,6 +4,7 @@ import Fetcher from '../ThreeBrowser/Fetcher';
 import '../../../css/CardBrowser.css';
 import { BrowsingModes } from '../../RightDock/BrowsingModeChanger';
 import Tag from '../ThreeBrowser/Tag';
+import { env } from 'process';
 
 /**
  * The CardBrowser allows the user to browse each photo one by one.
@@ -23,8 +24,8 @@ export default class CardBrowser extends React.Component<{
     render(){
         if(this.props.cubeObjects.length > 0){
             let fileName: string = "";
-            if(this.props.cubeObjects[this.state.photoIndex].FileName) {
-                fileName = this.props.cubeObjects[this.state.photoIndex].FileName!;
+            if(this.props.cubeObjects[this.state.photoIndex].FileURI) {
+                fileName = this.props.cubeObjects[this.state.photoIndex].FileURI!;
             }
             return(
                 <div className="grid-item cardBrowserContainer">
@@ -37,7 +38,7 @@ export default class CardBrowser extends React.Component<{
                         <img id="currentPhoto" 
                             className={this.state.currentPhotoClassName + " " + this.state.photoVisibility} 
                             onLoad={(e) => this.onImageLoad(e)} 
-                            src={Fetcher.GetPhotoURL(this.props.cubeObjects[this.state.photoIndex].PhotoId)}></img>
+                            src={process.env.REACT_APP_IMAGE_SERVER + this.props.cubeObjects[this.state.photoIndex].FileURI}></img>
                     </div>        
                 </div>
             );

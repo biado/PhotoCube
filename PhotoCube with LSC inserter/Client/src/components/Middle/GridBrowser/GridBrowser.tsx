@@ -17,7 +17,7 @@ export default class GridBrowser extends React.Component<{
         let images = this.props.cubeObjects.map((co, index) => <img 
             key={"image-"+index} 
             className="image" 
-            src={Fetcher.GetPhotoURL(co.PhotoId)}
+            src={process.env.REACT_APP_IMAGE_SERVER + co.FileURI}
             ></img>)
 
         return(
