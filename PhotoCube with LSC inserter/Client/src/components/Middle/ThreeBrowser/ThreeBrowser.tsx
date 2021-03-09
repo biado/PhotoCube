@@ -68,6 +68,7 @@ export default class ThreeBrowser extends React.Component<{
     }
 
     //THREE interaction properties:
+    //@ts-ignore
     private mount: HTMLDivElement|null = this.mount!;
     private scene: THREE.Scene = new THREE.Scene();
     private camera: THREE.Camera = new THREE.Camera();
@@ -594,10 +595,10 @@ export default class ThreeBrowser extends React.Component<{
         console.log("Done computing cells")
 
         //Update filecount:
-        let uniquePhotoIds: Set<number> = new Set();
+        let uniquePhotos: Set<string> = new Set();
         this.cells.forEach((cell: Cell) => 
-            cell.CubeObjects.forEach(co => uniquePhotoIds.add(co.PhotoId)));
-        this.props.onFileCountChanged(uniquePhotoIds.size);
+            cell.CubeObjects.forEach(co => uniquePhotos.add(co.FileURI)));
+        this.props.onFileCountChanged(uniquePhotos.size);
     }
 
     /**

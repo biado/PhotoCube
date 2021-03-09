@@ -15,16 +15,12 @@ namespace ObjectCubeServer.Models.DomainClasses
         [Key]
         public int Id { get; set; }
 
-        public string FileName { get; set; }
+        public string FileURI { get; set; }
 
         public FileType FileType { get; set; }
 
-        public int? PhotoId { get; set; }
-        public Photo Photo { get; set; }
-        
-        public List<ObjectTagRelation> ObjectTagRelations { get; set; }
+        public string ThumbnailURI { get; set; }
 
-        public int ThumbnailId { get; set; }
-        public Thumbnail Thumbnail { get; set; }
+        public List<ObjectTagRelation> ObjectTagRelations { get; set; }
     }
 }

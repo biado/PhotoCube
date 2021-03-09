@@ -91,7 +91,7 @@ class DimensionPickerModal extends Component<{
     fetchTagsets(){
         //Using this guide: https://blog.hellojs.org/fetching-api-data-with-react-js-460fe8bbf8f2
         //Fetching tagsets:
-        fetch(Fetcher.baseUrl + "tagset")
+        fetch(Fetcher.baseUrl + "/tagset")
         .then(result => {return result.json();})
         .then(data => {
             let tagset = data.map((ts : Tagset) => { return {"Name": ts.Name, "TagsetId": ts.Id}} );
@@ -101,7 +101,7 @@ class DimensionPickerModal extends Component<{
     }
 
     fetchHierarchies(){
-        fetch(Fetcher.baseUrl + "hierarchy")
+        fetch(Fetcher.baseUrl + "/hierarchy")
         .then(result => {return result.json();})
         .then(data => {
             let hierarchies = data.map((h: Hierarchy) => { return {"Name": h.Name, "HierarchyId": h.Id} });
