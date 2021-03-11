@@ -24,6 +24,7 @@ namespace ObjectCubeServer.Models.DomainClasses
         public Hierarchy Hierarchy { get; set; }
 
         //NodeId created automatically
+        public int? ParentNodeId { get; set; }
         public List<Node> Children { get; set; }
     }
 }

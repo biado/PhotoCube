@@ -20,83 +20,48 @@ namespace ConsoleAppForInteractingWithDatabase
     public class LSCDatasetInsertExperimenterRefactored
     {
         private int numOfImages;
-        private string connectionString;
         private string pathToDataset;
         private string pathToTagFile;
         private string pathToHierarchiesFile;
         private string pathToErrorLogFile;
-        private Stopwatch stopwatch;
-        private string resultSCPath;
+        private string SQLPath;
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
-        private int batchSize = 10000;
 
-        public LSCDatasetInsertExperimenterRefactored(int numOfImages, string connectionString)
+        private Dictionary<string, CubeObject> cubeObjects = new Dictionary<string, CubeObject>();
+        private Dictionary<string, Tagset> tagsets = new Dictionary<string, Tagset>();
+        private Dictionary<string, Dictionary <int,Tag>> tags = new Dictionary<string, Dictionary<int,Tag>>();
+        private Dictionary<string, Dictionary<int, ObjectTagRelation>> objectTagRelations = new Dictionary<string, Dictionary<int,ObjectTagRelation>>();
+        private Dictionary<string, Hierarchy> hierarchies = new Dictionary<string, Hierarchy>();
+        private Dictionary<int, Node> nodes = new Dictionary<int, Node>();
+
+        public LSCDatasetInsertExperimenterRefactored(int numOfImages)
         {
             this.numOfImages = numOfImages;
-            this.connectionString = connectionString;
             this.pathToDataset = sAll.Get("pathToLscData");
-            this.resultSCPath = sAll.Get("resultSCPath");
+            this.SQLPath = sAll.Get("SQLPath");
 
             this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
             this.pathToHierarchiesFile = Path.Combine(pathToDataset, @sAll.Get("LscHierarchiesFilePath"));
             this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
-        }
 
-        public void InsertLSCDataset()
-        {
-            var insertCubeObjects = true;
-            var insertTags = true;
-            var insertHierarchies = true;
-
-            stopwatch = new Stopwatch();
-
-            if (insertCubeObjects)
-            {
-                InsertCubeObjects();
-            }
-            else
-            {
-                Console.WriteLine("Skipping Photos");
-            }
-
-            if (insertTags)
-            {
-                InsertTags();
-            }
-            else
-            {
-                Console.WriteLine("Skipping Tags");
-            }
-
-            if (insertHierarchies)
-            {
-                InsertHierarchies();
-            }
-            else
-            {
-                Console.WriteLine("Skipping Hierarchies");
-            }
-
-            Console.WriteLine("Done with inserting LSC Dataset of size " + numOfImages);
+            BuildCubeObjects();
+            BuildTagsetsAndTags();
+            BuildHierarchiesAndNodes();
+            WriteInsertStatementsToFile();
         }
 
 
         /// <summary>
         /// Parses and inserts cube objects, photos and thumbnails.
         /// </summary>
-        private void InsertCubeObjects()
+        private void BuildCubeObjects()
         {
-            Console.WriteLine("Inserting Cube Objects:");
-            using (var context = new ObjectContext(connectionString))
+            Console.WriteLine("Building Cube Objects:");
+            try
             {
-                try
-                {
                     int fileCount = 1;
-                    int insertCount = 0;
-
-                    string experimentResult = "InsertCubeObject Rows,Elapsed Time,Tracked Entities\n";
 
                     using (StreamReader reader = new StreamReader(pathToTagFile))
                     {
@@ -106,16 +71,9 @@ namespace ConsoleAppForInteractingWithDatabase
                             //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
                             string filename = line.Split(":")[0];
                             string filepath = Path.Combine(pathToDataset, filename);
-                            Console.WriteLine("Saving file: " + fileCount +
-                                              " out of " + numOfImages + " files. " +
-                                              "Filename: " + filename +
-                                              ". (" +
-                                              (((double)fileCount / (double)numOfImages) * 100).ToString("0.0") +
-                                              @"%)");
 
-                            // If Image is already in database(Assuming no two file has the same name):
-                            if (context.CubeObjects
-                                .FirstOrDefault(co => co.FileURI.Equals(filename)) != null)
+                            // If Image is already in Map(Assuming no two file has the same name):
+                            if (cubeObjects.ContainsKey(filename))
                             {
                                 //Don't add it again.
                                 Console.WriteLine("Image " + filename + " is already in the database");
@@ -146,51 +104,18 @@ namespace ConsoleAppForInteractingWithDatabase
                                         filename,
                                         FileType.Photo,
                                         thumbnailURI);
-                                    context.CubeObjects.Add(cubeObject);
+                                    cubeObjects[filename] = cubeObject;
                                 }
                             }
                             fileCount++;
-                            insertCount++;
-                            if (insertCount == batchSize)
-                            {
-                                stopwatch.Start();
-                                //Save cube object: 
-                                context.SaveChanges();
-                                TimeSpan ts = stopwatch.Elapsed;
-                                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
-                                    ts.Hours, ts.Minutes, ts.Seconds);
-                                stopwatch.Stop();
-
-                                experimentResult += string.Join(",", fileCount - 1, elapsedTime, context.ChangeTracker.Entries().Count()) + "\n";
-                                File.AppendAllText(resultSCPath, experimentResult);
-                                experimentResult = "";
-
-                                insertCount = 0;
-                            }
                         }
                     }
-
-                    if (insertCount != 0)
-                    {
-                        stopwatch.Start();
-                        context.SaveChanges();
-                        TimeSpan ts = stopwatch.Elapsed;
-                        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
-                            ts.Hours, ts.Minutes, ts.Seconds);
-                        stopwatch.Stop();
-
-                        experimentResult += string.Join(",", fileCount - 1, elapsedTime, context.ChangeTracker.Entries().Count()) + "\n";
-                        File.AppendAllText(resultSCPath, experimentResult);
-                    }
-                }
-                catch (Exception e)
-                {
+            }
+            catch (Exception e) 
+            {
                     Console.WriteLine("File could not be read to insert the cube objects.");
                     Console.WriteLine(e.Message);
-                    File.AppendAllText(resultSCPath, e.Message + "\n");
-                }
             }
-
         }
 
         private string saveThumbnail(Image<Rgba32> image, string filename)
@@ -220,31 +145,24 @@ namespace ConsoleAppForInteractingWithDatabase
         /// <summary>
         /// Parses and inserts tags and tagsets. Also tags Photos.
         /// </summary>
-        private void InsertTags()
+        private void BuildTagsetsAndTags()
         {
-            Console.WriteLine("Inserting TagsSets and Tags:");
+            Console.WriteLine("Building TagsSets and Tags:");
 
-            using (var context = new ObjectContext(connectionString))
-            {
-                var tagsetSeen = new Dictionary<string, Tagset>();
-                var tagSeen = new Dictionary<string, Tag>();
-                try
+            try
                 {
                     int lineCount = 1;
-                    int insertCount = 0;
 
-                    string experimentResult = "InsertTag Rows,Elapsed Time,Tracked Entities\n";
                     using (StreamReader reader = new StreamReader(pathToTagFile))
                     {
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
                         {
-                            Console.WriteLine("Inserting line: " + lineCount + " out of " + numOfImages);
                             //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
                             string[] split = line.Split(":");
-                            string fileName = Path.Combine(pathToDataset, split[0]);
+                            string fileName = split[0];
 
-                            CubeObject cubeObjectFromDb = selectCubeObjectWithFilenameOTRelations(context, fileName);
+                            CubeObject cubeObject = cubeObjects[fileName];
 
                             int numTagPairs = (split.Length - 2) / 2;
                             //Looping over each pair of tags:
@@ -253,42 +171,48 @@ namespace ConsoleAppForInteractingWithDatabase
                                 string tagsetName = split[(i * 2) + 1];
                                 string tagName = split[(i * 2) + 2];
 
-                                Tagset tagsetFromDb;
-                                if (!tagsetSeen.ContainsKey(tagsetName))
+                                Tagset tagset;
+                                if (!tagsets.ContainsKey(tagsetName))
                                 {
-                                    tagsetFromDb = createNewTagsetAndSaveInDB(tagsetName, tagsetSeen, context);
+                                    tagset = createNewTagset(tagsetName, tagsets);
 
                                     //Also creates a tag with same name:
-                                    Tag tagWithSameNameAsTagset = DomainClassFactory.NewTag(tagsetName, tagsetFromDb);
-                                    //Add tag to tagset:
-                                    addTagAndTagsetToEachOther(tagWithSameNameAsTagset, tagsetFromDb);
-                                    //Add and update changes:
-                                    updateTagMapAndSaveChangedTagAndTagSetInDB(tagSeen, tagsetName, tagWithSameNameAsTagset, context);
+                                    Tag tagWithSameNameAsTagset = DomainClassFactory.NewTag(tagName, tagset);
+                                    Dictionary<int, Tag> tagWithSameNameAsTagsetList = new Dictionary<int, Tag>();
+                                    tagWithSameNameAsTagsetList[tagset.Id] = tagWithSameNameAsTagset;
+                                    tags[tagName] = tagWithSameNameAsTagsetList;
                                 }
                                 else
                                 {
-                                    tagsetFromDb = tagsetSeen[tagsetName];
+                                    tagset = tagsets[tagsetName];
                                 }
 
                                 //Checking if tag exists, and creates it if it doesn't exist.
-                                Tag tagFromDb;
-                                if (!tagSeen.ContainsKey(tagName))
+                                Tag tag;
+                                Dictionary<int, Tag> tagList;
+                                if (!tags.ContainsKey(tagName))
                                 {
-                                    tagFromDb = createNewTagAndSaveInDB(tagName, tagsetFromDb, context, tagSeen);
+                                    tag = DomainClassFactory.NewTag(tagName, tagset);
+                                    tagList = new Dictionary<int, Tag>();
+                                    tagList[tagset.Id] = tag;
+                                    tags[tagName] = tagList;
                                 }
                                 else
                                 {
-                                    tagFromDb = tagSeen[tagName];
+                                    tagList = tags[tagName];
+                                    if (!tagList.ContainsKey(tagset.Id))
+                                    {
+                                        tag = DomainClassFactory.NewTag(tagName, tagset);
+                                        tagList[tagset.Id] = tag;
+                                        tags[tagName] = tagList;
+                                    }
+                                    else
+                                    {
+                                        tag = tagList[tagset.Id];
+                                    }
                                 }
 
-                                //Add tag to tagset if tagset doesn't have it:
-                                if (!tagsetFromDb.Tags.Contains(tagFromDb))
-                                {
-                                    addTagAndTagsetToEachOther(tagFromDb, tagsetFromDb);
-                                    //updateContextAndSaveInDB(context, tagsetFromDb, tagFromDb);
-                                }
-
-                                if (cubeObjectFromDb == null)
+                                if (cubeObject == null)
                                 {
                                     File.AppendAllText(pathToErrorLogFile,
                                         "File " + fileName + " was not found while parsing line " + lineCount);
@@ -296,45 +220,32 @@ namespace ConsoleAppForInteractingWithDatabase
                                 }
                                 else
                                 {
-                                    if (!containsTagInObjectTagRelation(cubeObjectFromDb, tagFromDb)) 
-                                        //If Cubeobject does not already have tag asscociated with it, add it
+                                    Dictionary<int, ObjectTagRelation> OTRelations;
+                                    if (!objectTagRelations.ContainsKey(fileName))
                                     {
-                                        createNewObjectTagRelationAndAddToContext(tagFromDb, cubeObjectFromDb, context);
-                                        File.AppendAllText(resultSCPath, "Created new otr: co " + cubeObjectFromDb.Id + " - tag " + tagFromDb.Name);
+                                        OTRelations = new Dictionary<int, ObjectTagRelation>();
+                                        ObjectTagRelation otr =
+                                            DomainClassFactory.NewObjectTagRelation(tag, cubeObject);
+                                        OTRelations[tag.Id] = otr;
                                     }
+                                    else
+                                    {
+                                        OTRelations = objectTagRelations[fileName];
+                                        if (!containsObjectTagRelation(fileName, tag.Id))
+                                        {
+                                            //create new otr
+                                            ObjectTagRelation otr =
+                                                DomainClassFactory.NewObjectTagRelation(tag, cubeObject);
+                                            OTRelations[tag.Id] = otr;
+                                        }
+                                    }
+
+                                    objectTagRelations[fileName] = OTRelations;
                                 }
                             }
 
                             lineCount++;
-                            insertCount++;
-                            if (insertCount == batchSize)
-                            {
-                                stopwatch.Start();
-                                context.SaveChanges(); // to save the updated cubeobject
-                                TimeSpan ts = stopwatch.Elapsed;
-                                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
-                                    ts.Hours, ts.Minutes, ts.Seconds);
-                                stopwatch.Stop();
-
-                                experimentResult += string.Join(",",lineCount-1, elapsedTime, context.ChangeTracker.Entries().Count()) + "\n";
-                                File.AppendAllText(resultSCPath, experimentResult);
-                                experimentResult = "";
-                                insertCount = 0;
-                            }
                         }
-                    }
-
-                    if (insertCount != 0)
-                    {
-                        stopwatch.Start();
-                        context.SaveChanges();
-                        TimeSpan ts = stopwatch.Elapsed;
-                        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
-                            ts.Hours, ts.Minutes, ts.Seconds);
-                        stopwatch.Stop();
-
-                        experimentResult += string.Join(",", lineCount - 1, elapsedTime, context.ChangeTracker.Entries().Count()) + "\n";
-                        File.AppendAllText(resultSCPath, experimentResult);
                     }
                 }
                 catch (Exception e)
@@ -342,93 +253,36 @@ namespace ConsoleAppForInteractingWithDatabase
                     Console.WriteLine("File could not be read to insert the tags.");
                     Console.WriteLine(e.Message);
                     Console.WriteLine(e.InnerException.Message);
-                    File.AppendAllText(resultSCPath, e.Message + "\n");
-                    File.AppendAllText(resultSCPath, e.InnerException.Message + "\n");
                 }
-            }
         }
 
-        private void createNewObjectTagRelationAndAddToContext(Tag tagFromDb, CubeObject cubeObjectFromDb, ObjectContext context)
+        private bool containsObjectTagRelation(string fileName, int tagId)
         {
-            ObjectTagRelation newObjectTagRelation =
-                DomainClassFactory.NewObjectTagRelation(tagFromDb, cubeObjectFromDb);
-            context.ObjectTagRelations.Add(newObjectTagRelation);
+            Dictionary<int, ObjectTagRelation> OTRelations = objectTagRelations[fileName];
+            return OTRelations.ContainsKey(tagId);
         }
 
-        private bool containsTagInObjectTagRelation(CubeObject cubeObjectFromDb, Tag tagFromDb)
+        private Tagset createNewTagset(string tagsetName, Dictionary<string, Tagset> tagsets)
         {
-            return cubeObjectFromDb.ObjectTagRelations
-                       .FirstOrDefault(otr => otr.TagId == tagFromDb.Id) 
-                   != null;
-        }
-
-        private void updateContextAndSaveInDB(ObjectContext context, Tagset tagsetFromDb, Tag tagFromDb)
-        {
-            context.Update(tagsetFromDb);
-            context.Update(tagFromDb);
-            //context.SaveChanges();
-        }
-
-        private Tag createNewTagAndSaveInDB(string tagName, Tagset tagsetFromDb, ObjectContext context, Dictionary<string, Tag> tagSeen)
-        {
-            Tag tagFromDb = DomainClassFactory.NewTag(tagName, tagsetFromDb);
-            tagSeen.Add(tagName, tagFromDb);
-            context.Tags.Add(tagFromDb);
-            //context.SaveChanges();
-            return tagFromDb;
-        }
-
-        private void updateTagMapAndSaveChangedTagAndTagSetInDB(Dictionary<string, Tag> tagSeen, string tagsetName, Tag tagWithSameNameAsTagset, ObjectContext context)
-        {
-            tagSeen.Add(tagsetName, tagWithSameNameAsTagset);
-            context.Tags.Add(tagWithSameNameAsTagset);
-            //context.SaveChanges();
-        }
-
-        private void addTagAndTagsetToEachOther(Tag tag, Tagset tagset)
-        {
-            tag.Tagset = tagset;
-            tagset.Tags.Add(tag);
-        }
-
-        private Tagset createNewTagsetAndSaveInDB(string tagsetName, Dictionary<string, Tagset> tagsetSeen, ObjectContext context)
-        {
-            Tagset tagsetFromDb = DomainClassFactory.NewTagSet(tagsetName);
-            tagsetSeen.Add(tagsetName, tagsetFromDb);
-            context.Tagsets.Add(tagsetFromDb);
-            //context.SaveChanges();
-            return tagsetFromDb;
-        }
-
-        private CubeObject selectCubeObjectWithFilenameOTRelations(ObjectContext context, string fileName)
-        {
-            CubeObject cubeObjectFromDb = context.CubeObjects
-                .Where(co => co.FileURI.Equals(fileName))
-                .Include(co => co.ObjectTagRelations)
-                .FirstOrDefault();
-            return cubeObjectFromDb;
+            Tagset tagset = DomainClassFactory.NewTagSet(tagsetName);
+            tagsets.Add(tagsetName, tagset);
+            return tagset;
         }
 
         /// <summary>
         /// Inserts hierarchies
         /// </summary>
-        private void InsertHierarchies()
+        private void BuildHierarchiesAndNodes()
         {
-            Console.WriteLine("Inserting Hierarchies:");
-
-            using (var context = new ObjectContext(connectionString))
+            Console.WriteLine("Building Hierarchies:"); 
+            try 
             {
-                var rootNodes = new Dictionary<string, Node>();
-                try
-                {
                     using (StreamReader reader = new StreamReader(pathToHierarchiesFile))
                     {
                         int lineCount = 1;
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals(""))
                         {
-                            Console.WriteLine("Inserting hierarchy line number: " + lineCount);
-
                             //File format: TagsetName:HierarchyName:ParrentTag:ChildTag:ChildTag:ChildTag:(...)
                             string[] split = line.Split(":");
                             string tagsetName = split[0];
@@ -436,39 +290,66 @@ namespace ConsoleAppForInteractingWithDatabase
                             string parentTagName = split[2];
 
                             //Finding tagset:
-                            Tagset tagsetFromDb = selectTagsetWithTagsetNameAndTagsAndHierarchies(context, tagsetName);
+                            Tagset tagset = tagsets[tagsetName];
 
-                            //See if hierarchy exists:
-                            Hierarchy hierarchyFromDb = selectHierarchyWithNodesAndHierarchyName(context, hierarchyName);
-
+                            Hierarchy hierarchy;
                             //If hierarchyFromDb does not exist, create it:
-                            if (hierarchyFromDb == null)
+                            if (!hierarchies.ContainsKey(hierarchyName))
                             {
-                                hierarchyFromDb = createNewHierarchyAndSaveInDB(tagsetFromDb, context);
+                                hierarchy = DomainClassFactory.NewHierarchy(tagset, hierarchyName);
+                                hierarchies[hierarchyName] = hierarchy;
+                            }
+                            else
+                            {
+                                hierarchy = hierarchies[hierarchyName];
                             }
 
                             //Finding parent tag:
-                            Tag parentTagFromDb = selectTagWithTagsetIdAndTagName(context, tagsetFromDb, parentTagName);
+                            Tag parentTag;
+                            Dictionary<int, Tag> tagList;
 
                             //If parentTag does not exist, create it:
-                            if (parentTagFromDb == null)
+                            if (!tags.ContainsKey(parentTagName))
                             {
-                                parentTagFromDb = createNewParentTagAndSaveInDB(parentTagName, tagsetFromDb, context);
+                                parentTag = DomainClassFactory.NewTag(parentTagName, tagset);
+                                tagList = new Dictionary<int, Tag>();
+                                tagList[parentTag.TagsetId] = parentTag;
+                                tags[parentTagName] = tagList;
+                            }
+                            else
+                            {
+                                tagList = tags[parentTagName];
+                                if (!tagList.ContainsKey(tagset.Id)) 
+                                {
+                                    parentTag = DomainClassFactory.NewTag(parentTagName, tagset);
+                                    tagList[parentTag.TagsetId] = parentTag;
+                                    tags[parentTagName] = tagList;
+                                }
+                                else
+                                {
+                                    parentTag = tagList[tagset.Id];
+                                }
                             }
 
+                            // nodes dictionary (k,v) = (tagId, node)
                             //Finding parent node:
-                            Node parentNodeFromDb = selectNodeWithChildrenAndHierarchyIdAndTagId(hierarchyFromDb, parentTagFromDb, context);
+                            Node parentNode;
 
                             //If parent node does not exist, create it:
-                            if (parentNodeFromDb == null)
+                            if (!nodes.ContainsKey(parentTag.Id))
                             {
-                                //Probably root node:
-                                parentNodeFromDb = createParentNodeAndSaveInDB(parentTagFromDb, hierarchyFromDb, context);
+                                parentNode = DomainClassFactory.NewNode(parentTag, hierarchy);
+                                nodes[parentTag.Id] = parentNode;
 
                                 if (hierarchyName.Equals(parentTagName))
                                 {
-                                    addRootNodeIdToHierarchyAndSaveInDB(hierarchyFromDb, parentNodeFromDb, context);
+                                    // It is a rootNode
+                                    hierarchy.RootNodeId = parentNode.Id;
                                 }
+                            }
+                            else
+                            {
+                                parentNode = nodes[parentTag.Id];
                             }
 
                             //Adding child nodes:
@@ -476,133 +357,119 @@ namespace ConsoleAppForInteractingWithDatabase
                             {
                                 string childTagName = split[i];
 
-                                Tag childTagFromDb = selectTagWithTagsetIdAndTagName(context, tagsetFromDb, childTagName);
+                                Tag childTag;
+                                Dictionary<int, Tag> childTagList;
 
                                 //If child tag does not exist, create it:
-                                if (childTagFromDb == null)
+                                if (!tags.ContainsKey(childTagName))
                                 {
-                                    childTagFromDb = createNewChildTagAndSaveInDB(childTagName, tagsetFromDb, context);
-                                }
-
-                                //Finding child node:
-                                Node childNodeFromDb = selectNodeWithChildrenAndHierarchyIdAndTagId(hierarchyFromDb, childTagFromDb, context);
-
-                                if (childNodeFromDb == null)
-                                {
-                                    createNewChildNodeAndSaveInDB(childTagFromDb, hierarchyFromDb, parentNodeFromDb, context);
+                                    childTag = DomainClassFactory.NewTag(childTagName, tagset);
+                                    childTagList = new Dictionary<int, Tag>();
+                                    childTagList[childTag.TagsetId] = childTag;
+                                    tags[childTagName] = childTagList;
                                 }
                                 else
                                 {
-                                    addChildNodeToParentNodeAndSaveInDB(parentNodeFromDb, childNodeFromDb, context);
+                                    childTagList = tags[childTagName];
+                                    if (!childTagList.ContainsKey(tagset.Id))
+                                    {
+                                        childTag = DomainClassFactory.NewTag(childTagName, tagset);
+                                        childTagList[childTag.TagsetId] = childTag;
+                                        tags[childTagName] = childTagList;
+                                    }
+                                    else
+                                    {
+                                        childTag = childTagList[tagset.Id];
+                                    }
+                                }
+
+                                //Finding child node:
+                                Node childNode;
+                                if (!nodes.ContainsKey(childTag.Id))
+                                {
+                                    childNode = DomainClassFactory.NewNode(childTag, hierarchy);
+                                    childNode.ParentNodeId = parentNode.Id;
+                                    nodes[childTag.Id] = childNode;
+                                }
+                                else
+                                {
+                                    childNode = nodes[childTag.Id];
+                                    childNode.ParentNodeId = parentNode.Id;
                                 }
                             }
-
                             lineCount++;
                         }
                     }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("File could not be read to insert the hierarchies.");
-                    Console.WriteLine(e.Message);
-                }
+            }
+            catch (Exception e) 
+            {
+                Console.WriteLine("File could not be read to insert the hierarchies.");
+                Console.WriteLine(e.Message);
             }
         }
 
-        private void addChildNodeToParentNodeAndSaveInDB(Node parentNodeFromDb, Node childNodeFromDb, ObjectContext context)
+        private void WriteInsertStatementsToFile()
         {
-            parentNodeFromDb.Children.Add(childNodeFromDb);
-            context.Update(parentNodeFromDb);
-            context.SaveChanges();
-        }
+            // insert into [tableName]
+            // (column1, column2, ..)
+            // values
+            // (value1, value2, ..);
 
-        private void createNewChildNodeAndSaveInDB(Tag childTagFromDb, Hierarchy hierarchyFromDb, Node parentNodeFromDb, ObjectContext context)
-        {
-            Node newChildNode = DomainClassFactory.NewNode(childTagFromDb, hierarchyFromDb);
-            parentNodeFromDb.Children.Add(newChildNode);
-            hierarchyFromDb.Nodes.Add(newChildNode);
-            context.Update(parentNodeFromDb);
-            context.Update(hierarchyFromDb);
-            context.SaveChanges();
-        }
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\n");
+            foreach (var co in cubeObjects.Values)
+            {
+                string insertStatement = "INSERT INTO cubeobjects(Id, FileURI, FileType, ThumbnailURI) VALUES(" + co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI + "'); \n";
+                File.AppendAllText(SQLPath, insertStatement);
+            }
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects OFF;\n");
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\n");
+            foreach (var ts in tagsets.Values)
+            {
+                string insertStatement = "INSERT INTO tagsets(Id, Name) VALUES(" + ts.Id + ",'" + ts.Name + "'); \n";
+                File.AppendAllText(SQLPath, insertStatement);
+            }
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets OFF;\n");
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags ON;\n");
+            foreach (var list in tags.Values)
+            {
+                foreach (var t in list.Values)
+                {
+                    string insertStatement = "INSERT INTO tags(Id, Name, TagsetId) VALUES(" + t.Id + ",'" + t.Name + "'," + t.TagsetId + "); \n";
+                    File.AppendAllText(SQLPath, insertStatement);
+                }
+            }
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags OFF;\n");
+            foreach (var co in objectTagRelations.Values)
+            {
+                foreach (var otr in co.Values)
+                {
+                    string insertStatement = "INSERT INTO objecttagrelations(ObjectId, TagId) VALUES(" + otr.ObjectId + "," + otr.TagId + "); \n";
+                    File.AppendAllText(SQLPath, insertStatement);
+                }
+            }
 
-        private Tag createNewChildTagAndSaveInDB(string childTagName, Tagset tagsetFromDb, ObjectContext context)
-        {
-            Tag childTagFromDb = DomainClassFactory.NewTag(childTagName, tagsetFromDb);
-            childTagFromDb.Tagset = tagsetFromDb;
-            tagsetFromDb.Tags.Add(childTagFromDb);
-            context.Update(tagsetFromDb);
-            context.SaveChanges();
-            return childTagFromDb;
-        }
-
-        private void addRootNodeIdToHierarchyAndSaveInDB(Hierarchy hierarchyFromDb, Node parentNodeFromDb, ObjectContext context)
-        {
-            hierarchyFromDb.RootNodeId = parentNodeFromDb.Id;
-            context.Update(hierarchyFromDb);
-            context.SaveChanges();
-        }
-
-        private Node createParentNodeAndSaveInDB(Tag parentTagFromDb, Hierarchy hierarchyFromDb, ObjectContext context)
-        {
-            Node parentNodeFromDb = DomainClassFactory.NewNode(parentTagFromDb, hierarchyFromDb);
-            hierarchyFromDb.Nodes.Add(parentNodeFromDb);
-            context.Update(hierarchyFromDb);
-            context.SaveChanges();
-            return parentNodeFromDb;
-        }
-
-        private Node selectNodeWithChildrenAndHierarchyIdAndTagId(Hierarchy hierarchyFromDb, Tag tagFromDb, ObjectContext context)
-        {
-            return context.Nodes
-                .Include(n => n.Children)
-                .Where(n => n.HierarchyId == hierarchyFromDb.Id && n.TagId == tagFromDb.Id)
-                .FirstOrDefault();
-        }
-
-        private Tag createNewParentTagAndSaveInDB(string parentTagName, Tagset tagsetFromDb, ObjectContext context)
-        {
-            Tag parentTagFromDb = DomainClassFactory.NewTag(parentTagName, tagsetFromDb);
-            tagsetFromDb.Tags.Add(parentTagFromDb);
-            context.Tags.Add(parentTagFromDb);
-            context.Update(tagsetFromDb);
-            context.SaveChanges();
-            return parentTagFromDb;
-        }
-
-        private Tag selectTagWithTagsetIdAndTagName(ObjectContext context, Tagset tagsetFromDb, string tagName)
-        {
-            return context.Tags
-                .Where(t => t.TagsetId == tagsetFromDb.Id && t.Name.Equals(tagName))
-                .FirstOrDefault();
-        }
-
-        private Hierarchy createNewHierarchyAndSaveInDB(Tagset tagsetFromDb, ObjectContext context)
-        {
-            Hierarchy hierarchyFromDb = DomainClassFactory.NewHierarchy(tagsetFromDb);
-            tagsetFromDb.Hierarchies.Add(hierarchyFromDb);
-            //hierarchyFromDb.Tagset = tagsetFromDb;
-            context.Update(tagsetFromDb);
-            context.Update(hierarchyFromDb);
-            context.SaveChanges();
-            return hierarchyFromDb;
-        }
-
-        private Hierarchy selectHierarchyWithNodesAndHierarchyName(ObjectContext context, string hierarchyName)
-        {
-            return context.Hierarchies
-                .Include(h => h.Nodes)
-                .Where(h => h.Name.Equals(hierarchyName))
-                .FirstOrDefault();
-        }
-
-        private Tagset selectTagsetWithTagsetNameAndTagsAndHierarchies(ObjectContext context, string tagsetName)
-        {
-            return context.Tagsets
-                .Where(ts => ts.Name.Equals(tagsetName))
-                .Include(ts => ts.Tags)
-                .Include(ts => ts.Hierarchies)
-                .FirstOrDefault();
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\n");
+            foreach (var h in hierarchies.Values)
+            {
+                string insertStatement = "INSERT INTO hierarchies(Id, Name, TagsetId, RootNodeId) VALUES(" + h.Id + ",'" + h.Name + "'," + h.TagsetId + "," + h.RootNodeId + "); \n";
+                File.AppendAllText(SQLPath, insertStatement);
+            }
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies OFF;\n");
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\n");
+            foreach (var n in nodes.Values)
+            {
+                string insertStatement;
+                if (n.ParentNodeId == null)
+                {
+                    insertStatement = "INSERT INTO nodes(Id, TagId, HierarchyId) VALUES(" + n.Id + "," + n.TagId + "," + n.HierarchyId + "); \n";
+                }
+                else
+                {
+                    insertStatement = "INSERT INTO nodes(Id, TagId, HierarchyId, ParentNodeId) VALUES(" + n.Id + "," + n.TagId + "," + n.HierarchyId + "," + n.ParentNodeId + "); \n";
+                }
+                File.AppendAllText(SQLPath, insertStatement);
+            }
+            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\n");
         }
     }
 }

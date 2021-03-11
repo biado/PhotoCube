@@ -26,8 +26,7 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             Console.WriteLine("Started up!");
 
-            int[] N = new int[] { 191418 }; // 191418 = Total number of LSC images, based on VisualConcept file.
-            string[] DB = new string[] { "LSCAllwoMetadata" };
+            int[] N = new int[] { 5 }; // 191418 = Total number of LSC images, based on VisualConcept file.
 
             string resultPath = sAll.Get("resultPath");
             string experimentResult = "DB Name,Number of Images,Elapsed Time\n";
@@ -35,46 +34,27 @@ namespace ConsoleAppForInteractingWithDatabase
             for (int i = 0; i < N.Length; i++)
             {
                 int num = N[i];
-                string dbName = DB[i];
 
-                OperatingSystem OS = Environment.OSVersion;
-                PlatformID platformId = OS.Platform;
-                string connectionString;
-
-                switch (platformId)
-                {
-                    case PlatformID.Unix: //Mac 
-                        connectionString = sAll.Get("connectionStringWithoutDB") + "Database = " + dbName + ";";
-                        break;
-                    case PlatformID.Win32NT: //Windows
-                        string[] splitConnectionStringFormat = sAll.Get("connectionStringWithoutDB").Split("***");
-                        connectionString = splitConnectionStringFormat[0] + dbName + splitConnectionStringFormat[1] +
-                                           dbName + splitConnectionStringFormat[2];
-                        break;
-                    default:
-                        throw new System.Exception("Connection String is not defined");
-                }
-
-                Console.WriteLine("Inserting " + num + " images into " + dbName + " with RefactoredLSCInserter.");
+                Console.WriteLine("Generating SQL INSERT queries for " + num + " images using RefactoredLSCInserter.");
 
                 // Starting the timer
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
 
                 //Insert data:
-                new LSCDatasetInsertExperimenterRefactored(num, connectionString).InsertLSCDataset();
+                new LSCDatasetInsertExperimenterRefactored(num);
 
                 // Get the elapsed time as a TimeSpan value.
                 TimeSpan ts = stopWatch.Elapsed;
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
                     ts.Hours, ts.Minutes, ts.Seconds);
 
-                experimentResult += string.Join(",", dbName, num, elapsedTime) + "\n";
+                experimentResult += string.Join(",", "GenerateSQLQueries", num, elapsedTime) + "\n";
 
                 File.AppendAllText(resultPath, experimentResult);
                 experimentResult = "";
 
-                Console.WriteLine("Done! Inserted " + num + " images to " + dbName + " database.");
+                Console.WriteLine("Done! Generated SQL INSERT queries for " + num + " images.");
                 Console.WriteLine("Took: " + elapsedTime + " in format: hh:mm:ss\n");
 
             }
