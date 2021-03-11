@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.DataAccess;    
 using ObjectCubeServer.Models.DomainClasses;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -219,7 +219,7 @@ namespace ConsoleAppForInteractingWithDatabase
                             Console.WriteLine("Inserting line: " + lineCount + " out of " + numOfImages);
                             //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
                             string[] split = line.Split(":");
-                            string fileName = Path.Combine(pathToDataset, split[0]);
+                            string fileName = split[0];
 
                             CubeObject cubeObjectFromDb = selectCubeObjectWithFilenameOTRelations(context, fileName);
 
