@@ -28,7 +28,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private Stopwatch stopwatch;
         private string resultSCPath;
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
-        private int batchSize = 1000;
+        private int batchSize = 10000;
 
         public LSCDatasetInsertExperimenterRefactored(int numOfImages, string connectionString)
         {
@@ -50,6 +50,8 @@ namespace ConsoleAppForInteractingWithDatabase
             var insertTags = true;
             var insertHierarchies = true;
 
+            stopwatch = new Stopwatch();
+
             if (insertCubeObjects)
             {
                 InsertCubeObjects();
@@ -61,7 +63,6 @@ namespace ConsoleAppForInteractingWithDatabase
 
             if (insertTags)
             {
-                stopwatch = new Stopwatch();
                 InsertTags();
             }
             else
@@ -94,6 +95,9 @@ namespace ConsoleAppForInteractingWithDatabase
                 {
                     int fileCount = 1;
                     int insertCount = 0;
+
+                    string experimentResult = "InsertCubeObject Rows,Elapsed Time,Tracked Entities\n";
+
                     using (StreamReader reader = new StreamReader(pathToTagFile))
                     {
                         string line = reader.ReadLine(); // Skipping the first line
@@ -118,7 +122,7 @@ namespace ConsoleAppForInteractingWithDatabase
                             }
 
                             //Loading and saving image:
-                            using (Image<Rgba32> image = SixLabors.ImageSharp.Image.Load(filepath))
+                            using (Image<Rgba32> image = Image.Load<Rgba32>(filepath))
                             {
                                 using (MemoryStream ms = new MemoryStream())
                                 {
@@ -149,8 +153,18 @@ namespace ConsoleAppForInteractingWithDatabase
                             insertCount++;
                             if (insertCount == batchSize)
                             {
+                                stopwatch.Start();
                                 //Save cube object: 
                                 context.SaveChanges();
+                                TimeSpan ts = stopwatch.Elapsed;
+                                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
+                                    ts.Hours, ts.Minutes, ts.Seconds);
+                                stopwatch.Stop();
+
+                                experimentResult += string.Join(",", fileCount - 1, elapsedTime, context.ChangeTracker.Entries().Count()) + "\n";
+                                File.AppendAllText(resultSCPath, experimentResult);
+                                experimentResult = "";
+
                                 insertCount = 0;
                             }
                         }
@@ -158,13 +172,22 @@ namespace ConsoleAppForInteractingWithDatabase
 
                     if (insertCount != 0)
                     {
+                        stopwatch.Start();
                         context.SaveChanges();
+                        TimeSpan ts = stopwatch.Elapsed;
+                        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
+                            ts.Hours, ts.Minutes, ts.Seconds);
+                        stopwatch.Stop();
+
+                        experimentResult += string.Join(",", fileCount - 1, elapsedTime, context.ChangeTracker.Entries().Count()) + "\n";
+                        File.AppendAllText(resultSCPath, experimentResult);
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("File could not be read to insert the cube objects.");
                     Console.WriteLine(e.Message);
+                    File.AppendAllText(resultSCPath, e.Message + "\n");
                 }
             }
 
@@ -209,10 +232,10 @@ namespace ConsoleAppForInteractingWithDatabase
                 {
                     int lineCount = 1;
                     int insertCount = 0;
+
+                    string experimentResult = "InsertTag Rows,Elapsed Time,Tracked Entities\n";
                     using (StreamReader reader = new StreamReader(pathToTagFile))
                     {
-                        string experimentResult = "Rows,Elapsed Time\n";
-
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
                         {
@@ -277,6 +300,7 @@ namespace ConsoleAppForInteractingWithDatabase
                                         //If Cubeobject does not already have tag asscociated with it, add it
                                     {
                                         createNewObjectTagRelationAndAddToContext(tagFromDb, cubeObjectFromDb, context);
+                                        File.AppendAllText(resultSCPath, "Created new otr: co " + cubeObjectFromDb.Id + " - tag " + tagFromDb.Name);
                                     }
                                 }
                             }
@@ -292,7 +316,7 @@ namespace ConsoleAppForInteractingWithDatabase
                                     ts.Hours, ts.Minutes, ts.Seconds);
                                 stopwatch.Stop();
 
-                                experimentResult += string.Join(",",lineCount-1, elapsedTime) + "\n";
+                                experimentResult += string.Join(",",lineCount-1, elapsedTime, context.ChangeTracker.Entries().Count()) + "\n";
                                 File.AppendAllText(resultSCPath, experimentResult);
                                 experimentResult = "";
                                 insertCount = 0;
@@ -302,7 +326,15 @@ namespace ConsoleAppForInteractingWithDatabase
 
                     if (insertCount != 0)
                     {
+                        stopwatch.Start();
                         context.SaveChanges();
+                        TimeSpan ts = stopwatch.Elapsed;
+                        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
+                            ts.Hours, ts.Minutes, ts.Seconds);
+                        stopwatch.Stop();
+
+                        experimentResult += string.Join(",", lineCount - 1, elapsedTime, context.ChangeTracker.Entries().Count()) + "\n";
+                        File.AppendAllText(resultSCPath, experimentResult);
                     }
                 }
                 catch (Exception e)
@@ -310,6 +342,8 @@ namespace ConsoleAppForInteractingWithDatabase
                     Console.WriteLine("File could not be read to insert the tags.");
                     Console.WriteLine(e.Message);
                     Console.WriteLine(e.InnerException.Message);
+                    File.AppendAllText(resultSCPath, e.Message + "\n");
+                    File.AppendAllText(resultSCPath, e.InnerException.Message + "\n");
                 }
             }
         }

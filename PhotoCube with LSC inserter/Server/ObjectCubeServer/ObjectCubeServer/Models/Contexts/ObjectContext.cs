@@ -140,7 +140,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = RemoveImage; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\RemoveImage.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSCAllwoMetadata; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSCAllwoMetadata.mdf");
                     }
                     break;
                 default:
