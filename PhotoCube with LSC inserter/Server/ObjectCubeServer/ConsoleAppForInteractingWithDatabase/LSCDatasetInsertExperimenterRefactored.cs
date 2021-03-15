@@ -418,14 +418,14 @@ namespace ConsoleAppForInteractingWithDatabase
             File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\n");
             foreach (var co in cubeObjects.Values)
             {
-                string insertStatement = "INSERT INTO cubeobjects(Id, FileURI, FileType, ThumbnailURI) VALUES(" + co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI + "'); \n";
+                string insertStatement = "INSERT INTO cubeobjects(id, file_uri, file_type, thumbnail_uri) VALUES(" + co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
             File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects OFF;\n");
             File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\n");
             foreach (var ts in tagsets.Values)
             {
-                string insertStatement = "INSERT INTO tagsets(Id, Name) VALUES(" + ts.Id + ",'" + ts.Name + "'); \n";
+                string insertStatement = "INSERT INTO tagsets(id, name) VALUES(" + ts.Id + ",'" + ts.Name + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
             File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets OFF;\n");
@@ -434,7 +434,7 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 foreach (var t in list.Values)
                 {
-                    string insertStatement = "INSERT INTO tags(Id, Name, TagsetId) VALUES(" + t.Id + ",'" + t.Name + "'," + t.TagsetId + "); \n";
+                    string insertStatement = "INSERT INTO tags(id, name, tagset_id) VALUES(" + t.Id + ",'" + t.Name + "'," + t.TagsetId + "); \n";
                     File.AppendAllText(SQLPath, insertStatement);
                 }
             }
@@ -443,7 +443,7 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 foreach (var otr in co.Values)
                 {
-                    string insertStatement = "INSERT INTO objecttagrelations(ObjectId, TagId) VALUES(" + otr.ObjectId + "," + otr.TagId + "); \n";
+                    string insertStatement = "INSERT INTO objecttagrelations(object_id, tag_id) VALUES(" + otr.ObjectId + "," + otr.TagId + "); \n";
                     File.AppendAllText(SQLPath, insertStatement);
                 }
             }
@@ -451,24 +451,30 @@ namespace ConsoleAppForInteractingWithDatabase
             File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\n");
             foreach (var h in hierarchies.Values)
             {
-                string insertStatement = "INSERT INTO hierarchies(Id, Name, TagsetId, RootNodeId) VALUES(" + h.Id + ",'" + h.Name + "'," + h.TagsetId + "," + h.RootNodeId + "); \n";
+                string insertStatement = "INSERT INTO hierarchies(id, name, tagset_Id, rootnode_id) VALUES(" + h.Id + ",'" + h.Name + "'," + h.TagsetId + "," + h.RootNodeId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
             File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies OFF;\n");
             File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\n");
+
+            //Insert all nodes first without setting parent node to avoid violating FK constraint
             foreach (var n in nodes.Values)
             {
-                string insertStatement;
-                if (n.ParentNodeId == null)
-                {
-                    insertStatement = "INSERT INTO nodes(Id, TagId, HierarchyId) VALUES(" + n.Id + "," + n.TagId + "," + n.HierarchyId + "); \n";
-                }
-                else
-                {
-                    insertStatement = "INSERT INTO nodes(Id, TagId, HierarchyId, ParentNodeId) VALUES(" + n.Id + "," + n.TagId + "," + n.HierarchyId + "," + n.ParentNodeId + "); \n";
-                }
+                string insertStatement = "INSERT INTO nodes(id, tag_id, hierarchy_id) VALUES(" + n.Id + "," + n.TagId + "," + n.HierarchyId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
+
+            foreach (var n in nodes.Values)
+            {
+                //Root nodes should have no parent node
+                if (n.ParentNodeId != null)
+                {
+                    //Update parent node 
+                    string insertStatement = "UPDATE nodes SET parentnode_id=" + n.ParentNodeId + " WHERE id=" + n.Id + "; \n";
+                    File.AppendAllText(SQLPath, insertStatement);
+                }
+            }
+
             File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\n");
         }
     }
