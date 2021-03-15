@@ -12,19 +12,24 @@ namespace ObjectCubeServer.Models.DomainClasses
     /// Has child nodes.
     /// If Children is empty, then this node is a leaf.
     /// </summary>
+    [Table("nodes")]
     public class Node
     {
+        [Column("id")]
         public int Id { get; set; }
 
+        [Column("tag_id")]
         public int TagId { get; set; }
-        [ForeignKey("TagId")]
         public Tag Tag { get; set; }
 
+        [Column("hierarchy_id")]
         public int HierarchyId { get; set; }
         public Hierarchy Hierarchy { get; set; }
 
-        //NodeId created automatically
-        public int? ParentNodeId { get; set; }
+        [ForeignKey("parentnode_id")]
         public List<Node> Children { get; set; }
+
+        [NotMapped]
+        public int? ParentNodeId { get; set; }
     }
 }
