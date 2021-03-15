@@ -58,7 +58,7 @@ namespace ConsoleAppForInteractingWithDatabase
         /// </summary>
         private void BuildCubeObjects()
         {
-            Console.WriteLine("Building Cube Objects:");
+            Console.WriteLine("Building Cube Objects.");
             try
             {
                     int fileCount = 1;
@@ -147,7 +147,7 @@ namespace ConsoleAppForInteractingWithDatabase
         /// </summary>
         private void BuildTagsetsAndTags()
         {
-            Console.WriteLine("Building TagsSets and Tags:");
+            Console.WriteLine("Building TagsSets and Tags.");
 
             try
                 {
@@ -274,7 +274,7 @@ namespace ConsoleAppForInteractingWithDatabase
         /// </summary>
         private void BuildHierarchiesAndNodes()
         {
-            Console.WriteLine("Building Hierarchies:"); 
+            Console.WriteLine("Building Hierarchies."); 
             try 
             {
                     using (StreamReader reader = new StreamReader(pathToHierarchiesFile))
@@ -415,21 +415,36 @@ namespace ConsoleAppForInteractingWithDatabase
             // values
             // (value1, value2, ..);
 
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\n");
+            OperatingSystem OS = Environment.OSVersion;
+            PlatformID platformId = OS.Platform;
+
+            if (platformId == PlatformID.Win32NT)
+            {
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\n");
+            }
+            //Insert all CubeObjects
             foreach (var co in cubeObjects.Values)
             {
                 string insertStatement = "INSERT INTO cubeobjects(id, file_uri, file_type, thumbnail_uri) VALUES(" + co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects OFF;\n");
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\n");
+            if (platformId == PlatformID.Win32NT)
+            {
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects OFF;\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\n");
+            }
+            //Insert all Tagsets
             foreach (var ts in tagsets.Values)
             {
                 string insertStatement = "INSERT INTO tagsets(id, name) VALUES(" + ts.Id + ",'" + ts.Name + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets OFF;\n");
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags ON;\n");
+            if (platformId == PlatformID.Win32NT)
+            {
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets OFF;\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags ON;\n");
+            }
+            //Insert all Tags 
             foreach (var list in tags.Values)
             {
                 foreach (var t in list.Values)
@@ -438,7 +453,11 @@ namespace ConsoleAppForInteractingWithDatabase
                     File.AppendAllText(SQLPath, insertStatement);
                 }
             }
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags OFF;\n");
+            if (platformId == PlatformID.Win32NT)
+            {
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags OFF;\n");
+            }
+            //Inser all ObjectTagRelations
             foreach (var co in objectTagRelations.Values)
             {
                 foreach (var otr in co.Values)
@@ -447,35 +466,41 @@ namespace ConsoleAppForInteractingWithDatabase
                     File.AppendAllText(SQLPath, insertStatement);
                 }
             }
-
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\n");
+            if (platformId == PlatformID.Win32NT)
+            {
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\n");
+            }
+            //Insert all Hierarchies
             foreach (var h in hierarchies.Values)
             {
                 string insertStatement = "INSERT INTO hierarchies(id, name, tagset_Id, rootnode_id) VALUES(" + h.Id + ",'" + h.Name + "'," + h.TagsetId + "," + h.RootNodeId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies OFF;\n");
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\n");
-
-            //Insert all nodes first without setting parent node to avoid violating FK constraint
+            if (platformId == PlatformID.Win32NT)
+            {
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies OFF;\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\n");
+            }
+            //Insert all Nodes first without setting parent node to avoid violating FK constraint
             foreach (var n in nodes.Values)
             {
                 string insertStatement = "INSERT INTO nodes(id, tag_id, hierarchy_id) VALUES(" + n.Id + "," + n.TagId + "," + n.HierarchyId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
-
+            //Upate all Nodes and set parent node
             foreach (var n in nodes.Values)
             {
                 //Root nodes should have no parent node
                 if (n.ParentNodeId != null)
                 {
-                    //Update parent node 
                     string insertStatement = "UPDATE nodes SET parentnode_id=" + n.ParentNodeId + " WHERE id=" + n.Id + "; \n";
                     File.AppendAllText(SQLPath, insertStatement);
                 }
             }
-
-            File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\n");
+            if (platformId == PlatformID.Win32NT)
+            {
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\n");
+            }
         }
     }
 }
