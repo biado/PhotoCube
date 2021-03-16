@@ -15,12 +15,14 @@ namespace ObjectCubeServer.Models.DomainClasses
     {
         [Key][Column("id")]
         public int Id { get; set; }
-        [Column("name")]
-        public string Name { get; set; }
 
-        public Tagset Tagset { get; set; }
+        [Column("tagtype_id")]
+        public int TagTypeId { get; set; }
+        public TagType TagType { get; set; }
+
         [Column("tagset_id")]
         public int TagsetId { get; set; }
+        public Tagset Tagset { get; set; }
 
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }
     }

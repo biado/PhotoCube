@@ -58,8 +58,7 @@ namespace ObjectCubeServer.Models.DataAccess
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //One to one relationship between CubeObject and Photo.
-            //If CubeObject is deleted, then photo is also deleted.
+
             //This is called "fluent API": https://docs.microsoft.com/en-us/ef/core/modeling/
             //And is a way to specify database relations explicitly for Entity Framework CORE (EF CORE)
 
@@ -88,16 +87,25 @@ namespace ObjectCubeServer.Models.DataAccess
                 .WithOne(t => t.Tagset)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //Ids of Tags are generated when added... Needed for some reason...
-            modelBuilder.Entity<Tag>()
-               .Property(t => t.Id)
-               .ValueGeneratedOnAdd();
-
             //Many-to-one relationship, if tagset is deleted, then hierarchies are also deleted.
             modelBuilder.Entity<Tagset>()
                 .HasMany(ts => ts.Hierarchies)
                 .WithOne(h => h.Tagset)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            //Ids of Tags are generated when added... Needed for some reason...
+            modelBuilder.Entity<Tag>()
+               .Property(t => t.Id)
+               .ValueGeneratedOnAdd();
+
+            //Enforce that there are no duplicate tags within a tagset.
+            modelBuilder.Entity<Tag>()
+                .HasIndex(t => new { t.Name, t.TagsetId })
+                .IsUnique();
+
+            //Every tag has exactly one tag type
+            modelBuilder.Entity<Tag>()
+                .HasOne(t => t.TagType);
 
             //Many-to-one relationship, if hierarchy is deleted, then nodes are also deleted.
             modelBuilder.Entity<Hierarchy>()
