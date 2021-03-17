@@ -82,6 +82,11 @@ namespace ObjectCubeServer.Models.DataAccess
                 .HasIndex(ts => ts.Name)
                 .IsUnique();
 
+            // Enforce that there are no duplicate tags within a tagset.
+            modelBuilder.Entity<Tag>()
+                .HasIndex(t => new { t.Name, t.TagsetId })
+                .IsUnique();
+
             //Many-to-one relationship, if tagset is deleted, then tags are also deleted.
             modelBuilder.Entity<Tagset>()
                 .HasMany(ts => ts.Tags)
