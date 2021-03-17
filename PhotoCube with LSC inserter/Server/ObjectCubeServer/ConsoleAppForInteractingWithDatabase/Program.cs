@@ -26,7 +26,7 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             Console.WriteLine("Started up!");
 
-            int[] N = new int[] { 200 }; // 191418 = Total number of LSC images, based on VisualConcept file.
+            int[] N = new int[] { 100 }; // 191418 = Total number of LSC images, based on VisualConcept file.
 
             string resultPath = sAll.Get("resultPath");
             string experimentResult = "DB Name,Number of Images,Elapsed Time\n";
@@ -49,7 +49,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
                     ts.Hours, ts.Minutes, ts.Seconds);
 
-                experimentResult += string.Join(",", "GenerateSQLQueries", num, elapsedTime) + "\n";
+                experimentResult += string.Join(",", "Total time for GenerateSQLQueries", num, elapsedTime) + "\n";
 
                 File.AppendAllText(resultPath, experimentResult);
                 experimentResult = "";
