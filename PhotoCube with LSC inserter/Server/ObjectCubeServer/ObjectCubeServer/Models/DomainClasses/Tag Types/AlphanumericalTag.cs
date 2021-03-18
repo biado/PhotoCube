@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ObjectCubeServer.Models.DomainClasses
+namespace ObjectCubeServer.Models.DomainClasses.TagTypes
 {
     [Table("alphanumerical_tags")]
     public class AlphanumericalTag : Tag

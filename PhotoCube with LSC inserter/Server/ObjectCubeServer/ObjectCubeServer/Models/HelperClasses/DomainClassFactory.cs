@@ -1,4 +1,5 @@
 ﻿using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,17 +47,63 @@ namespace ObjectCubeServer.Models
             };
         }
 
-        public static Tag NewTag(string name, Tagset tagset)
+        public static Tag NewTag(TagType tagtype,Tagset tagset)
         {
-            if (name == null) { throw new Exception("Given name was null."); }
             if (tagset == null) { throw new Exception("Given tagset was null."); }
 
             tagId++;
             return new Tag()
             {
                 Id =  tagId,
-                Name = name,
+                TagTypeId = tagtype.Id,
                 TagsetId = tagset.Id
+            };
+        }
+
+        public static AlphanumericalTag NewAlphanumericalTag(Tag tag, string name)
+        {
+            if (name == null) { throw new Exception("Given name was null."); }
+            if (tag == null) { throw new Exception("Given tag was null."); }
+
+            return new AlphanumericalTag()
+            {
+                Id = tag.Id,
+                Name = name
+            };
+        }
+
+        public static NumericalTag NewNumericalTag(Tag tag, int name)
+        {
+            if (tag == null) { throw new Exception("Given tag was null."); }
+
+            return new NumericalTag()
+            {
+                Id = tag.Id,
+                Name = name
+            };
+        }
+
+        public static TimeTag NewTimeTag(Tag tag, DateTime name)
+        {
+            if (tag == null) { throw new Exception("Given tag was null."); }
+            if (name == null) { throw new Exception("Given name was null."); }
+
+            return new TimeTag()
+            {
+                Id = tag.Id,
+                Name = name
+            };
+        }
+
+        public static DateTag NewDateTag(Tag tag, DateTime name)
+        {
+            if (tag == null) { throw new Exception("Given tag was null."); }
+            if (name == null) { throw new Exception("Given name was null."); }
+
+            return new DateTag()
+            {
+                Id = tag.Id,
+                Name = name
             };
         }
 

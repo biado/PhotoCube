@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ObjectCubeServer.Models.DomainClasses
 {
     /// <summary>
-    /// Repressents a Tag in the M^3 model.
+    /// Represents a Tag in the M^3 model.
     /// Belongs to a Tagset.
     /// Has a name.
     /// Has a many-to-many relationshop with CubeObjects.
@@ -15,6 +15,9 @@ namespace ObjectCubeServer.Models.DomainClasses
     {
         [Key][Column("id")]
         public int Id { get; set; }
+
+        //[NotMapped]
+        //public T Name;
 
         [Column("tagtype_id")]
         public int TagTypeId { get; set; }

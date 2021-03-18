@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using System;
 using System.Configuration;
 
@@ -55,6 +56,7 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<ObjectTagRelation> ObjectTagRelations { get; set; }
         public DbSet<Hierarchy> Hierarchies { get; set; }
         public DbSet<Node> Nodes { get; set; }
+        public DbSet<TagType> TagTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -98,11 +100,6 @@ namespace ObjectCubeServer.Models.DataAccess
                .Property(t => t.Id)
                .ValueGeneratedOnAdd();
 
-            //Enforce that there are no duplicate tags within a tagset.
-            modelBuilder.Entity<Tag>()
-                .HasIndex(t => new { t.Name, t.TagsetId })
-                .IsUnique();
-
             //Every tag has exactly one tag type
             modelBuilder.Entity<Tag>()
                 .HasOne(t => t.TagType);
@@ -119,6 +116,24 @@ namespace ObjectCubeServer.Models.DataAccess
                 .HasOne(n => n.Tag)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //Create unique constraint for 4 different typed tags
+            //Enforce that there are no duplicate tags within a tagset.
+            modelBuilder.Entity<AlphanumericalTag>()
+                .HasIndex(t => new { t.Name, t.TagsetId })
+                .IsUnique();
+
+            modelBuilder.Entity<DateTag>()
+                .HasIndex(t => new { t.Name, t.TagsetId })
+                .IsUnique();
+
+            modelBuilder.Entity<TimeTag>()
+                .HasIndex(t => new { t.Name, t.TagsetId })
+                .IsUnique();
+
+            modelBuilder.Entity<NumericalTag>()
+                .HasIndex(t => new { t.Name, t.TagsetId })
+                .IsUnique();
 
             //Calling on model creating:
             base.OnModelCreating(modelBuilder);
@@ -138,7 +153,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc2000sql; User Id = photocube; Password = postgres;");
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lscallsql; User Id = photocube; Password = postgres;");
                     }
                     break;
                 case PlatformID.Win32NT: //Windows
