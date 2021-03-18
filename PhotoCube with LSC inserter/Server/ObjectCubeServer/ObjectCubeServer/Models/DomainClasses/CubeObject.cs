@@ -10,15 +10,19 @@ namespace ObjectCubeServer.Models.DomainClasses
     /// Is tagged with tags in ObjectTagRelation (many to many relation table to Tag).
     /// In the fututre i can repressent different types of files.
     /// </summary>
+    [Table("cubeobjects")]
     public class CubeObject
     {
-        [Key]
+        [Key][Column("id")]
         public int Id { get; set; }
 
+        [Column("file_uri")]
         public string FileURI { get; set; }
 
+        [Column("file_type")]
         public FileType FileType { get; set; }
 
+        [Column("thumbnail_uri")]
         public string ThumbnailURI { get; set; }
 
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }

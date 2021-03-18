@@ -13,26 +13,36 @@ namespace ObjectCubeServer.Models
     /// </summary>
     public class DomainClassFactory
     {
+        private static int cubeObjectId = 0;
+        private static int tagSetId = 0;
+        private static int tagId = 0;
+        private static int hierarchyId = 0;
+        private static int nodeId = 0;
+
         public static CubeObject NewCubeObject(string fileURI, FileType fileType, string thumbnailURI)
         {
             if (fileURI == null) { throw new Exception("Given fileURI was null."); }
+
+            cubeObjectId++;
             return new CubeObject()
             {
+                Id = cubeObjectId,
                 FileURI = fileURI,
                 FileType = fileType,
-                ThumbnailURI =  thumbnailURI,
-                ObjectTagRelations = new List<ObjectTagRelation>()
+                ThumbnailURI =  thumbnailURI
+
             };
         }
 
         public static Tagset NewTagSet(string name)
         {
             if (name == null) { throw new Exception("Given name was null."); }
+
+            tagSetId++;
             return new Tagset()
             {
-                Name = name,
-                Tags = new List<Tag>(),
-                Hierarchies = new List<Hierarchy>()
+                Id = tagSetId,
+                Name = name
             };
         }
 
@@ -40,22 +50,27 @@ namespace ObjectCubeServer.Models
         {
             if (name == null) { throw new Exception("Given name was null."); }
             if (tagset == null) { throw new Exception("Given tagset was null."); }
+
+            tagId++;
             return new Tag()
             {
+                Id =  tagId,
                 Name = name,
-                Tagset = tagset,
-                ObjectTagRelations = new List<ObjectTagRelation>()
+                TagsetId = tagset.Id
             };
         }
 
-        public static Hierarchy NewHierarchy(Tagset tagset)
+        public static Hierarchy NewHierarchy(Tagset tagset, string hierarchyName)
         {
             if (tagset == null) { throw new Exception("Given tagset was null."); }
+
+            hierarchyId++;
             return new Hierarchy()
             {
-                Name = tagset.Name,
-                Tagset = tagset,
-                Nodes = new List<Node>()
+                Id = hierarchyId,
+                Name = hierarchyName,
+                TagsetId = tagset.Id
+                // RootNodeId is set later
             };
         }
 
@@ -63,11 +78,13 @@ namespace ObjectCubeServer.Models
         {
             if (tag == null) { throw new Exception("Given tag was null."); }
             if (hierarchy == null) { throw new Exception("Given hierarchy was null."); }
+
+            nodeId++;
             return new Node()
             {
-                Tag = tag,
-                Hierarchy = hierarchy,
-                Children = new List<Node>()
+                Id = nodeId,
+                TagId = tag.Id,
+                HierarchyId = hierarchy.Id
             };
         }
 
@@ -75,10 +92,11 @@ namespace ObjectCubeServer.Models
         {
             if (tag == null) { throw new Exception("Given tag was null."); }
             if (cubeObject == null) { throw new Exception("Given cubeObject was null."); }
+
             return new ObjectTagRelation()
             {
-                CubeObject = cubeObject,
-                Tag = tag
+                ObjectId = cubeObject.Id,
+                TagId = tag.Id
             };
         }
     }
