@@ -18,7 +18,7 @@ using Microsoft.EntityFrameworkCore.Query.ExpressionTranslators;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
-    public class LSCDatasetInsertExperimenterRefactored
+    public class DatasetInserter
     {
         private int numOfImages;
         private string pathToDataset;
@@ -38,7 +38,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private Dictionary<string, Hierarchy> hierarchies = new Dictionary<string, Hierarchy>();
         private Dictionary<int, Node> nodes = new Dictionary<int, Node>();
 
-        public LSCDatasetInsertExperimenterRefactored(int numOfImages)
+        public DatasetInserter(int numOfImages)
         {
             this.numOfImages = numOfImages;
             this.pathToDataset = sAll.Get("pathToLscData");
