@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class ImageTagGenerator {
+    private static final String delimiter = ",,";
+
     private Set<String> solutionFilenames;
     private Map<String, String> tag_tagset_map;
     private Map<String, String> minuteId_line_map;
@@ -82,7 +84,7 @@ public class ImageTagGenerator {
         // Considering PhotoCube is written in C#, make filepath using \
         // String newImagePath = "lsc2020\\" + imagePath.substring(17).replace("/","\\");
 
-        // Decided to concatenate "lsc2020\\" in the PhotoCube server code.
+        // Decided to concatenate "[Image Server address]\\lsc2020\\" in the PhotoCube client code.
         String newImagePath = imagePath.substring(17).replace("/","\\");
         return newImagePath;
     }
@@ -101,7 +103,7 @@ public class ImageTagGenerator {
         for (String tag : attributes) {
             String tagset = tag_tagset_map.get(tag);
             if (tagset != null) {
-                sb.append(":" + tagset + ":" + tag);
+                sb.append(delimiter + tagset + delimiter + tag);
             }
         }
         return sb.toString();
@@ -121,7 +123,7 @@ public class ImageTagGenerator {
         for (String tag : attributes) {
             String tagset = tag_tagset_map.get(tag);
             if (tagset != null) {
-                sb.append(":" + tagset + ":" + tag); // After we made [attribute, concept, metadata] tagsets as the highest, this just becomes adding ":Concept:tag"
+                sb.append(delimiter + tagset + delimiter + tag); // After we made [attribute, concept, metadata] tagsets as the highest, this just becomes adding ":Concept:tag"
             }
         }
         return sb.toString();
@@ -135,25 +137,25 @@ public class ImageTagGenerator {
         // utc_time
         String[] utc_time = input[1].split("_");
         String[] ymd = utc_time[1].split("-");
-        sb.append(":"+ metadataColumns[1] + ":" + ymd[0]); // Year
-        sb.append(":"+ metadataColumns[1] + ":" + Tagset.getMonth(input[1].substring(4), "UTC")); // Month
-        sb.append(":"+ metadataColumns[1] + ":" + ymd[2]); // Date
-        sb.append(":"+ metadataColumns[1] + ":" + utc_time[2].replace(":", ".")); // Timestamp
-        sb.append(":"+ metadataColumns[1] + ":" + Tagset.getDay(input[1].substring(4), "UTC")); // Day
+        sb.append(delimiter+ metadataColumns[1] + delimiter + ymd[0]); // Year
+        sb.append(delimiter+ metadataColumns[1] + delimiter + Tagset.getMonth(input[1].substring(4), "UTC")); // Month
+        sb.append(delimiter+ metadataColumns[1] + delimiter + ymd[2]); // Date
+        sb.append(delimiter+ metadataColumns[1] + delimiter + utc_time[2].replace(":", ".")); // Timestamp
+        sb.append(delimiter+ metadataColumns[1] + delimiter + Tagset.getDay(input[1].substring(4), "UTC")); // Day
 
         // local_time
         String[] local_time = input[2].split("_");
         String[] ymdLocal = local_time[0].split("-");
-        sb.append(":"+ metadataColumns[2] + ":" + ymdLocal[0]); // Year
-        sb.append(":"+ metadataColumns[2] + ":" + Tagset.getMonth(input[2], input[3])); // Month
-        sb.append(":"+ metadataColumns[2] + ":" + ymdLocal[2]); // Date
-        sb.append(":"+ metadataColumns[2] + ":" + local_time[1].replace(":", ".")); // Timestamp
-        sb.append(":"+ metadataColumns[2] + ":" + Tagset.getDay(input[2], input[3])); // Day
+        sb.append(delimiter+ metadataColumns[2] + delimiter + ymdLocal[0]); // Year
+        sb.append(delimiter+ metadataColumns[2] + delimiter + Tagset.getMonth(input[2], input[3])); // Month
+        sb.append(delimiter+ metadataColumns[2] + delimiter + ymdLocal[2]); // Date
+        sb.append(delimiter+ metadataColumns[2] + delimiter + local_time[1].replace(":", ".")); // Timestamp
+        sb.append(delimiter+ metadataColumns[2] + delimiter + Tagset.getDay(input[2], input[3])); // Day
 
         // Everything else
         for (int i = 3; i < input.length; i++) {
             if (!input[i].equals("NULL")) {
-                sb.append(":"+ metadataColumns[i] + ":" + input[i]);
+                sb.append(delimiter+ metadataColumns[i] + delimiter + input[i]);
             }
         }
         return sb.toString();
@@ -180,7 +182,7 @@ public class ImageTagGenerator {
         System.out.println("Started writing tags into the image tag file.");
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
-                writer.write("FileName:TagSet:Tag:TagSet:Tag:(...)\n"); // File format
+                writer.write("FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)\n"); // File format
                 writer.write(this.solutionsInFront.toString());
                 writer.write(this.othersAtBack.toString());
                 writer.close();

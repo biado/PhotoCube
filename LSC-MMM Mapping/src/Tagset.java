@@ -8,6 +8,7 @@ import java.time.*;
 import java.time.DayOfWeek; 
 
 public class Tagset {
+    private static final String delimiter = ",,";
     private String tagsetName; // The top level tagset name.
     private Map<String, Set<String>> tagset_tags_map; // fx. People - [Adult, Family, Student]
     private Map<String, String> tag_tagset_map; // fx. Alex - People, cat - animal. Note the value is top tagset name.
@@ -142,9 +143,9 @@ public class Tagset {
             // Note: maximum height of the tree is 2.
             // depth: 1
             sb = new StringBuilder();
-            sb.append(tagsetName + ":" + tagsetName + ":" + tagset);
+            sb.append(tagsetName + delimiter + tagsetName + delimiter + tagset);
             for (String tag : tags) {
-                sb.append(":" + tag);
+                sb.append(delimiter + tag);
             }
             sb.append("\n");
             hierarchyLines.add(sb.toString());
@@ -155,10 +156,10 @@ public class Tagset {
                 sb = new StringBuilder();
                 
                 if (tagset_tags_map.containsKey(tag) && !tag.equals(tagsetName)) {
-                    sb.append(tagsetName + ":" + tagsetName + ":" + tag);
+                    sb.append(tagsetName + delimiter + tagsetName + delimiter + tag);
                     Set<String> subtags = tagset_tags_map.get(tag);
                     for (String subtag: subtags) {
-                        sb.append(":" + subtag);
+                        sb.append(delimiter + subtag);
                     }
                     sb.append("\n");
                     hierarchyLines.add(sb.toString());

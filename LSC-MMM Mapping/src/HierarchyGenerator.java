@@ -53,7 +53,7 @@ public class HierarchyGenerator {
             for(int i = 0; i<6; i++) {
                 sanitized[i] = input[i];
             }
-            sanitized[6] = String.join(",", input[6], input[7]).replace(", ","-");
+            sanitized[6] = String.join(",", input[6], input[7]);
             for(int i=7; i<sanitized.length; i++) {
                 sanitized[i] = input[i+1];
             }
@@ -85,7 +85,7 @@ public class HierarchyGenerator {
         // Note: maximum height of the tree is 2.
         StringBuilder sb = new StringBuilder();
 
-        sb.append("# Format: TagsetName:HierarchyName:ParrentTagName:ChildTag:ChildTag:ChildTag:(...)\n");
+        sb.append("# Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n");
         for (String tagsetName : tagsets.keySet()) {
             sb.append(tagsets.get(tagsetName));
         }
