@@ -19,6 +19,7 @@ namespace ObjectCubeServer.Models
         private static int tagId = 0;
         private static int hierarchyId = 0;
         private static int nodeId = 0;
+        private static int tagtypeId = 0;
 
         public static CubeObject NewCubeObject(string fileURI, FileType fileType, string thumbnailURI)
         {
@@ -47,62 +48,77 @@ namespace ObjectCubeServer.Models
             };
         }
 
-        public static Tag NewTag(TagType tagtype,Tagset tagset)
+        public static TagType NewTagType(string description)
         {
+            if (description == null) { throw new Exception("Given name was null."); }
+
+            tagtypeId++;
+            return new TagType()
+            {
+                Id = tagtypeId,
+                Description = description
+            };
+        }
+
+        public static AlphanumericalTag NewAlphanumericalTag(TagType tagtype, Tagset tagset, string name)
+        {
+            if (name == null) { throw new Exception("Given name was null."); }
             if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
 
             tagId++;
-            return new Tag()
-            {
-                Id =  tagId,
-                TagTypeId = tagtype.Id,
-                TagsetId = tagset.Id
-            };
-        }
-
-        public static AlphanumericalTag NewAlphanumericalTag(Tag tag, string name)
-        {
-            if (name == null) { throw new Exception("Given name was null."); }
-            if (tag == null) { throw new Exception("Given tag was null."); }
-
             return new AlphanumericalTag()
             {
-                Id = tag.Id,
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
                 Name = name
             };
         }
 
-        public static NumericalTag NewNumericalTag(Tag tag, int name)
+        public static NumericalTag NewNumericalTag(TagType tagtype, Tagset tagset, int name)
         {
-            if (tag == null) { throw new Exception("Given tag was null."); }
+            if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
 
+            tagId++;
             return new NumericalTag()
             {
-                Id = tag.Id,
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
                 Name = name
             };
         }
 
-        public static TimeTag NewTimeTag(Tag tag, DateTime name)
+        public static TimeTag NewTimeTag(TagType tagtype, Tagset tagset, DateTime name)
         {
-            if (tag == null) { throw new Exception("Given tag was null."); }
+            if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
             if (name == null) { throw new Exception("Given name was null."); }
 
+            tagId++;
             return new TimeTag()
             {
-                Id = tag.Id,
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
                 Name = name
             };
         }
 
-        public static DateTag NewDateTag(Tag tag, DateTime name)
+        public static DateTag NewDateTag(TagType tagtype, Tagset tagset, DateTime name)
         {
-            if (tag == null) { throw new Exception("Given tag was null."); }
+            if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
             if (name == null) { throw new Exception("Given name was null."); }
 
+            tagId++;
             return new DateTag()
             {
-                Id = tag.Id,
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
                 Name = name
             };
         }

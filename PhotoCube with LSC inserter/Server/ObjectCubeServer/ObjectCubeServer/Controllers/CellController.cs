@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -298,10 +299,11 @@ namespace ObjectCubeServer.Controllers
             {
                 var Tagset = context.Tagsets
                     .Include(ts => ts.Tags)
+                        .ThenInclude(t => t.AlphanumericalTag)
                     //.Include(co => co.ObjectTagRelations)
                     .Where(ts => ts.Id == parsedAxis.TagsetId)
                     .FirstOrDefault();
-                tags = Tagset.Tags.OrderBy(t => t.Name).ToList();
+                tags = Tagset.Tags.OrderBy(t => t.AlphanumericalTag.Name).ToList();
             }
             return tags
                 .Select(t => getAllCubeObjectsTaggedWith(t.Id))
@@ -349,11 +351,12 @@ namespace ObjectCubeServer.Controllers
                 currentNode = context.Nodes
                     .Include(n => n.Tag)
                     .Include(n => n.Children)
-                        .ThenInclude(cn => cn.Tag)
+                        .ThenInclude(cn => cn.Tag as AlphanumericalTag)
                     .Where(n => n.Id == nodeId)
                     .FirstOrDefault();
             }
-            currentNode.Children.Sort((cn1, cn2) => cn1.Tag.Name.CompareTo(cn2.Tag.Name));
+            currentNode.Children.OrderBy(n => n.Tag.AlphanumericalTag.Name);
+            //currentNode.Children.Sort((cn1, cn2) => cn1.Tag.AlphanumericalTag.Name.CompareTo(cn2.Tag.AlphanumericalTag.Name));
             List<Node> newChildNodes = new List<Node>();
             currentNode.Children.ForEach(cn => newChildNodes.Add(fetchWholeHierarchyFromRootNode(cn.Id)));
             currentNode.Children = newChildNodes;
