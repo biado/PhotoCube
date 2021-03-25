@@ -19,8 +19,6 @@ public class Tagset {
         putLineInMaps(line);
     }
 
-    // TODO: Maybe make a method for Timezone hierarchy? But that's not now.
-
     public void extendHierarchy(String columnValue, String columnName) {
         if(!columnValue.trim().equals("NULL")) {
             addTagToHierarchy(columnName, columnValue.trim());

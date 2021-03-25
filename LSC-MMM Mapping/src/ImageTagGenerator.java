@@ -18,18 +18,21 @@ public class ImageTagGenerator {
     private Map<String, String> minuteId_line_map;
     private StringBuilder solutionsInFront;
     private StringBuilder othersAtBack;
-    private String[] metadataColumns;
+    private String[] metadataColumnNames;
+    private MetadataFormatter metadataFormatter;
 
-    private static final String visualConcept = "C:\\lsc2020\\lsc2020_visual_concepts\\lsc2020-visual-concepts.csv";
+    private static final String LSCVisualConcept = "C:\\lsc2020\\lsc2020_visual_concepts\\lsc2020-visual-concepts.csv";
     private static final String LSCmetadata = "C:\\lsc2020\\lsc2020-metadata\\lsc2020-metadata.csv";
-    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lscImageTags_Range.csv";
+    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lscImageTags_with_Metadata.csv";
 
     public ImageTagGenerator() throws IOException, ParseException {
         this.solutionFilenames = new SolutionListGenerator().getSolutionSet();
-        this.tag_tagset_map = new HierarchyGenerator().buildAndGetTag_Tagset_Map();
+        HierarchyGenerator hg = new HierarchyGenerator();
+        this.tag_tagset_map = hg.buildAndGetTag_Tagset_Map();
+        hg.writeToHierarchyFile();
         this.solutionsInFront = new StringBuilder();
         this.othersAtBack = new StringBuilder();
-        BufferedReader brVC = new BufferedReader(new FileReader(new File(visualConcept)));
+        BufferedReader brVC = new BufferedReader(new FileReader(new File(LSCVisualConcept)));
         BufferedReader brMD = new BufferedReader(new FileReader(new File(LSCmetadata)));
         this.minuteId_line_map = buildMinuteID_Line_Map(brMD);
         buildStrings(brVC);
@@ -38,13 +41,31 @@ public class ImageTagGenerator {
     private Map<String,String> buildMinuteID_Line_Map(BufferedReader brMD) throws IOException {
         Map<String,String> minuteId_line_map = new HashMap<>();
         String line = brMD.readLine();
-        this.metadataColumns = line.split(","); // Store the first line
+        String[] metadataColumns = line.split(",");
+        this.metadataFormatter = new MetadataFormatter(metadataColumns);
+        this.metadataColumnNames = metadataFormatter.formatMetadataColumnNames(metadataColumns);  // Store the first line
+
         while ((line = brMD.readLine()) != null && !line.equals("")) {
             String[] input = line.split(",");
             minuteId_line_map.put(input[0], line);
         }
         return minuteId_line_map;
     }
+
+    // private String[] storeColumnNamesInFirstLetterUppercase(String line) {
+    //     String[] lowercaseColumnNames = line.split(",");
+    //     String[] firstLetterUppercaseColumnNames = new String[lowercaseColumnNames.length];
+    //     for (int i = 0; i < lowercaseColumnNames.length; i++) {
+    //         String lowercaseColumnName = lowercaseColumnNames[i];
+    //         String firstLetterUppercaseColumnName = setFirstUppercase(lowercaseColumnName);
+    //         firstLetterUppercaseColumnNames[i] = firstLetterUppercaseColumnName;
+    //     }
+    //     return firstLetterUppercaseColumnNames;
+    // }
+
+    // private String setFirstUppercase(String s) {
+    //     return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+    // }
 
     public void buildStrings(BufferedReader brVC) throws IOException, ParseException {
         // read in Visual Concept file and process line by line.
@@ -131,50 +152,27 @@ public class ImageTagGenerator {
 
     private String makeTagsFromMetadata(String metadataLine) throws ParseException {
         String[] input = metadataLine.split(",");
-        input = sanitizeInput(input);
+        String[] formattedMetadataLine = metadataFormatter.formatMetadataLine(input);
         StringBuilder sb = new StringBuilder();
 
-        // utc_time
-        String[] utc_time = input[1].split("_");
-        String[] ymd = utc_time[1].split("-");
-        sb.append(delimiter+ metadataColumns[1] + delimiter + ymd[0]); // Year
-        sb.append(delimiter+ metadataColumns[1] + delimiter + Tagset.getMonth(input[1].substring(4), "UTC")); // Month
-        sb.append(delimiter+ metadataColumns[1] + delimiter + ymd[2]); // Date
-        sb.append(delimiter+ metadataColumns[1] + delimiter + utc_time[2].replace(":", ".")); // Timestamp
-        sb.append(delimiter+ metadataColumns[1] + delimiter + Tagset.getDay(input[1].substring(4), "UTC")); // Day
+        // Ignore minute_id (i=0) and utc_time (i=1)
 
-        // local_time
-        String[] local_time = input[2].split("_");
-        String[] ymdLocal = local_time[0].split("-");
-        sb.append(delimiter+ metadataColumns[2] + delimiter + ymdLocal[0]); // Year
-        sb.append(delimiter+ metadataColumns[2] + delimiter + Tagset.getMonth(input[2], input[3])); // Month
-        sb.append(delimiter+ metadataColumns[2] + delimiter + ymdLocal[2]); // Date
-        sb.append(delimiter+ metadataColumns[2] + delimiter + local_time[1].replace(":", ".")); // Timestamp
-        sb.append(delimiter+ metadataColumns[2] + delimiter + Tagset.getDay(input[2], input[3])); // Day
+        // local_time (i=2) is broken down into Date & Time
+        String[] date_time = formattedMetadataLine[2].split("_");
+        sb.append(delimiter + "Date" + delimiter + date_time[0]);
+        sb.append(delimiter + "Time" + delimiter + date_time[1]);
+
+        // timezone (i=3) only use the city name as the tag (Europe/Dublin -> Timezone,,Dublin)
+        String[] region_city = formattedMetadataLine[3].split("/");
+        sb.append(delimiter + metadataColumnNames[3] + delimiter + region_city[1]);
 
         // Everything else
-        for (int i = 3; i < input.length; i++) {
-            if (!input[i].equals("NULL")) {
-                sb.append(delimiter+ metadataColumns[i] + delimiter + input[i]);
+        for (int i = 4; i < formattedMetadataLine.length; i++) {
+            if (!formattedMetadataLine[i].equals("NULL")) {
+                sb.append(delimiter+ metadataColumnNames[i] + delimiter + formattedMetadataLine[i]);
             }
         }
         return sb.toString();
-    }
-
-    private String[] sanitizeInput(String[] input) {
-        if (input.length != 13) { // comma(,) in the 6th column. input[] length == 14
-            String[] sanitized = new String[13];
-            for(int i = 0; i<6; i++) {
-                sanitized[i] = input[i];
-            }
-            sanitized[6] = String.join(",", input[6], input[7]).replace(", ","-");
-            for(int i=7; i<sanitized.length; i++) {
-                sanitized[i] = input[i+1];
-            }
-            return sanitized;
-        } else {
-            return input;
-        }
     }
 
     public void writeToImageTagFile() {

@@ -15,7 +15,7 @@ public class HierarchyGenerator {
     private static final String manualTagSetsVC = "C:\\lsc2020\\tags-and-hierarchies\\manual-grouping-scenes-objects.csv";
     private static final String manualTagSetsMD = "C:\\lsc2020\\tags-and-hierarchies\\manual-grouping-metadata.csv";
     private static final String LSCmetadata = "C:\\lsc2020\\lsc2020-metadata\\lsc2020-metadata.csv";
-    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lscHierarchies_Range.csv";
+    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lscHierarchies_with_Timezone.csv";
     
     public HierarchyGenerator() throws IOException, ParseException {
         this.tagsets = new HashMap<>();
@@ -23,12 +23,12 @@ public class HierarchyGenerator {
         buildTagsetsMap(br);
         br = new BufferedReader(new FileReader(new File(manualTagSetsMD)));
         buildTagsetsMap(br);
-        br = new BufferedReader(new FileReader(new File(LSCmetadata)));
-        readMetaData(br);
+        // br = new BufferedReader(new FileReader(new File(LSCmetadata)));
+        // readMetaData(br);
         // TODO: uppercase, lowercase, lat/lon -> latitude/longitude, _ -> " "
     }
 
-    public void readMetaData(BufferedReader br) throws IOException, ParseException { // adding leaves to hierarchy
+    private void readMetaData(BufferedReader br) throws IOException, ParseException { // adding leaves to hierarchy
         String[] columns = br.readLine().split(","); // first line = column names
         String line;
         while ((line = br.readLine()) != null && !line.equals("")) {
@@ -116,7 +116,7 @@ public class HierarchyGenerator {
     }
 
     public static void main(String[] args){
-        System.out.println("Started finding solution files from manually grouped tagset file.");
+        System.out.println("Started generating Hierarchies.");
         try {
             HierarchyGenerator hg = new HierarchyGenerator();
             // hg.buildAndGetTag_Tagset_Map();
@@ -131,8 +131,4 @@ public class HierarchyGenerator {
 
         System.out.println("Done.");
     }
-
-    // public String setFirstUppercase(String s) {
-    //     return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
-    // }
 }
