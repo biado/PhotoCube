@@ -25,7 +25,6 @@ public class HierarchyGenerator {
         buildTagsetsMap(br);
         // br = new BufferedReader(new FileReader(new File(LSCmetadata)));
         // readMetaData(br);
-        // TODO: uppercase, lowercase, lat/lon -> latitude/longitude, _ -> " "
     }
 
     private void readMetaData(BufferedReader br) throws IOException, ParseException { // adding leaves to hierarchy

@@ -52,17 +52,6 @@ public class ImageTagGenerator {
         return minuteId_line_map;
     }
 
-    // private String[] storeColumnNamesInFirstLetterUppercase(String line) {
-    //     String[] lowercaseColumnNames = line.split(",");
-    //     String[] firstLetterUppercaseColumnNames = new String[lowercaseColumnNames.length];
-    //     for (int i = 0; i < lowercaseColumnNames.length; i++) {
-    //         String lowercaseColumnName = lowercaseColumnNames[i];
-    //         String firstLetterUppercaseColumnName = setFirstUppercase(lowercaseColumnName);
-    //         firstLetterUppercaseColumnNames[i] = firstLetterUppercaseColumnName;
-    //     }
-    //     return firstLetterUppercaseColumnNames;
-    // }
-
     // private String setFirstUppercase(String s) {
     //     return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     // }
@@ -72,14 +61,14 @@ public class ImageTagGenerator {
         String line = brVC.readLine(); // Skip the first line
         while ((line = brVC.readLine()) != null && !line.equals("")) {
             String[] input = line.split(",");
-            StringBuilder sb = getCorrectStringBuilder(input[2]);
-            // File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
-            // Make sure to put the correct filepath in front of the filename.
+            StringBuilder sb = getCorrectStringBuilder(input[2]); // Make sure to put the correct filepath in front of the filename.
+
+            // File format: "FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)"
             sb.append(makeImagePath(input[2]));
             sb.append(makeTagsFromVisualConceptAttributes(input));
             sb.append(makeTagsFromVisualConceptConcepts(input));
             String minuteID = input[0];
-            if (minuteId_line_map.containsKey(minuteID)) {
+            if (minuteId_line_map.containsKey(minuteID)) { // If the minute_id is in Metadata file, then make tags from metadata.
                 String metadataLine = minuteId_line_map.get(minuteID);
                 sb.append(makeTagsFromMetadata(metadataLine));
             }
@@ -144,7 +133,7 @@ public class ImageTagGenerator {
         for (String tag : attributes) {
             String tagset = tag_tagset_map.get(tag);
             if (tagset != null) {
-                sb.append(delimiter + tagset + delimiter + tag); // After we made [attribute, concept, metadata] tagsets as the highest, this just becomes adding ":Concept:tag"
+                sb.append(delimiter + tagset + delimiter + tag);
             }
         }
         return sb.toString();
@@ -201,6 +190,5 @@ public class ImageTagGenerator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
     }
 }
