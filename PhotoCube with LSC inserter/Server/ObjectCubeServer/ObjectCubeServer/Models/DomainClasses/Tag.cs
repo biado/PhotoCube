@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 
 namespace ObjectCubeServer.Models.DomainClasses
 {
@@ -11,13 +12,10 @@ namespace ObjectCubeServer.Models.DomainClasses
     /// Has a many-to-many relationshop with CubeObjects.
     /// </summary>
     [Table("tags")]
-    public class Tag
+    public abstract class Tag
     {
         [Key][Column("id")]
         public int Id { get; set; }
-
-        //[NotMapped]
-        //public T Name;
 
         [Column("tagtype_id")]
         public int TagTypeId { get; set; }
@@ -26,6 +24,11 @@ namespace ObjectCubeServer.Models.DomainClasses
         [Column("tagset_id")]
         public int TagsetId { get; set; }
         public Tagset Tagset { get; set; }
+
+        public AlphanumericalTag AlphanumericalTag { get; set; }
+        public NumericalTag NumericalTag { get; set; }
+        public DateTag DateTag { get; set; }
+        public TimeTag TimeTag { get; set; }
 
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }
     }
