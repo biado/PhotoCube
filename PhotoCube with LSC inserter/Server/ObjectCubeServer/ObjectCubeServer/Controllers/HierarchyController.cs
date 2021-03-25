@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -71,10 +72,11 @@ namespace ObjectCubeServer.Controllers
                         .Where(n => n.Id == childNode.Id)
                         .Include(n => n.Tag)
                         .Include(n => n.Children)
-                            .ThenInclude(cn => cn.Tag)
+                            .ThenInclude(cn => cn.Tag as AlphanumericalTag)
                         .FirstOrDefault();
                 }
-                childNodeWithTagAndChildren.Children.Sort((cn1, cn2) => cn1.Tag.Name.CompareTo(cn2.Tag.Name));
+                childNodeWithTagAndChildren.Children.OrderBy(n => n.Tag.AlphanumericalTag.Name);
+                //childNodeWithTagAndChildren.Children.Sort((cn1, cn2) => cn1.Tag.AlphanumericalTag.Name.CompareTo(cn2.Tag.AlphanumericalTag.Name));
                 childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }
