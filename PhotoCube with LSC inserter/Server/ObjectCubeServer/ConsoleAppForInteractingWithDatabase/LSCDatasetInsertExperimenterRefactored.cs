@@ -25,6 +25,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToHierarchiesFile;
         private string pathToErrorLogFile;
         private string SQLPath;
+        private static string delimiter = ",,";
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
         private string delimiter = ",,";
 
@@ -73,7 +74,7 @@ namespace ConsoleAppForInteractingWithDatabase
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && fileCount <= numOfImages)
                         {
-                            //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
+                            //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
                             string filename = line.Split(delimiter)[0];
                             string filepath = Path.Combine(pathToDataset, filename);
 
@@ -216,7 +217,7 @@ namespace ConsoleAppForInteractingWithDatabase
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
                         {
-                            //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
+                            //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
                             string[] split = line.Split(delimiter);
                             string fileName = split[0];
 
@@ -347,7 +348,7 @@ namespace ConsoleAppForInteractingWithDatabase
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals(""))
                         {
-                            //File format: TagsetName:HierarchyName:ParrentTag:ChildTag:ChildTag:ChildTag:(...)
+                            //File format: TagsetName,,HierarchyName,,ParrentTag,,ChildTag,,ChildTag,,ChildTag:(...)
                             string[] split = line.Split(delimiter);
                             string tagsetName = split[0];
                             string hierarchyName = split[1];

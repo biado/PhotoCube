@@ -25,9 +25,13 @@ namespace ObjectCubeServer.Models.DomainClasses
         public int TagsetId { get; set; }
         public Tagset Tagset { get; set; }
 
+        [NotMapped]
         public AlphanumericalTag AlphanumericalTag { get; set; }
+        [NotMapped]
         public NumericalTag NumericalTag { get; set; }
+        [NotMapped]
         public DateTag DateTag { get; set; }
+        [NotMapped]
         public TimeTag TimeTag { get; set; }
 
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }
