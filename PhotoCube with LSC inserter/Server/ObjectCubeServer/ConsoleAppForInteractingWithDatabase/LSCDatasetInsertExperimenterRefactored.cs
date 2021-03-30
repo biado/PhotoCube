@@ -25,6 +25,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToHierarchiesFile;
         private string pathToErrorLogFile;
         private string SQLPath;
+        private static string delimiter = ",,";
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
 
         private Dictionary<string, CubeObject> cubeObjects = new Dictionary<string, CubeObject>();
@@ -72,8 +73,8 @@ namespace ConsoleAppForInteractingWithDatabase
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && fileCount <= numOfImages)
                         {
-                            //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
-                            string filename = line.Split(":")[0];
+                            //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
+                            string filename = line.Split(delimiter)[0];
                             string filepath = Path.Combine(pathToDataset, filename);
 
                             // If Image is already in Map(Assuming no two file has the same name):
@@ -215,8 +216,8 @@ namespace ConsoleAppForInteractingWithDatabase
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
                         {
-                            //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
-                            string[] split = line.Split(":");
+                            //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
+                            string[] split = line.Split(delimiter);
                             string fileName = split[0];
 
                             CubeObject cubeObject = cubeObjects[fileName];
@@ -341,8 +342,8 @@ namespace ConsoleAppForInteractingWithDatabase
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals(""))
                         {
-                            //File format: TagsetName:HierarchyName:ParrentTag:ChildTag:ChildTag:ChildTag:(...)
-                            string[] split = line.Split(":");
+                            //File format: TagsetName,,HierarchyName,,ParrentTag,,ChildTag,,ChildTag,,ChildTag:(...)
+                            string[] split = line.Split(delimiter);
                             string tagsetName = split[0];
                             string hierarchyName = split[1];
                             string parentTagName = split[2];
