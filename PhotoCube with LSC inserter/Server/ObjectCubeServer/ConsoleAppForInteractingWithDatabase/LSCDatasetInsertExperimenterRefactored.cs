@@ -27,7 +27,6 @@ namespace ConsoleAppForInteractingWithDatabase
         private string SQLPath;
         private static string delimiter = ",,";
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
-        private string delimiter = ",,";
 
         private Dictionary<string, CubeObject> cubeObjects = new Dictionary<string, CubeObject>();
         private Dictionary<string, Tagset> tagsets = new Dictionary<string, Tagset>();
@@ -196,7 +195,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 case "date":
                     DateTime date = DateTime.ParseExact(tagName, "yyyy-MM-dd",
                                         System.Globalization.CultureInfo.InvariantCulture);
-                    return DomainClassFactory.NewTimeTag(tagType, tagset, date);
+                    return DomainClassFactory.NewDateTag(tagType, tagset, date);
                 default: return null;
             }
         }
@@ -238,10 +237,10 @@ namespace ConsoleAppForInteractingWithDatabase
                                     //Also creates a tag with same name:
                                     Tag tagWithSameNameAsTagset =
                                         DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset,
-                                            tagName);
+                                            tagsetName);
                                     Dictionary<int, Tag> tagWithSameNameAsTagsetList = new Dictionary<int, Tag>();
                                     tagWithSameNameAsTagsetList[tagset.Id] = tagWithSameNameAsTagset;
-                                    tags[tagName] = tagWithSameNameAsTagsetList;
+                                    tags[tagsetName] = tagWithSameNameAsTagsetList;
                                 }
                                 else
                                 {
@@ -536,16 +535,16 @@ namespace ConsoleAppForInteractingWithDatabase
                     switch (t)
                     {
                         case AlphanumericalTag at:
-                            insertStatement = "INSERT INTO alphanumerical_tags(id, name) VALUES(" + t.Id + ",'" + at.Name + "'); \n";
+                            insertStatement += "INSERT INTO alphanumerical_tags(id, name) VALUES(" + t.Id + ",'" + at.Name + "'); \n";
                             break;
                         case NumericalTag nt:
-                            insertStatement = "INSERT INTO numerical_tags(id, name) VALUES(" + t.Id + "," + nt.Name + "); \n";
+                            insertStatement += "INSERT INTO numerical_tags(id, name) VALUES(" + t.Id + "," + nt.Name + "); \n";
                             break;
                         case DateTag dt:
-                            insertStatement = "INSERT INTO date_tags(id, name) VALUES(" + t.Id + ",'" + dt.Name.ToString() + "'); \n";
+                            insertStatement += "INSERT INTO date_tags(id, name) VALUES(" + t.Id + ",'" + dt.Name.ToString() + "'); \n";
                             break;
                         case TimeTag tt:
-                            insertStatement = "INSERT INTO time_tags(id, name) VALUES(" + t.Id + ",'" + tt.Name.ToString() + "'); \n";
+                            insertStatement += "INSERT INTO time_tags(id, name) VALUES(" + t.Id + ",'" + tt.Name.ToString() + "'); \n";
                             break;
                     }
                     
