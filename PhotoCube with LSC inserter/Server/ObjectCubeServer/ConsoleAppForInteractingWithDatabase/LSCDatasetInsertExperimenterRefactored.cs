@@ -2,6 +2,7 @@
 using ObjectCubeServer.Models;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -13,7 +14,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore.Query.ExpressionTranslators;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
@@ -33,6 +33,8 @@ namespace ConsoleAppForInteractingWithDatabase
         private Dictionary<string, Dictionary<int, ObjectTagRelation>> objectTagRelations = new Dictionary<string, Dictionary<int,ObjectTagRelation>>();
         private Dictionary<string, Hierarchy> hierarchies = new Dictionary<string, Hierarchy>();
         private Dictionary<int, Node> nodes = new Dictionary<int, Node>();
+        private Dictionary<string, TagType> tagtypes = new Dictionary<string, TagType>();
+        private Dictionary<string, string> datatypes;
 
         public LSCDatasetInsertExperimenterRefactored(int numOfImages)
         {
@@ -45,8 +47,10 @@ namespace ConsoleAppForInteractingWithDatabase
             this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
+            datatypes = MapDataTypestoTagTypes();
 
             BuildCubeObjects();
+            BuildTagTypes();
             BuildTagsetsAndTags();
             BuildHierarchiesAndNodes();
             WriteInsertStatementsToFile();
@@ -142,6 +146,59 @@ namespace ConsoleAppForInteractingWithDatabase
             return false;
         }
 
+        private Dictionary<string, string> MapDataTypestoTagTypes()
+        {
+            return new Dictionary<string, string>()
+            {
+                {"Attributes", "alphanumerical" },
+                {"Concept", "alphanumerical" },
+                {"Time", "time" },
+                {"Date", "date" },
+                {"Timezone", "alphanumerical" },
+                {"Elevation", "numerical"},
+                {"Speed", "numerical" },
+                {"Heart", "numerical" },
+                {"Calories", "numerical" },
+                {"Activity type", "alphanumerical" },
+                {"Steps", "numerical" }
+            };
+        }
+
+        private void BuildTagTypes()
+        {
+           
+            Console.WriteLine("Building TagTypes.");
+
+            foreach(var description in datatypes.Values.Distinct())
+            {
+                tagtypes.Add
+                (
+                   description, DomainClassFactory.NewTagType(description)
+                );
+            }
+        }
+
+        private Tag CreateNewTag(string description, Tagset tagset, string tagName)
+        {
+            TagType tagType = tagtypes[description];
+            switch(description)
+            {
+                case "alphanumerical":
+                    return DomainClassFactory.NewAlphanumericalTag(tagType, tagset, tagName);
+                case "numerical":
+                    return DomainClassFactory.NewNumericalTag(tagType, tagset, int.Parse(tagName));
+                case "time":
+                    DateTime time = DateTime.ParseExact(tagName, "HH:mm",
+                                        System.Globalization.CultureInfo.InvariantCulture);
+                    return DomainClassFactory.NewTimeTag(tagType, tagset, time);
+                case "date":
+                    DateTime date = DateTime.ParseExact(tagName, "yyyy-MM-dd",
+                                        System.Globalization.CultureInfo.InvariantCulture);
+                    return DomainClassFactory.NewTimeTag(tagType, tagset, date);
+                default: return null;
+            }
+        }
+
         /// <summary>
         /// Parses and inserts tags and tagsets. Also tags Photos.
         /// </summary>
@@ -177,7 +234,7 @@ namespace ConsoleAppForInteractingWithDatabase
                                     tagset = createNewTagset(tagsetName, tagsets);
 
                                     //Also creates a tag with same name:
-                                    Tag tagWithSameNameAsTagset = DomainClassFactory.NewTag(tagName, tagset);
+                                    Tag tagWithSameNameAsTagset = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, tagName);
                                     Dictionary<int, Tag> tagWithSameNameAsTagsetList = new Dictionary<int, Tag>();
                                     tagWithSameNameAsTagsetList[tagset.Id] = tagWithSameNameAsTagset;
                                     tags[tagName] = tagWithSameNameAsTagsetList;
@@ -189,10 +246,11 @@ namespace ConsoleAppForInteractingWithDatabase
 
                                 //Checking if tag exists, and creates it if it doesn't exist.
                                 Tag tag;
+                                string tagtype = datatypes[tagsetName];
                                 Dictionary<int, Tag> tagList;
                                 if (!tags.ContainsKey(tagName))
                                 {
-                                    tag = DomainClassFactory.NewTag(tagName, tagset);
+                                    tag = CreateNewTag(tagtype, tagset, tagName);
                                     tagList = new Dictionary<int, Tag>();
                                     tagList[tagset.Id] = tag;
                                     tags[tagName] = tagList;
@@ -202,7 +260,7 @@ namespace ConsoleAppForInteractingWithDatabase
                                     tagList = tags[tagName];
                                     if (!tagList.ContainsKey(tagset.Id))
                                     {
-                                        tag = DomainClassFactory.NewTag(tagName, tagset);
+                                        tag = CreateNewTag(tagtype, tagset, tagName);
                                         tagList[tagset.Id] = tag;
                                         tags[tagName] = tagList;
                                     }
@@ -311,7 +369,7 @@ namespace ConsoleAppForInteractingWithDatabase
                             //If parentTag does not exist, create it:
                             if (!tags.ContainsKey(parentTagName))
                             {
-                                parentTag = DomainClassFactory.NewTag(parentTagName, tagset);
+                                parentTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, parentTagName);
                                 tagList = new Dictionary<int, Tag>();
                                 tagList[parentTag.TagsetId] = parentTag;
                                 tags[parentTagName] = tagList;
@@ -321,7 +379,7 @@ namespace ConsoleAppForInteractingWithDatabase
                                 tagList = tags[parentTagName];
                                 if (!tagList.ContainsKey(tagset.Id)) 
                                 {
-                                    parentTag = DomainClassFactory.NewTag(parentTagName, tagset);
+                                    parentTag = parentTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, parentTagName);
                                     tagList[parentTag.TagsetId] = parentTag;
                                     tags[parentTagName] = tagList;
                                 }
@@ -363,7 +421,7 @@ namespace ConsoleAppForInteractingWithDatabase
                                 //If child tag does not exist, create it:
                                 if (!tags.ContainsKey(childTagName))
                                 {
-                                    childTag = DomainClassFactory.NewTag(childTagName, tagset);
+                                    childTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, childTagName);
                                     childTagList = new Dictionary<int, Tag>();
                                     childTagList[childTag.TagsetId] = childTag;
                                     tags[childTagName] = childTagList;
@@ -373,7 +431,7 @@ namespace ConsoleAppForInteractingWithDatabase
                                     childTagList = tags[childTagName];
                                     if (!childTagList.ContainsKey(tagset.Id))
                                     {
-                                        childTag = DomainClassFactory.NewTag(childTagName, tagset);
+                                        childTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, childTagName);
                                         childTagList[childTag.TagsetId] = childTag;
                                         tags[childTagName] = childTagList;
                                     }
@@ -422,41 +480,77 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\n");
             }
+
             //Insert all CubeObjects
             foreach (var co in cubeObjects.Values)
             {
                 string insertStatement = "INSERT INTO cubeobjects(id, file_uri, file_type, thumbnail_uri) VALUES(" + co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
+
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects OFF;\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\n");
             }
+
             //Insert all Tagsets
             foreach (var ts in tagsets.Values)
             {
                 string insertStatement = "INSERT INTO tagsets(id, name) VALUES(" + ts.Id + ",'" + ts.Name + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
+
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets OFF;\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tag_types ON;\n");
+            }
+
+            //Insert all TagTypes
+            foreach(var tt in tagtypes.Values) 
+            {
+                string insertStatement = "INSERT INTO tag_types(id, description) VALUES(" + tt.Id + ",'" + tt.Description + "'); \n";
+                File.AppendAllText(SQLPath, insertStatement);
+            }
+
+            if (platformId == PlatformID.Win32NT)
+            {
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tag_types OFF;\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags ON;\n");
             }
+
             //Insert all Tags 
             foreach (var list in tags.Values)
             {
                 foreach (var t in list.Values)
                 {
-                    string insertStatement = "INSERT INTO tags(id, name, tagset_id) VALUES(" + t.Id + ",'" + t.Name + "'," + t.TagsetId + "); \n";
+                    string insertStatement = "INSERT INTO tags(id, tagtype_id, tagset_id) VALUES(" + t.Id + "," + t.TagTypeId + "," + t.TagsetId + "); \n";
+                    switch (t)
+                    {
+                        case AlphanumericalTag at:
+                            insertStatement = "INSERT INTO alphanumerical_tags(id, name) VALUES(" + t.Id + ",'" + at.Name + "'); \n";
+                            break;
+                        case NumericalTag nt:
+                            insertStatement = "INSERT INTO numerical_tags(id, name) VALUES(" + t.Id + "," + nt.Name + "); \n";
+                            break;
+                        case DateTag dt:
+                            insertStatement = "INSERT INTO date_tags(id, name) VALUES(" + t.Id + ",'" + dt.Name.ToString() + "'); \n";
+                            break;
+                        case TimeTag tt:
+                            insertStatement = "INSERT INTO time_tags(id, name) VALUES(" + t.Id + ",'" + tt.Name.ToString() + "'); \n";
+                            break;
+                    }
+                    
                     File.AppendAllText(SQLPath, insertStatement);
                 }
             }
+
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags OFF;\n");
             }
+
             //Inser all ObjectTagRelations
             foreach (var co in objectTagRelations.Values)
             {
@@ -466,27 +560,32 @@ namespace ConsoleAppForInteractingWithDatabase
                     File.AppendAllText(SQLPath, insertStatement);
                 }
             }
+
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\n");
             }
+
             //Insert all Hierarchies
             foreach (var h in hierarchies.Values)
             {
                 string insertStatement = "INSERT INTO hierarchies(id, name, tagset_Id, rootnode_id) VALUES(" + h.Id + ",'" + h.Name + "'," + h.TagsetId + "," + h.RootNodeId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
+
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies OFF;\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\n");
             }
+
             //Insert all Nodes first without setting parent node to avoid violating FK constraint
             foreach (var n in nodes.Values)
             {
                 string insertStatement = "INSERT INTO nodes(id, tag_id, hierarchy_id) VALUES(" + n.Id + "," + n.TagId + "," + n.HierarchyId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
             }
+
             //Upate all Nodes and set parent node
             foreach (var n in nodes.Values)
             {
@@ -497,6 +596,7 @@ namespace ConsoleAppForInteractingWithDatabase
                     File.AppendAllText(SQLPath, insertStatement);
                 }
             }
+
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\n");
