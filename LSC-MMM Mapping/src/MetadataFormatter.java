@@ -2,8 +2,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MetadataFormatter {
-    private static final int numOfMetadataColumns = 13;
-    private static final String LSCmetadata = "C:\\lsc2020\\lsc2020-metadata\\lsc2020-metadata.csv";
+    private int numOfMetadataColumns;
     private String[] columnTypes;
 
     public MetadataFormatter(String[] metadataColumns) {
@@ -44,6 +43,7 @@ public class MetadataFormatter {
 
     private void initializeColumnTypes(Map<String, String> columnTypeMap, String[] metadataColumns) {
         this.columnTypes = new String[numOfMetadataColumns];
+        this.numOfMetadataColumns = metadataColumns.length;
         for (int i = 0; i < numOfMetadataColumns; i++) {
             String columnName = metadataColumns[i];
             String columnType = columnTypeMap.get(columnName);
