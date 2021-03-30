@@ -26,6 +26,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToErrorLogFile;
         private string SQLPath;
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
+        private string delimiter = ",,";
 
         private Dictionary<string, CubeObject> cubeObjects = new Dictionary<string, CubeObject>();
         private Dictionary<string, Tagset> tagsets = new Dictionary<string, Tagset>();
@@ -73,7 +74,7 @@ namespace ConsoleAppForInteractingWithDatabase
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && fileCount <= numOfImages)
                         {
                             //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
-                            string filename = line.Split(":")[0];
+                            string filename = line.Split(delimiter)[0];
                             string filepath = Path.Combine(pathToDataset, filename);
 
                             // If Image is already in Map(Assuming no two file has the same name):
@@ -216,7 +217,7 @@ namespace ConsoleAppForInteractingWithDatabase
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
                         {
                             //File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
-                            string[] split = line.Split(":");
+                            string[] split = line.Split(delimiter);
                             string fileName = split[0];
 
                             CubeObject cubeObject = cubeObjects[fileName];
@@ -234,7 +235,9 @@ namespace ConsoleAppForInteractingWithDatabase
                                     tagset = createNewTagset(tagsetName, tagsets);
 
                                     //Also creates a tag with same name:
-                                    Tag tagWithSameNameAsTagset = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, tagName);
+                                    Tag tagWithSameNameAsTagset =
+                                        DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset,
+                                            tagName);
                                     Dictionary<int, Tag> tagWithSameNameAsTagsetList = new Dictionary<int, Tag>();
                                     tagWithSameNameAsTagsetList[tagset.Id] = tagWithSameNameAsTagset;
                                     tags[tagName] = tagWithSameNameAsTagsetList;
@@ -244,61 +247,64 @@ namespace ConsoleAppForInteractingWithDatabase
                                     tagset = tagsets[tagsetName];
                                 }
 
-                                //Checking if tag exists, and creates it if it doesn't exist.
-                                Tag tag;
-                                string tagtype = datatypes[tagsetName];
-                                Dictionary<int, Tag> tagList;
-                                if (!tags.ContainsKey(tagName))
+                                if (datatypes.ContainsKey(tagsetName))
                                 {
-                                    tag = CreateNewTag(tagtype, tagset, tagName);
-                                    tagList = new Dictionary<int, Tag>();
-                                    tagList[tagset.Id] = tag;
-                                    tags[tagName] = tagList;
-                                }
-                                else
-                                {
-                                    tagList = tags[tagName];
-                                    if (!tagList.ContainsKey(tagset.Id))
+                                    //Checking if tag exists, and creates it if it doesn't exist.
+                                    Tag tag;
+                                    string tagtype = datatypes[tagsetName];
+                                    Dictionary<int, Tag> tagList;
+                                    if (!tags.ContainsKey(tagName))
                                     {
                                         tag = CreateNewTag(tagtype, tagset, tagName);
+                                        tagList = new Dictionary<int, Tag>();
                                         tagList[tagset.Id] = tag;
                                         tags[tagName] = tagList;
                                     }
                                     else
                                     {
-                                        tag = tagList[tagset.Id];
+                                        tagList = tags[tagName];
+                                        if (!tagList.ContainsKey(tagset.Id))
+                                        {
+                                            tag = CreateNewTag(tagtype, tagset, tagName);
+                                            tagList[tagset.Id] = tag;
+                                            tags[tagName] = tagList;
+                                        }
+                                        else
+                                        {
+                                            tag = tagList[tagset.Id];
+                                        }
                                     }
-                                }
 
-                                if (cubeObject == null)
-                                {
-                                    File.AppendAllText(pathToErrorLogFile,
-                                        "File " + fileName + " was not found while parsing line " + lineCount);
-                                    //throw new Exception("Expected cubeobject to be in the DB already, but it isn't!");
-                                }
-                                else
-                                {
-                                    Dictionary<int, ObjectTagRelation> OTRelations;
-                                    if (!objectTagRelations.ContainsKey(fileName))
+                                    if (cubeObject == null)
                                     {
-                                        OTRelations = new Dictionary<int, ObjectTagRelation>();
-                                        ObjectTagRelation otr =
-                                            DomainClassFactory.NewObjectTagRelation(tag, cubeObject);
-                                        OTRelations[tag.Id] = otr;
+                                        File.AppendAllText(pathToErrorLogFile,
+                                            "File " + fileName + " was not found while parsing line " + lineCount);
+                                        //throw new Exception("Expected cubeobject to be in the DB already, but it isn't!");
                                     }
                                     else
                                     {
-                                        OTRelations = objectTagRelations[fileName];
-                                        if (!containsObjectTagRelation(fileName, tag.Id))
+                                        Dictionary<int, ObjectTagRelation> OTRelations;
+                                        if (!objectTagRelations.ContainsKey(fileName))
                                         {
-                                            //create new otr
+                                            OTRelations = new Dictionary<int, ObjectTagRelation>();
                                             ObjectTagRelation otr =
                                                 DomainClassFactory.NewObjectTagRelation(tag, cubeObject);
                                             OTRelations[tag.Id] = otr;
                                         }
-                                    }
+                                        else
+                                        {
+                                            OTRelations = objectTagRelations[fileName];
+                                            if (!containsObjectTagRelation(fileName, tag.Id))
+                                            {
+                                                //create new otr
+                                                ObjectTagRelation otr =
+                                                    DomainClassFactory.NewObjectTagRelation(tag, cubeObject);
+                                                OTRelations[tag.Id] = otr;
+                                            }
+                                        }
 
-                                    objectTagRelations[fileName] = OTRelations;
+                                        objectTagRelations[fileName] = OTRelations;
+                                    }
                                 }
                             }
 
@@ -342,7 +348,7 @@ namespace ConsoleAppForInteractingWithDatabase
                         while ((line = reader.ReadLine()) != null && !line.Equals(""))
                         {
                             //File format: TagsetName:HierarchyName:ParrentTag:ChildTag:ChildTag:ChildTag:(...)
-                            string[] split = line.Split(":");
+                            string[] split = line.Split(delimiter);
                             string tagsetName = split[0];
                             string hierarchyName = split[1];
                             string parentTagName = split[2];

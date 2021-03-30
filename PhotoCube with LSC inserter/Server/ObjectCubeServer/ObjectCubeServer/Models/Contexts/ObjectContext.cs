@@ -163,7 +163,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = SQLTest; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\SQLTest.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = TypedTags; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\TypedTags.mdf");
                     }
                     break;
                 default:
