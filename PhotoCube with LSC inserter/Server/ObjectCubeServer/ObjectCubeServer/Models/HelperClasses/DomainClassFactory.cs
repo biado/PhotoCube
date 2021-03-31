@@ -91,7 +91,7 @@ namespace ObjectCubeServer.Models
             };
         }
 
-        public static TimeTag NewTimeTag(TagType tagtype, Tagset tagset, DateTime name)
+        public static TimeTag NewTimeTag(TagType tagtype, Tagset tagset, TimeSpan name)
         {
             if (tagset == null) { throw new Exception("Given tagset was null."); }
             if (tagtype == null) { throw new Exception("Given tagtype was null."); }

@@ -6,7 +6,7 @@ namespace ObjectCubeServer.Models.DomainClasses.TagTypes
     [Table("date_tags")]
     public class DateTag : Tag
     {
-        [Column("name")]
+        [Column("name", TypeName = "Date")]
         public DateTime Name { get; set; }
     }
 }
