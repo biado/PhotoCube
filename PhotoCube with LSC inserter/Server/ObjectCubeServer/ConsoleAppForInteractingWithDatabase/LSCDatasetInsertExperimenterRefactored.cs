@@ -189,7 +189,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 case "numerical":
                     return DomainClassFactory.NewNumericalTag(tagType, tagset, int.Parse(tagName));
                 case "time":
-                    TimeSpan time = TimeSpan.ParseExact(tagName, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                    TimeSpan time = DateTime.ParseExact(tagName, "HH:mm", System.Globalization.CultureInfo.InvariantCulture).TimeOfDay;
                     return DomainClassFactory.NewTimeTag(tagType, tagset, time);
                 case "date":
                     DateTime date = DateTime.ParseExact(tagName, "yyyy-MM-dd",
