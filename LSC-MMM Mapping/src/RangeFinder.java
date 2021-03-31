@@ -1,20 +1,16 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 public class RangeFinder {
-    private static final String LSCmetadata = "C:\\lsc2020\\lsc2020-metadata\\lsc2020-metadata.csv";
-    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lsc2019-metadata-range-1.csv";
+    private static final String LSCmetadata = FilepathReader.LSCMetadata;
+    private static final String outputFileName = "lsc2019-metadata-range-test.csv";
 
     private Map<String, String> columnTypes;
     private Map<String, TreeSet<String>> stringColumnValues;
@@ -122,7 +118,7 @@ public class RangeFinder {
     public void writeToFile() {
         System.out.println("Started writing tags into the file.");
             try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(new File(FilepathReader.OutputFolder, outputFileName)));
                 writer.write(this.buildString());
                 writer.close();
             } catch (IOException e) {

@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SolutionListGenerator {
-    private static final String topicXmlPath = "C:\\lsc2020\\tags-and-hierarchies\\lsc2019-topics.xml";
-    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lsc2019-solution-list.txt";
+    private static final String topicXmlPath = FilepathReader.LSCTopic;
+    private static final String outputFileName = "lsc2019-solution-list-test.txt";
     
     private Set<String> set = new HashSet<>();
 
@@ -53,7 +53,7 @@ public class SolutionListGenerator {
     public void writeToSolutionListFile() {
         System.out.println("Started writing tags into the output file.");
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(FilepathReader.OutputFolder, outputFileName)));
             writer.write(this.toString());
             writer.close();
         } catch (IOException e) {

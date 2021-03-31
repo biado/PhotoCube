@@ -15,9 +15,9 @@ public class TagListGenerator {
     private BufferedReader br;
     private StringBuilder sb = new StringBuilder();
     private BufferedWriter writer;
-    private final String visualConceptPath = "C:\\lsc2020\\lsc2020_visual_concepts\\lsc2020-visual-concepts.csv";
-    private final String metadataPath = "C:\\lsc2020\\lsc2020-metadata\\lsc2020-metadata.csv";
-    private final String outputPath = "C:\\lsc2020\\TagList.txt";
+    private final String visualConceptPath = FilepathReader.LSCVisualConcept;
+    private final String metadataPath = FilepathReader.LSCMetadata;
+    private final String outputFileName = "TagList-test.txt";
 
     private Set<String> tags = new HashSet<>();
 
@@ -90,7 +90,7 @@ public class TagListGenerator {
     private void writeToTXTFile() {
         System.out.println("Started writing tags into the output file.");
         try {
-            writer = new BufferedWriter(new FileWriter(outputPath));
+            writer = new BufferedWriter(new FileWriter(new File(FilepathReader.OutputFolder, outputFileName)));
             writer.write(sb.toString());
             writer.close();
         } catch (IOException e) {

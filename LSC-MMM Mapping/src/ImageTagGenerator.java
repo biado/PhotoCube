@@ -21,9 +21,9 @@ public class ImageTagGenerator {
     private String[] metadataColumnNames;
     private MetadataFormatter metadataFormatter;
 
-    private static final String LSCVisualConcept = "C:\\lsc2020\\lsc2020_visual_concepts\\lsc2020-visual-concepts.csv";
-    private static final String LSCmetadata = "C:\\lsc2020\\lsc2020-metadata\\lsc2020-metadata.csv";
-    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lscImageTags_with_Metadata.csv";
+    private static final String LSCVisualConcept = FilepathReader.LSCVisualConcept;
+    private static final String LSCmetadata = FilepathReader.LSCMetadata;
+    private static final String outputPath = FilepathReader.LSCImageTagsOutput;
 
     public ImageTagGenerator() throws IOException, ParseException {
         this.solutionFilenames = new SolutionListGenerator().getSolutionSet();

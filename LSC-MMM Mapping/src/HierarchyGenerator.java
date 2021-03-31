@@ -12,10 +12,10 @@ import java.util.Map;
 public class HierarchyGenerator {
     private Map<String,Tagset> tagsets;
 
-    private static final String manualTagSetsVC = "C:\\lsc2020\\tags-and-hierarchies\\manual-grouping-scenes-objects.csv";
-    private static final String manualTagSetsMD = "C:\\lsc2020\\tags-and-hierarchies\\manual-grouping-metadata.csv";
-    private static final String LSCmetadata = "C:\\lsc2020\\lsc2020-metadata\\lsc2020-metadata.csv";
-    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lscHierarchies_with_Timezone.csv";
+    private static final String manualTagSetsVC = FilepathReader.manualTagSetsVC;
+    private static final String manualTagSetsMD = FilepathReader.manualTagSetsMD;
+    private static final String LSCmetadata = FilepathReader.LSCMetadata;
+    private static final String outputPath = FilepathReader.LSCHierarchiesOutput;
     
     public HierarchyGenerator() throws IOException, ParseException {
         this.tagsets = new HashMap<>();
