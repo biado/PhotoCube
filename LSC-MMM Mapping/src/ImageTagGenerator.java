@@ -90,7 +90,7 @@ public class ImageTagGenerator {
         }
     }
 
-    private static String makeImagePath(String imagePath) {
+    private String makeImagePath(String imagePath) {
         // LSCVisualConcept's image_path column looks like this: DATASETS/LSC2020/2015-02-23/b00000e.jpg
         // We want to store only '2015-02-23/b00000e.jpg' in the ImageTags.csv file.
         // Decided to concatenate "[Image Server address]\\lsc2020\\" in the PhotoCube client code.
