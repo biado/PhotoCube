@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,15 +90,16 @@ public class ImageTagGenerator {
         }
     }
 
-    private String makeImagePath(String imagePath) {
-        // Note: Need to add the correct path when using the output file in C#. (fx. Jihye has to add C:/ in the beginning.)
-        // java uses \\, but C# uses \
-        // Considering PhotoCube is written in C#, make filepath using \
-        // String newImagePath = "lsc2020\\" + imagePath.substring(17).replace("/","\\");
-
+    private static String makeImagePath(String imagePath) {
+        // LSCVisualConcept's image_path column looks like this: DATASETS/LSC2020/2015-02-23/b00000e.jpg
+        // We want to store only '2015-02-23/b00000e.jpg' in the ImageTags.csv file.
         // Decided to concatenate "[Image Server address]\\lsc2020\\" in the PhotoCube client code.
-        String newImagePath = imagePath.substring(17).replace("/","\\");
-        return newImagePath;
+
+        // (Windows) java uses \\, but C# uses \
+
+        String newImagePath = imagePath.substring(17);
+        Path newPath = Paths.get(newImagePath);
+        return newPath.toString();
     }
 
     private String makeTagsFromVisualConceptAttributes(String[] input) {
@@ -180,13 +183,15 @@ public class ImageTagGenerator {
 
     public static void main(String[] args) throws ParseException {
         try {
+            // String pathString = ImageTagGenerator.makeImagePath("DATASETS/LSC2020/2015-02-23/b00000e.jpg");
+            // System.out.println(pathString);
             ImageTagGenerator itg = new ImageTagGenerator();
             itg.writeToImageTagFile();
             
             System.out.println("Done.");
 
-            // TODO: other columns in Visual Concept?
-            
+            //TODO: other columns in Visual Concept?
+
         } catch (IOException e) {
             e.printStackTrace();
         }
