@@ -42,8 +42,8 @@ public class MetadataFormatter {
     }
 
     private void initializeColumnTypes(Map<String, String> columnTypeMap, String[] metadataColumns) {
-        this.columnTypes = new String[numOfMetadataColumns];
         this.numOfMetadataColumns = metadataColumns.length;
+        this.columnTypes = new String[numOfMetadataColumns];
         for (int i = 0; i < numOfMetadataColumns; i++) {
             String columnName = metadataColumns[i];
             String columnType = columnTypeMap.get(columnName);
