@@ -1,13 +1,13 @@
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.text.ParseException;
-import java.time.*; 
-import java.time.DayOfWeek; 
 
+/**
+ * Tagset is the entity that we store information of which tags belong to which tagset.
+ */
 public class Tagset {
+    private static final String delimiter = ",,"; // Using 2 commas because 1) semantic_name column has some values that use ',' and 2) timestamp has ':'.
     private String tagsetName; // The top level tagset name.
     private Map<String, Set<String>> tagset_tags_map; // fx. People - [Adult, Family, Student]
     private Map<String, String> tag_tagset_map; // fx. Alex - People, cat - animal. Note the value is top tagset name.
@@ -18,60 +18,10 @@ public class Tagset {
         putLineInMaps(line);
     }
 
-    // TODO: Maybe make a method for Timezone hierarchy? But that's not now.
-
-    public void extendHierarchy(String columnValue, String columnName) {
-        if(!columnValue.trim().equals("NULL")) {
-            addTagToHierarchy(columnName, columnValue.trim());
-        }
-    }
-    
-    public void extendTimeHierarchy(String columnValue, String columnName, String timezone) throws ParseException{
-        // Format of parameter: 2015-02-23_00:00
-        // columnName for example utc_time
-        String[] input = columnValue.split("_");
-        String[] ymd = input[0].split("-");
-        
-        addTagToHierarchy("Year", ymd[0]);
-        addTagToHierarchy("Month", ymd[1]);
-        addTagToHierarchy("Date", ymd[2]);
-        addTagToHierarchy("Timestamp", input[1].replace(":", "."));
-        addTagToHierarchy("Day", getDay(columnValue, timezone));
-    }
-
-    // TODO: refactor to a class for transforming Day and Month
-    public static String getDay(String ymdhm, String timezone) throws ParseException {
-        // parameter: 2015-02-23_00:00
-        // getDay("2018-05-25T00:48", "Asia/Shanghai"));
-        LocalDateTime localDateTime = LocalDateTime.parse(ymdhm.replace("_", "T"));
-        ZoneId zoneId = ZoneId.of(timezone);
-        ZonedDateTime zdt = ZonedDateTime.of(localDateTime, zoneId);
-        DayOfWeek day = DayOfWeek.from(zdt);
-        return day.name();
-    }
-
-    public static String getMonth(String ymdhm, String timezone) throws ParseException {
-        // parameter: 2015-02-23_00:00
-        // getDay("2018-05-25T00:48", "Asia/Shanghai"));
-        LocalDateTime localDateTime = LocalDateTime.parse(ymdhm.replace("_", "T"));
-        ZoneId zoneId = ZoneId.of(timezone);
-        ZonedDateTime zdt = ZonedDateTime.of(localDateTime, zoneId);
-        Month month = zdt.getMonth();
-        return month.name();
-    }
-
-    private void addTagToHierarchy(String parentTag, String tag) {
-        if (tagset_tags_map.containsKey(parentTag)) {
-            Set<String> tags = tagset_tags_map.get(parentTag);
-            tags.add(tag);
-            tagset_tags_map.put(parentTag, tags);
-        } else {
-            Set<String> tags = new HashSet<>();
-            tags.add(tag);
-            tagset_tags_map.put(parentTag, tags);
-        }
-    }
-
+    /**
+     * Using the given grouping information from the line, fills in the 2 Map fields.
+     * @param line a line from manual grouping files. (We use 2 files - manualTagsetVC and manualTagsetMD)
+     */
     public void putLineInMaps(String line) {
         String[] input = line.split(",");
         int key;
@@ -114,57 +64,67 @@ public class Tagset {
     }
 
     private int assignColumn(String[] input, int index) {
+        // Manual grouping files have hierarchies of the LSC tags.
+        // File format: Tag, ParentTag, PPTag, PPPTag, Tagset
+        // The rightmost column is the highest tag.
+
+        // Here we find the column index from the rightmost column, where the column has a value.
         while (index >= 0 && input[index].equals("")) {
             index = index-1;
         }
         return index;
     }
 
+    /**
+     * Returns the name of this tagset
+     * @return the name of this tagset
+     */
     public String getTagsetName() {
         return this.tagsetName;
     }
 
+    /**
+     * Returns the Map of (tagset, {tags}) pairs
+     * Example: In 'Timezone' tagset, this map has (Timezone, [Europe, Asia]), (Europe, [Ireland, England, Belgium...Turkey]), (Asia, [China]), (China, [Shanghai]), (Ireland, [Dublin])... pairs.
+     * @return the Map of (tagset, [tags]) pairs
+     */
     public Map<String,Set<String>> getTagset_Tags_Map() {
         return this.tagset_tags_map;
     }
 
+    /**
+     * Returns the Map of (tag, tagset) pairs
+     * Example: In 'Timezone' tagset, this map has (Dublin, Timezone), (Ireland, Timezone), (Shanghai, Timezone), (China, Timezone), (Europe, Timezone), (Asia, Timezone) ... pairs.
+     * Note the value is top tagset name.
+     * @return the Map of (tag, tagset) pairs
+     */
     public Map<String,String> getTag_Tagset_Map() {
         return this.tag_tagset_map;
     }
 
+    /**
+     * Returns the hierarchy information from this tagset.
+     * Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n
+     */
     @Override
     public String toString() {
-        StringBuilder sb;;
-        Set<String> hierarchyLines = new HashSet<>();
-        for (String tagset : tagset_tags_map.keySet()) { // <- this gives duplicate lines.
-            Set<String> tags = tagset_tags_map.get(tagset);
+        StringBuilder sb;
+        Set<String> hierarchyLines = new HashSet<>(); // To avoid duplicates
+        for (String tagset : tagset_tags_map.keySet()) {
+            // Example: keySet = [Timezone, Europe, Asia, China, Ireland ...]
+            // Note: Leaf tags (example: Dublin) are not in the keyset.
+            Set<String> tags = tagset_tags_map.get(tagset); 
 
-            // Note: maximum height of the tree is 2.
-            // depth: 1
+            // Example: Timezone,,Europe,,Asia\n
+            // Example: Europe,,Ireland,,Norway,,Turkey\n
+            // Example: Ireland,,Dublin\n
             sb = new StringBuilder();
-            sb.append(tagsetName + ":" + tagsetName + ":" + tagset);
+            sb.append(tagsetName + delimiter + tagsetName + delimiter + tagset);
             for (String tag : tags) {
-                sb.append(":" + tag);
+                sb.append(delimiter + tag);
             }
             sb.append("\n");
             hierarchyLines.add(sb.toString());
-            
-
-            // depth: 2
-            for (String tag : tags) {
-                sb = new StringBuilder();
-                
-                if (tagset_tags_map.containsKey(tag) && !tag.equals(tagsetName)) {
-                    sb.append(tagsetName + ":" + tagsetName + ":" + tag);
-                    Set<String> subtags = tagset_tags_map.get(tag);
-                    for (String subtag: subtags) {
-                        sb.append(":" + subtag);
-                    }
-                    sb.append("\n");
-                    hierarchyLines.add(sb.toString());
-                }
-                
-            }
         }
 
         StringBuilder sb1 = new StringBuilder();
@@ -172,9 +132,5 @@ public class Tagset {
             sb1.append(line);
         }
         return sb1.toString();
-    }
-
-    public static void main(String[] args) throws ParseException{
-        System.out.println(Tagset.getMonth("2015-02-23_00:00", "Asia/Shanghai")); 
     }
 }
