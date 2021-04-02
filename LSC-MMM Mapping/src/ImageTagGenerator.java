@@ -4,30 +4,52 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * ImageTagGenerator generates imageTags.csv file from LSC data set.
+ * 
+ * First, it gets the solution set from SolutionListGenerator.
+ * It was needed because we were experimenting with databases with different number of objects from LSC data set and wanted all the databases to contain the solution images.
+ * 
+ * Then it gets the (tagName, tagsetName) Map from HierarchyGenerator, and writes the hierarchy lines to a file.
+ * 
+ * Next step is to read in the LSC Metadata file, and create a (minute_id, metadata line) Map.
+ * It is because LSC data set has a Visual Concept and Metadata file where they both have minute_id, but the number of lines are different.
+ * 
+ * And it generates imageTag strings line by line from the Visual Concept file.
+ * Visual Concept has the image filepath and the tags associated to the image.
+ * If there is minute_id corresponding to the image, it uses MetadataFormatter to also use the metadata as tags.
+ */
 public class ImageTagGenerator {
+    private static final String delimiter = ",,";
+
     private Set<String> solutionFilenames;
     private Map<String, String> tag_tagset_map;
     private Map<String, String> minuteId_line_map;
     private StringBuilder solutionsInFront;
     private StringBuilder othersAtBack;
-    private String[] metadataColumns;
+    private String[] metadataColumnNames;
+    private MetadataFormatter metadataFormatter;
 
-    private static final String visualConcept = "C:\\lsc2020\\lsc2020_visual_concepts\\lsc2020-visual-concepts.csv";
-    private static final String LSCmetadata = "C:\\lsc2020\\lsc2020-metadata\\lsc2020-metadata.csv";
-    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lscImageTags_Range.csv";
+    private static final String LSCVisualConcept = FilepathReader.LSCVisualConcept;
+    private static final String LSCmetadata = FilepathReader.LSCMetadata;
+    private static final String outputPath = FilepathReader.LSCImageTagsOutput;
 
     public ImageTagGenerator() throws IOException, ParseException {
         this.solutionFilenames = new SolutionListGenerator().getSolutionSet();
-        this.tag_tagset_map = new HierarchyGenerator().buildAndGetTag_Tagset_Map();
+        HierarchyGenerator hg = new HierarchyGenerator();
+        this.tag_tagset_map = hg.buildAndGetTag_Tagset_Map();
+        hg.writeToHierarchyFile();
         this.solutionsInFront = new StringBuilder();
         this.othersAtBack = new StringBuilder();
-        BufferedReader brVC = new BufferedReader(new FileReader(new File(visualConcept)));
+        BufferedReader brVC = new BufferedReader(new FileReader(new File(LSCVisualConcept)));
         BufferedReader brMD = new BufferedReader(new FileReader(new File(LSCmetadata)));
         this.minuteId_line_map = buildMinuteID_Line_Map(brMD);
         buildStrings(brVC);
@@ -36,7 +58,10 @@ public class ImageTagGenerator {
     private Map<String,String> buildMinuteID_Line_Map(BufferedReader brMD) throws IOException {
         Map<String,String> minuteId_line_map = new HashMap<>();
         String line = brMD.readLine();
-        this.metadataColumns = line.split(","); // Store the first line
+        String[] metadataColumns = line.split(",");
+        this.metadataFormatter = new MetadataFormatter(metadataColumns);
+        this.metadataColumnNames = metadataFormatter.formatMetadataColumnNames(metadataColumns);  // Store the first line
+
         while ((line = brMD.readLine()) != null && !line.equals("")) {
             String[] input = line.split(",");
             minuteId_line_map.put(input[0], line);
@@ -44,19 +69,24 @@ public class ImageTagGenerator {
         return minuteId_line_map;
     }
 
+    /**
+     * Reads in LSC Visual Concept file, and process line by line.
+     * @param brVC BufferedReader that reads in Visual Concept file
+     * @throws IOException
+     * @throws ParseException
+     */
     public void buildStrings(BufferedReader brVC) throws IOException, ParseException {
-        // read in Visual Concept file and process line by line.
         String line = brVC.readLine(); // Skip the first line
         while ((line = brVC.readLine()) != null && !line.equals("")) {
             String[] input = line.split(",");
-            StringBuilder sb = getCorrectStringBuilder(input[2]);
-            // File format: "FileName:TagSet:Tag:TagSet:Tag:(...)"
-            // Make sure to put the correct filepath in front of the filename.
+            StringBuilder sb = getCorrectStringBuilder(input[2]); // Make sure to put the solution images in the beginning of the output file.
+
+            // File format: "FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)"
             sb.append(makeImagePath(input[2]));
             sb.append(makeTagsFromVisualConceptAttributes(input));
             sb.append(makeTagsFromVisualConceptConcepts(input));
             String minuteID = input[0];
-            if (minuteId_line_map.containsKey(minuteID)) {
+            if (minuteId_line_map.containsKey(minuteID)) { // If the minute_id is in Metadata file, then make tags from metadata.
                 String metadataLine = minuteId_line_map.get(minuteID);
                 sb.append(makeTagsFromMetadata(metadataLine));
             }
@@ -77,14 +107,15 @@ public class ImageTagGenerator {
     }
 
     private String makeImagePath(String imagePath) {
-        // Note: Need to add the correct path when using the output file in C#. (fx. Jihye has to add C:/ in the beginning.)
-        // java uses \\, but C# uses \
-        // Considering PhotoCube is written in C#, make filepath using \
-        // String newImagePath = "lsc2020\\" + imagePath.substring(17).replace("/","\\");
+        // LSCVisualConcept's image_path column looks like this: DATASETS/LSC2020/2015-02-23/b00000e.jpg
+        // We want to store only '2015-02-23/b00000e.jpg' in the ImageTags.csv file.
+        // Decided to concatenate "[Image Server address]\\lsc2020\\" in the PhotoCube client code.
 
-        // Decided to concatenate "lsc2020\\" in the PhotoCube server code.
-        String newImagePath = imagePath.substring(17).replace("/","\\");
-        return newImagePath;
+        // (Windows) java uses \\, but C# uses \
+
+        String newImagePath = imagePath.substring(17);
+        Path newPath = Paths.get(newImagePath);
+        return newPath.toString();
     }
 
     private String makeTagsFromVisualConceptAttributes(String[] input) {
@@ -101,7 +132,7 @@ public class ImageTagGenerator {
         for (String tag : attributes) {
             String tagset = tag_tagset_map.get(tag);
             if (tagset != null) {
-                sb.append(":" + tagset + ":" + tag);
+                sb.append(delimiter + tagset + delimiter + tag);
             }
         }
         return sb.toString();
@@ -121,7 +152,7 @@ public class ImageTagGenerator {
         for (String tag : attributes) {
             String tagset = tag_tagset_map.get(tag);
             if (tagset != null) {
-                sb.append(":" + tagset + ":" + tag); // After we made [attribute, concept, metadata] tagsets as the highest, this just becomes adding ":Concept:tag"
+                sb.append(delimiter + tagset + delimiter + tag);
             }
         }
         return sb.toString();
@@ -129,58 +160,39 @@ public class ImageTagGenerator {
 
     private String makeTagsFromMetadata(String metadataLine) throws ParseException {
         String[] input = metadataLine.split(",");
-        input = sanitizeInput(input);
+        String[] formattedMetadataLine = metadataFormatter.formatMetadataLine(input);
         StringBuilder sb = new StringBuilder();
 
-        // utc_time
-        String[] utc_time = input[1].split("_");
-        String[] ymd = utc_time[1].split("-");
-        sb.append(":"+ metadataColumns[1] + ":" + ymd[0]); // Year
-        sb.append(":"+ metadataColumns[1] + ":" + Tagset.getMonth(input[1].substring(4), "UTC")); // Month
-        sb.append(":"+ metadataColumns[1] + ":" + ymd[2]); // Date
-        sb.append(":"+ metadataColumns[1] + ":" + utc_time[2].replace(":", ".")); // Timestamp
-        sb.append(":"+ metadataColumns[1] + ":" + Tagset.getDay(input[1].substring(4), "UTC")); // Day
+        // Ignore minute_id (i=0) and utc_time (i=1)
 
-        // local_time
-        String[] local_time = input[2].split("_");
-        String[] ymdLocal = local_time[0].split("-");
-        sb.append(":"+ metadataColumns[2] + ":" + ymdLocal[0]); // Year
-        sb.append(":"+ metadataColumns[2] + ":" + Tagset.getMonth(input[2], input[3])); // Month
-        sb.append(":"+ metadataColumns[2] + ":" + ymdLocal[2]); // Date
-        sb.append(":"+ metadataColumns[2] + ":" + local_time[1].replace(":", ".")); // Timestamp
-        sb.append(":"+ metadataColumns[2] + ":" + Tagset.getDay(input[2], input[3])); // Day
+        // local_time (i=2) is broken down into Date & Time
+        String[] date_time = formattedMetadataLine[2].split("_");
+        sb.append(delimiter + "Date" + delimiter + date_time[0]);
+        sb.append(delimiter + "Time" + delimiter + date_time[1]);
+
+        // timezone (i=3) only use the city name as the tag (Europe/Dublin -> Timezone,,Dublin)
+        String[] region_city = formattedMetadataLine[3].split("/");
+        sb.append(delimiter + metadataColumnNames[3] + delimiter + region_city[1]);
 
         // Everything else
-        for (int i = 3; i < input.length; i++) {
-            if (!input[i].equals("NULL")) {
-                sb.append(":"+ metadataColumns[i] + ":" + input[i]);
+        for (int i = 4; i < formattedMetadataLine.length; i++) {
+            if (!formattedMetadataLine[i].equals("NULL")) {
+                sb.append(delimiter+ metadataColumnNames[i] + delimiter + formattedMetadataLine[i]);
             }
         }
         return sb.toString();
     }
 
-    private String[] sanitizeInput(String[] input) {
-        if (input.length != 13) { // comma(,) in the 6th column. input[] length == 14
-            String[] sanitized = new String[13];
-            for(int i = 0; i<6; i++) {
-                sanitized[i] = input[i];
-            }
-            sanitized[6] = String.join(",", input[6], input[7]).replace(", ","-");
-            for(int i=7; i<sanitized.length; i++) {
-                sanitized[i] = input[i+1];
-            }
-            return sanitized;
-        } else {
-            return input;
-        }
-    }
-
+    /**
+     * Writes the fileName, tagset, tag information to imageTags.csv file.
+     * The path to output file is to be specified in config.properties file.
+     */
     public void writeToImageTagFile() {
         // write to file: frontStringBuilder first (has solutions in) -> then backStringBuilder
         System.out.println("Started writing tags into the image tag file.");
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
-                writer.write("FileName:TagSet:Tag:TagSet:Tag:(...)\n"); // File format
+                writer.write("FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)\n"); // File format
                 writer.write(this.solutionsInFront.toString());
                 writer.write(this.othersAtBack.toString());
                 writer.close();
@@ -191,16 +203,17 @@ public class ImageTagGenerator {
 
     public static void main(String[] args) throws ParseException {
         try {
+            // String pathString = ImageTagGenerator.makeImagePath("DATASETS/LSC2020/2015-02-23/b00000e.jpg");
+            // System.out.println(pathString);
             ImageTagGenerator itg = new ImageTagGenerator();
             itg.writeToImageTagFile();
             
             System.out.println("Done.");
 
-            // TODO: other columns in Visual Concept?
-            
+            //TODO: other columns in Visual Concept?
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
     }
 }

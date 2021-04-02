@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * SolutionListGenerator reads in LSCTopic (xml file) and generates a list of solution files without duplicates.
+ */
 public class SolutionListGenerator {
-    private static final String topicXmlPath = "C:\\lsc2020\\tags-and-hierarchies\\lsc2019-topics.xml";
-    private static final String outputPath = "C:\\lsc2020\\tags-and-hierarchies\\lsc2019-solution-list.txt";
+    private static final String topicXmlPath = FilepathReader.LSCTopic;
+    private static final String outputFileName = "lsc2019-solution-list-test.txt";
     
     private Set<String> set = new HashSet<>();
 
@@ -20,7 +23,8 @@ public class SolutionListGenerator {
         buildSet(br);
     }
 
-    public void buildSet(BufferedReader br) throws IOException {
+    private void buildSet(BufferedReader br) throws IOException {
+        // TODO: There's probably a better way to read in xml rather than using regex as we did.
         String line;
         while((line = br.readLine()) != null && !line.equals("")) {
             if (line.contains(".jpg")) {
@@ -29,9 +33,6 @@ public class SolutionListGenerator {
                 //                  , <ImageID> , 20160822_061808_000.jpg , </ImageID>
                 
                 String filename = splitedTexts[2];
-                // String folder = filename.substring(0,8);
-                // String foldername = folder.substring(0,4) + "-" + folder.substring(4,6) + "-" + folder.substring(6,8) + "\\";
-                // String filepath = foldername + filename;
                 if (set.contains(filename)) {
                     System.out.println("Duplicate file in the solution: " + filename);
                 } else {
@@ -41,6 +42,9 @@ public class SolutionListGenerator {
         }
     }
 
+    /**
+     * Returns the list of LSC solution filenames
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -50,10 +54,13 @@ public class SolutionListGenerator {
         return sb.toString();
     }
 
+    /**
+     * Writes the list of LSC solution filenames to a file.
+     */
     public void writeToSolutionListFile() {
         System.out.println("Started writing tags into the output file.");
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(FilepathReader.OutputFolder, outputFileName)));
             writer.write(this.toString());
             writer.close();
         } catch (IOException e) {
@@ -62,6 +69,10 @@ public class SolutionListGenerator {
         System.out.println("Done writing tags into the output file.");
     }
 
+    /**
+     * Returns a Set that includes LSC solution filenames.
+     * @return the Set of LSC solution filenames
+     */
     public Set<String> getSolutionSet() {
         return this.set;
     }
@@ -71,11 +82,6 @@ public class SolutionListGenerator {
         try {
             SolutionListGenerator slg = new SolutionListGenerator();
             slg.writeToSolutionListFile();
-            
-            // System.out.println("number of files: " + count);
-            // System.out.println("number of distinct solution files: " + set.size());
-            // System.out.println("total line in the file: " + totalline);
-
             System.out.println("Done.");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
