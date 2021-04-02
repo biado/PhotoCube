@@ -1,10 +1,11 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Reads in config.properties file and store the filepath information in the static fields.
+ * It is the way we deal with different filepaths in different OS.
+ */
 public class FilepathReader {
     public static String LSCVisualConcept;
     public static String LSCMetadata;

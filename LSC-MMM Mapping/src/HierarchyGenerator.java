@@ -9,12 +9,14 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * HierarchyGenerator keeps track of all the hierarchies and tagsets derived from the LSC data set.
+ */
 public class HierarchyGenerator {
-    private Map<String,Tagset> tagsets;
+    private Map<String,Tagset> tagsets; // All the tagsets derived from LSC data set. (tagsetName, Tagset)
 
     private static final String manualTagSetsVC = FilepathReader.manualTagSetsVC;
     private static final String manualTagSetsMD = FilepathReader.manualTagSetsMD;
-    private static final String LSCmetadata = FilepathReader.LSCMetadata;
     private static final String outputPath = FilepathReader.LSCHierarchiesOutput;
     
     public HierarchyGenerator() throws IOException, ParseException {
@@ -23,46 +25,9 @@ public class HierarchyGenerator {
         buildTagsetsMap(br);
         br = new BufferedReader(new FileReader(new File(manualTagSetsMD)));
         buildTagsetsMap(br);
-        // br = new BufferedReader(new FileReader(new File(LSCmetadata)));
-        // readMetaData(br);
     }
 
-    private void readMetaData(BufferedReader br) throws IOException, ParseException { // adding leaves to hierarchy
-        String[] columns = br.readLine().split(","); // first line = column names
-        String line;
-        while ((line = br.readLine()) != null && !line.equals("")) {
-            String[] input = line.split(",");
-            input = sanitizeInput(input);
-            
-            Tagset utc_time = tagsets.get("utc_time");
-            utc_time.extendTimeHierarchy(input[1].substring(4), columns[1], "UTC"); // utc_time
-            Tagset local_time = tagsets.get("local_time");
-            local_time.extendTimeHierarchy(input[2], columns[2], input[3]); // local_time
-            
-            for (int i = 3; i<columns.length; i++) {
-                Tagset column_Tagset = tagsets.get(columns[i]);
-                column_Tagset.extendHierarchy(input[i], columns[i]);
-            }
-        }
-    }
-
-    public static String[] sanitizeInput(String[] input) {
-        if (input.length != 13) { // comma(,) in the 6th column. input[] length == 14
-            String[] sanitized = new String[13];
-            for(int i = 0; i<6; i++) {
-                sanitized[i] = input[i];
-            }
-            sanitized[6] = String.join(",", input[6], input[7]);
-            for(int i=7; i<sanitized.length; i++) {
-                sanitized[i] = input[i+1];
-            }
-            return sanitized;
-        } else {
-            return input;
-        }
-    }
-
-    public void buildTagsetsMap(BufferedReader br) throws IOException {
+    private void buildTagsetsMap(BufferedReader br) throws IOException {
         String line = br.readLine(); // Skip the first line
         while ((line = br.readLine()) != null && !line.equals("")) {
             String[] input = line.split(",");
@@ -71,19 +36,21 @@ public class HierarchyGenerator {
                 Tagset tagset = tagsets.get(tagsetName);
                 tagset.putLineInMaps(line);
             } else {
-                Tagset tagset = new Tagset(line);
+                Tagset tagset = new Tagset(line); // putLineInMaps(line) is called within the Tagset constructor.
                 tagsets.put(tagsetName, tagset);
             }
         }
     }
 
+    /**
+     * Returns all the hierarchy information of all tagsets in the LSC data set.
+     * Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n
+     */
     @Override
     public String toString() {
         // build string with proper format
-        // # Format: TagsetName:HierarchyName:ParrentTagName:ChildTag:ChildTag:ChildTag:(...)
-        // Note: maximum height of the tree is 2.
+        // # Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)
         StringBuilder sb = new StringBuilder();
-
         sb.append("# Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n");
         for (String tagsetName : tagsets.keySet()) {
             sb.append(tagsets.get(tagsetName));
@@ -92,6 +59,10 @@ public class HierarchyGenerator {
         return sb.toString();
     }
 
+    /**
+     * Writes the hierarchy information in the LSC data set to a file.
+     * The path to output file is to specified in config.properties file.
+     */
     public void writeToHierarchyFile() {
         System.out.println("Started writing tags into the hierarchy file.");
             try {
@@ -103,14 +74,21 @@ public class HierarchyGenerator {
             }
     }
 
+    /**
+     * Returns the Map of (tagsetName, Tagset) pairs
+     * @return the Map of (tagsetName, Tagset) pairs
+     */
     public Map<String,Tagset> getTagsets() {
         return this.tagsets;
     }
 
+    /**
+     * Builds and returns the Map of all (tagName, tagsetName) pairs in the LSC data set.
+     * @return the Map of (tagName, tagsetName) pairs
+     */
     public Map<String,String> buildAndGetTag_Tagset_Map() {
         Map<String,String> map = new HashMap<>();
         tagsets.forEach((k,v) -> map.putAll(v.getTag_Tagset_Map()));
-        // map.forEach((k,v) -> System.out.println(k + " : " + v));
         return map;
     }
 

@@ -12,6 +12,21 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * ImageTagGenerator generates imageTags.csv file from LSC data set.
+ * 
+ * First, it gets the solution set from SolutionListGenerator.
+ * It was needed because we were experimenting with databases with different number of objects from LSC data set and wanted all the databases to contain the solution images.
+ * 
+ * Then it gets the (tagName, tagsetName) Map from HierarchyGenerator, and writes the hierarchy lines to a file.
+ * 
+ * Next step is to read in the LSC Metadata file, and create a (minute_id, metadata line) Map.
+ * It is because LSC data set has a Visual Concept and Metadata file where they both have minute_id, but the number of lines are different.
+ * 
+ * And it generates imageTag strings line by line from the Visual Concept file.
+ * Visual Concept has the image filepath and the tags associated to the image.
+ * If there is minute_id corresponding to the image, it uses MetadataFormatter to also use the metadata as tags.
+ */
 public class ImageTagGenerator {
     private static final String delimiter = ",,";
 
@@ -54,16 +69,17 @@ public class ImageTagGenerator {
         return minuteId_line_map;
     }
 
-    // private String setFirstUppercase(String s) {
-    //     return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
-    // }
-
+    /**
+     * Reads in LSC Visual Concept file, and process line by line.
+     * @param brVC BufferedReader that reads in Visual Concept file
+     * @throws IOException
+     * @throws ParseException
+     */
     public void buildStrings(BufferedReader brVC) throws IOException, ParseException {
-        // read in Visual Concept file and process line by line.
         String line = brVC.readLine(); // Skip the first line
         while ((line = brVC.readLine()) != null && !line.equals("")) {
             String[] input = line.split(",");
-            StringBuilder sb = getCorrectStringBuilder(input[2]); // Make sure to put the correct filepath in front of the filename.
+            StringBuilder sb = getCorrectStringBuilder(input[2]); // Make sure to put the solution images in the beginning of the output file.
 
             // File format: "FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)"
             sb.append(makeImagePath(input[2]));
@@ -167,6 +183,10 @@ public class ImageTagGenerator {
         return sb.toString();
     }
 
+    /**
+     * Writes the fileName, tagset, tag information to imageTags.csv file.
+     * The path to output file is to be specified in config.properties file.
+     */
     public void writeToImageTagFile() {
         // write to file: frontStringBuilder first (has solutions in) -> then backStringBuilder
         System.out.println("Started writing tags into the image tag file.");

@@ -1,6 +1,10 @@
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * MetadataFormatter changes the metadata values to fit the data type of columns we agreed upon.
+ * For example, a Heartbeat value would be formatted as Int, thus clear all the decimal digits.
+ */
 public class MetadataFormatter {
     private int numOfMetadataColumns;
     private String[] columnTypes;
@@ -10,6 +14,11 @@ public class MetadataFormatter {
         initializeColumnTypes(columnTypeMap, metadataColumns);
     }
 
+    /**
+     * Returns the String array with correctly formatted metadata values according to data type of columns
+     * @param metadataLine a line from LSC metadata file, split by delimiter
+     * @return String[] with correctly formatted metadata values
+     */
     public String[] formatMetadataLine(String[] metadataLine) {
         String[] formatted = new String[numOfMetadataColumns];
         metadataLine = sanitizeInputForCommaUsedInSemanticName(metadataLine);
@@ -52,7 +61,7 @@ public class MetadataFormatter {
     }
 
     private String[] sanitizeInputForCommaUsedInSemanticName(String[] input) {
-        if (input.length != numOfMetadataColumns) { // comma(,) in the 6th column. input[] length == 14
+        if (input.length != numOfMetadataColumns) { // comma(,) used in the 6th column(semantic_name). input[] length == 14
             String[] sanitized = new String[numOfMetadataColumns];
             for(int i = 0; i<6; i++) {
                 sanitized[i] = input[i];
@@ -67,6 +76,7 @@ public class MetadataFormatter {
         }
     }
 
+    // The data type we used for LSC metadata columns.
     private Map<String, String> initializeColumnTypeMap() {
         Map<String, String> columnTypeMap = new HashMap<>();
         columnTypeMap.put("elevation", "int");
@@ -85,6 +95,11 @@ public class MetadataFormatter {
         return columnTypeMap;
     }
 
+    /**
+     * Used to format the metadata column names to the names we agreed upon.
+     * @param columnNamesFromCSV the first line of LSC metadata file, split by delimiter
+     * @return the String[] with formatted column names
+     */
     public String[] formatMetadataColumnNames(String[] columnNamesFromCSV) {
         Map<String, String> columnNameMap = initializeColumnNameMap();
         String[] formattedColumnNames = new String[numOfMetadataColumns];
