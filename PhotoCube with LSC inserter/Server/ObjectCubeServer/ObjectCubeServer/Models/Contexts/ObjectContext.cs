@@ -57,6 +57,10 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Hierarchy> Hierarchies { get; set; }
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
+        public DbSet<AlphanumericalTag> AlphanumericalTags { get; set; }
+        public DbSet<NumericalTag> NumericalTags { get; set; }
+        public DbSet<DateTag> DateTags { get; set; }
+        public DbSet<TimeTag> TimeTags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -120,8 +124,9 @@ namespace ObjectCubeServer.Models.DataAccess
             //Create unique constraint for 4 different typed tags
             //Enforce that there are no duplicate tags within a tagset.
             modelBuilder.Entity<AlphanumericalTag>()
-                .HasIndex(t => new { t.Name, t.TagsetId })
-                .IsUnique();
+                .HasIndex(t => new {t.Name, t.TagsetId})
+                .IsUnique()
+                .HasFilter("tagtype_id = '1'");
 
             modelBuilder.Entity<DateTag>()
                 .HasIndex(t => new { t.Name, t.TagsetId })
@@ -163,7 +168,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = TypedTags; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\TypedTags.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = TPTTagsetId; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\TPTTagsetId.mdf");
                     }
                     break;
                 default:

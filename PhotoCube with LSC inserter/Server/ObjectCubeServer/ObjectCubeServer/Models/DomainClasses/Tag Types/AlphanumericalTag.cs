@@ -8,5 +8,9 @@ namespace ObjectCubeServer.Models.DomainClasses.TagTypes
     {   
         [Column("name")]
         public string Name { get; set; }
+
+        [Column("tagset_id")]
+        public int TagsetId { get; set; }
+        public Tagset Tagset { get; set; }
     }
 }
