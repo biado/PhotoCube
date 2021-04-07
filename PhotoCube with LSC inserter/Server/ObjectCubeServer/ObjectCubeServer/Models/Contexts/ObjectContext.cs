@@ -57,11 +57,7 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Hierarchy> Hierarchies { get; set; }
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
-        public DbSet<AlphanumericalTag> AlphanumericalTags { get; set; }
-        public DbSet<NumericalTag> NumericalTags { get; set; }
-        public DbSet<DateTag> DateTags { get; set; }
-        public DbSet<TimeTag> TimeTags { get; set; }
-
+       
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
@@ -121,24 +117,48 @@ namespace ObjectCubeServer.Models.DataAccess
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //Create unique constraint for 4 different typed tags
-            //Enforce that there are no duplicate tags within a tagset.
+            //Typed Tags store a replicate of tagsetid
+            //Creates foreign key constraints for these properties
             modelBuilder.Entity<AlphanumericalTag>()
-                .HasIndex(t => new {t.Name, t.TagsetId})
-                .IsUnique()
-                .HasFilter("tagtype_id = '1'");
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(at => at.TagsetIdReplicate);
 
             modelBuilder.Entity<DateTag>()
-                .HasIndex(t => new { t.Name, t.TagsetId })
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(dt => dt.TagsetIdReplicate);
+
+            modelBuilder.Entity<TimeTag>()
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(tt => tt.TagsetIdReplicate);
+
+            modelBuilder.Entity<NumericalTag>()
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(nt => nt.TagsetIdReplicate);
+
+            //Enforce that a typed tag is unqiue within a tagset
+            modelBuilder.Entity<DateTag>()
+                .HasIndex(dt => new { dt.TagsetIdReplicate, dt.Name })
+                .IsUnique();
+
+            modelBuilder.Entity<AlphanumericalTag>()
+                .HasIndex(at => new { at.TagsetIdReplicate, at.Name })
                 .IsUnique();
 
             modelBuilder.Entity<TimeTag>()
-                .HasIndex(t => new { t.Name, t.TagsetId })
+                .HasIndex(tt => new { tt.TagsetIdReplicate, tt.Name })
                 .IsUnique();
 
             modelBuilder.Entity<NumericalTag>()
-                .HasIndex(t => new { t.Name, t.TagsetId })
+                .HasIndex(nt => new { nt.TagsetIdReplicate, nt.Name })
                 .IsUnique();
+
+            //Create unique constraint for 4 different typed tags
+            //Enforce that there are no duplicate tags within a tagset.
+            //...
 
             //Calling on model creating:
             base.OnModelCreating(modelBuilder);
@@ -158,7 +178,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc50tt_hierarchyfix; User Id = photocube; Password = postgres;");
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc50tt_tagsetfix; User Id = photocube; Password = postgres;");
                     }
                     break;
                 case PlatformID.Win32NT: //Windows
