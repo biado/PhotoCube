@@ -57,7 +57,7 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Hierarchy> Hierarchies { get; set; }
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
-       
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
@@ -155,10 +155,6 @@ namespace ObjectCubeServer.Models.DataAccess
             modelBuilder.Entity<NumericalTag>()
                 .HasIndex(nt => new { nt.TagsetIdReplicate, nt.Name })
                 .IsUnique();
-
-            //Create unique constraint for 4 different typed tags
-            //Enforce that there are no duplicate tags within a tagset.
-            //...
 
             //Calling on model creating:
             base.OnModelCreating(modelBuilder);
