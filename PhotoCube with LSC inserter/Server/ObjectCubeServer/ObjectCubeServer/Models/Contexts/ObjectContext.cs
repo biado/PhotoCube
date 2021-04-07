@@ -57,10 +57,6 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Hierarchy> Hierarchies { get; set; }
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
-        public DbSet<AlphanumericalTag> AlphanumericalTags { get; set; }
-        public DbSet<NumericalTag> NumericalTags { get; set; }
-        public DbSet<DateTag> DateTags { get; set; }
-        public DbSet<TimeTag> TimeTags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -120,6 +116,27 @@ namespace ObjectCubeServer.Models.DataAccess
                 .HasOne(n => n.Tag)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //Configure TagsetId column within 4 typed tags tables
+            modelBuilder.Entity<AlphanumericalTag>()
+                .Property(t => t.TagsetId)
+                .HasColumnName("tagset_id")
+                .HasColumnType("int");
+
+            modelBuilder.Entity<NumericalTag>()
+                .Property(t => t.TagsetId)
+                .HasColumnName("tagset_id")
+                .HasColumnType("int");
+
+            modelBuilder.Entity<DateTag>()
+                .Property(t => t.TagsetId)
+                .HasColumnName("tagset_id")
+                .HasColumnType("int");
+
+            modelBuilder.Entity<TimeTag>()
+                .Property(t => t.TagsetId)
+                .HasColumnName("tagset_id")
+                .HasColumnType("int");
 
             //Create unique constraint for 4 different typed tags
             //Enforce that there are no duplicate tags within a tagset.
