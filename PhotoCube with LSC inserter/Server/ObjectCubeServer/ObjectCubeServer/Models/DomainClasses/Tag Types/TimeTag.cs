@@ -8,5 +8,8 @@ namespace ObjectCubeServer.Models.DomainClasses.TagTypes
     {
         [Column("name", TypeName = "Time")]
         public TimeSpan Name { get; set; }
+
+        [Column("tagset_id")]
+        public int TagsetIdReplicate { get; set; }
     }
 }

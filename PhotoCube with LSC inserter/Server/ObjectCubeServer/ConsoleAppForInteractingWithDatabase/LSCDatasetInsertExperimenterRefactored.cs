@@ -481,6 +481,7 @@ namespace ConsoleAppForInteractingWithDatabase
             OperatingSystem OS = Environment.OSVersion;
             PlatformID platformId = OS.Platform;
 
+            //SQL server specific requirement
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\n");
@@ -530,20 +531,22 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 foreach (var t in list.Values)
                 {
+                    //Insert the tag first to avoid violation of FK constraint
                     string insertStatement = "INSERT INTO tags(id, tagtype_id, tagset_id) VALUES(" + t.Id + "," + t.TagTypeId + "," + t.TagsetId + "); \n";
                     switch (t)
                     {
+                        //Insert typed tag next, including a replicate of tagset_id
                         case AlphanumericalTag at:
-                            insertStatement += "INSERT INTO alphanumerical_tags(id, name) VALUES(" + t.Id + ",'" + at.Name + "'); \n";
+                            insertStatement += "INSERT INTO alphanumerical_tags(id, name, tagset_id) VALUES(" + at.Id + ",'" + at.Name + "'," + at.TagsetId +"); \n";
                             break;
                         case NumericalTag nt:
-                            insertStatement += "INSERT INTO numerical_tags(id, name) VALUES(" + t.Id + "," + nt.Name + "); \n";
+                            insertStatement += "INSERT INTO numerical_tags(id, name, tagset_id) VALUES(" + nt.Id + "," + nt.Name + "," + nt.TagsetId + "); \n";
                             break;
                         case DateTag dt:
-                            insertStatement += "INSERT INTO date_tags(id, name) VALUES(" + t.Id + ",'" + dt.Name.ToString() + "'); \n";
+                            insertStatement += "INSERT INTO date_tags(id, name, tagset_id) VALUES(" + dt.Id + ",'" + dt.Name.ToString() + "'," + dt.TagsetId + "); \n";
                             break;
                         case TimeTag tt:
-                            insertStatement += "INSERT INTO time_tags(id, name) VALUES(" + t.Id + ",'" + tt.Name.ToString() + "'); \n";
+                            insertStatement += "INSERT INTO time_tags(id, name, tagset_id) VALUES(" + tt.Id + ",'" + tt.Name.ToString() + "'," + tt.TagsetId + "); \n";
                             break;
                     }
                     
@@ -556,7 +559,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags OFF;\n");
             }
 
-            //Inser all ObjectTagRelations
+            //Insert all ObjectTagRelations
             foreach (var co in objectTagRelations.Values)
             {
                 foreach (var otr in co.Values)
