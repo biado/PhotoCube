@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.DataAccess;    
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using SixLabors.ImageSharp;
@@ -14,16 +14,21 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Query.ExpressionTranslators;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
-    public class LSCDatasetInsertExperimenterRefactored
+    public class DatasetInserter
     {
         private int numOfImages;
         private string pathToDataset;
         private string pathToTagFile;
         private string pathToHierarchiesFile;
         private string pathToErrorLogFile;
+        private string resultPath;
+        private Stopwatch stopwatch;
+        private int batchSize = 10000;
         private string SQLPath;
         private static string delimiter = ",,";
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
@@ -37,10 +42,11 @@ namespace ConsoleAppForInteractingWithDatabase
         private Dictionary<string, TagType> tagtypes = new Dictionary<string, TagType>();
         private Dictionary<string, string> datatypes;
 
-        public LSCDatasetInsertExperimenterRefactored(int numOfImages)
+        public DatasetInserter(int numOfImages)
         {
             this.numOfImages = numOfImages;
             this.pathToDataset = sAll.Get("pathToLscData");
+            this.resultPath = sAll.Get("resultPath");
             this.SQLPath = sAll.Get("SQLPath");
 
             this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
@@ -50,6 +56,8 @@ namespace ConsoleAppForInteractingWithDatabase
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
             datatypes = MapDataTypestoTagTypes();
 
+            this.stopwatch = new Stopwatch();
+            stopwatch.Start();
             BuildCubeObjects();
             BuildTagTypes();
             BuildTagsetsAndTags();
@@ -57,6 +65,14 @@ namespace ConsoleAppForInteractingWithDatabase
             WriteInsertStatementsToFile();
         }
 
+        private void LogTimeToFile(string entities, int row)
+        {
+            TimeSpan ts = stopwatch.Elapsed;
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
+                ts.Hours, ts.Minutes, ts.Seconds);
+            string log = string.Join(",", entities, row, elapsedTime) + "\n";
+            File.AppendAllText(resultPath, log);
+        }
 
         /// <summary>
         /// Parses and inserts cube objects, photos and thumbnails.
@@ -73,6 +89,8 @@ namespace ConsoleAppForInteractingWithDatabase
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && fileCount <= numOfImages)
                         {
+                            Console.WriteLine("CubeObject line: " + fileCount);
+
                             //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
                             string filename = line.Split(delimiter)[0];
                             string filepath = Path.Combine(pathToDataset, filename);
@@ -112,9 +130,15 @@ namespace ConsoleAppForInteractingWithDatabase
                                     cubeObjects[filename] = cubeObject;
                                 }
                             }
+
+                            if (fileCount % batchSize == 0)
+                            {
+                                LogTimeToFile("CubeObject", fileCount);
+                            }
                             fileCount++;
                         }
                     }
+                    LogTimeToFile("CubeObject", fileCount-1);
             }
             catch (Exception e) 
             {
@@ -215,6 +239,8 @@ namespace ConsoleAppForInteractingWithDatabase
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
                         {
+                            Console.WriteLine("Tagset & Tag line: " + lineCount);
+
                             //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
                             string[] split = line.Split(delimiter);
                             string fileName = split[0];
@@ -306,12 +332,17 @@ namespace ConsoleAppForInteractingWithDatabase
                                     }
                                 }
                             }
-
-                            lineCount++;
+                            if (lineCount % batchSize == 0)
+                            {
+                                LogTimeToFile("Tagset & Tag", lineCount);
+                            }
+                        lineCount++;
                         }
                     }
-                }
-                catch (Exception e)
+                    LogTimeToFile("Tagset & Tag", lineCount-1);
+
+            }
+            catch (Exception e)
                 {
                     Console.WriteLine("File could not be read to insert the tags.");
                     Console.WriteLine(e.Message);
@@ -340,12 +371,15 @@ namespace ConsoleAppForInteractingWithDatabase
             Console.WriteLine("Building Hierarchies."); 
             try 
             {
-                    using (StreamReader reader = new StreamReader(pathToHierarchiesFile))
+                int lineCount = 1;
+
+                using (StreamReader reader = new StreamReader(pathToHierarchiesFile))
                     {
-                        int lineCount = 1;
                         string line = reader.ReadLine(); // Skipping the first line
                         while ((line = reader.ReadLine()) != null && !line.Equals(""))
                         {
+                            Console.WriteLine("Hierarchy & Node line: " + lineCount);
+
                             //File format: TagsetName,,HierarchyName,,ParrentTag,,ChildTag,,ChildTag,,ChildTag:(...)
                             string[] split = line.Split(delimiter);
                             string tagsetName = split[0];
@@ -460,9 +494,14 @@ namespace ConsoleAppForInteractingWithDatabase
                                     childNode.ParentNodeId = parentNode.Id;
                                 }
                             }
-                            lineCount++;
+                            if (lineCount % batchSize == 0)
+                            {
+                                LogTimeToFile("Hierarchy & Node", lineCount);
+                            }
+                        lineCount++;
                         }
                     }
+                    LogTimeToFile("Hierarchy & Node", lineCount-1);
             }
             catch (Exception e) 
             {
@@ -481,10 +520,12 @@ namespace ConsoleAppForInteractingWithDatabase
             OperatingSystem OS = Environment.OSVersion;
             PlatformID platformId = OS.Platform;
 
+            int insertCount = 0;
             //SQL server specific requirement
             if (platformId == PlatformID.Win32NT)
             {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\n");
+                File.AppendAllText(SQLPath, "SET QUOTED_IDENTIFIER ON\nGO\nSET ANSI_NULLS ON\nGO\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\nGO\n");
             }
 
             //Insert all CubeObjects
@@ -492,12 +533,17 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 string insertStatement = "INSERT INTO cubeobjects(id, file_uri, file_type, thumbnail_uri) VALUES(" + co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
+                insertCount++;
+                if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                {
+                    File.AppendAllText(SQLPath, "GO\n");
+                }
             }
 
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects OFF;\n");
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\nGO\n");
             }
 
             //Insert all Tagsets
@@ -527,6 +573,7 @@ namespace ConsoleAppForInteractingWithDatabase
             }
 
             //Insert all Tags 
+            insertCount = 0;
             foreach (var list in tags.Values)
             {
                 foreach (var t in list.Values)
@@ -551,6 +598,11 @@ namespace ConsoleAppForInteractingWithDatabase
                     }
                     
                     File.AppendAllText(SQLPath, insertStatement);
+                    insertCount++;
+                    if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                    {
+                        File.AppendAllText(SQLPath, "GO\n");
+                    }
                 }
             }
 
@@ -558,20 +610,25 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags OFF;\n");
             }
-
-            //Insert all ObjectTagRelations
+            //Insert all ObjectTagRelations (IDENTITY_INSERT should be off)
+            insertCount = 0;
             foreach (var co in objectTagRelations.Values)
             {
                 foreach (var otr in co.Values)
                 {
                     string insertStatement = "INSERT INTO objecttagrelations(object_id, tag_id) VALUES(" + otr.ObjectId + "," + otr.TagId + "); \n";
                     File.AppendAllText(SQLPath, insertStatement);
+                    insertCount++;
+                    if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                    {
+                        File.AppendAllText(SQLPath, "GO\n");
+                    }
                 }
             }
 
             if (platformId == PlatformID.Win32NT)
             {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\nGO\n");
             }
 
             //Insert all Hierarchies
@@ -584,14 +641,20 @@ namespace ConsoleAppForInteractingWithDatabase
             if (platformId == PlatformID.Win32NT)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies OFF;\n");
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\nGO\n");
             }
 
             //Insert all Nodes first without setting parent node to avoid violating FK constraint
+            insertCount = 0;
             foreach (var n in nodes.Values)
             {
                 string insertStatement = "INSERT INTO nodes(id, tag_id, hierarchy_id) VALUES(" + n.Id + "," + n.TagId + "," + n.HierarchyId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
+                insertCount++;
+                if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                {
+                    File.AppendAllText(SQLPath, "GO\n");
+                }
             }
 
             //Upate all Nodes and set parent node
@@ -607,7 +670,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
             if (platformId == PlatformID.Win32NT)
             {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\n");
+                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\nGO");
             }
         }
     }

@@ -42,14 +42,14 @@ namespace ConsoleAppForInteractingWithDatabase
                 stopWatch.Start();
 
                 //Insert data:
-                new LSCDatasetInsertExperimenterRefactored(num);
+                new DatasetInserter(num);
 
                 // Get the elapsed time as a TimeSpan value.
                 TimeSpan ts = stopWatch.Elapsed;
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
                     ts.Hours, ts.Minutes, ts.Seconds);
 
-                experimentResult += string.Join(",", "GenerateSQLQueries", num, elapsedTime) + "\n";
+                experimentResult += string.Join(",", "Total time for GenerateSQLQueries", num, elapsedTime) + "\n";
 
                 File.AppendAllText(resultPath, experimentResult);
                 experimentResult = "";
