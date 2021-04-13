@@ -15,7 +15,6 @@ using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Query.ExpressionTranslators;
 
 namespace ConsoleAppForInteractingWithDatabase
 {

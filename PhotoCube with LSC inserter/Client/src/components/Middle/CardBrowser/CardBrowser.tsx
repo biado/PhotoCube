@@ -18,7 +18,7 @@ export default class CardBrowser extends React.Component<{
         currentPhotoClassName: "",
         spinnerVisibility: "hidden",
         photoVisibility: "visible",
-        tagNamesWithCubeObjectId: ""
+        tagNamesWithCubeObjectId: []
     }
 
     render(){
@@ -32,7 +32,13 @@ export default class CardBrowser extends React.Component<{
                     <div>
                         <p>{"Showing photo: " + (this.state.photoIndex + 1) + " out of " + this.props.cubeObjects.length}</p><br/>
                         <p>Filename: {fileName}</p><br/>
-                        <p>Tags: {this.state.tagNamesWithCubeObjectId}.</p>
+                        <div className="taglist container">
+                            <p>Tags:</p>
+                            <ul className="taglist cardmode">
+                                {this.state.tagNamesWithCubeObjectId.map(tag => 
+                                <li>{tag}</li> )}
+                            </ul>
+                        </div>
                     </div>
                     <div className="currentPhotoContainer">
                         <img id="currentPhoto" 
@@ -56,10 +62,8 @@ export default class CardBrowser extends React.Component<{
     private async updateTagsInState() {
         if(this.props.cubeObjects.length > 0){
             await Fetcher.FetchTagsWithCubeObjectId(this.props.cubeObjects[this.state.photoIndex].Id)
-            .then((tags:Tag[]) => {
-                let result : string = "";
-                tags.forEach(t => result += t.Name + ", ");
-                this.setState({tagNamesWithCubeObjectId: result.substring(0, result.length - 2)})
+            .then((tags:string[]) => {
+                this.setState({tagNamesWithCubeObjectId: tags})
             });
         }   
     }
