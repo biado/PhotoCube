@@ -4,6 +4,7 @@
 
 ##Configuration files
 App.config
+LSC-MMM Mapping/src/config.properties
 
 ### Csharp ###
 ## Ignore Visual Studio temporary files, build results, and

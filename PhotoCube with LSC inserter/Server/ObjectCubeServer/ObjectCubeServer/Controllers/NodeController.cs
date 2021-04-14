@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -46,7 +47,7 @@ namespace ObjectCubeServer.Controllers
             if (nodeFound == null) { return NotFound(); }
             else
             {
-                nodeFound.Children.Sort((cn1, cn2) => cn1.Tag.Name.CompareTo(cn2.Tag.Name));
+                nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 nodeFound = RecursiveAddChildrenAndTags(nodeFound);
                 return Ok(JsonConvert.SerializeObject(nodeFound));
             }
@@ -68,7 +69,7 @@ namespace ObjectCubeServer.Controllers
                             .ThenInclude(cn => cn.Tag)
                         .FirstOrDefault();
                 }
-                childNodeWithTagAndChildren.Children.Sort((cn1, cn2) => cn1.Tag.Name.CompareTo(cn2.Tag.Name));
+                childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }

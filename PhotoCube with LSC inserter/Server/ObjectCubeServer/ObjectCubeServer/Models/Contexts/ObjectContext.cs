@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using System;
 using System.Configuration;
 
@@ -55,11 +56,11 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<ObjectTagRelation> ObjectTagRelations { get; set; }
         public DbSet<Hierarchy> Hierarchies { get; set; }
         public DbSet<Node> Nodes { get; set; }
-
+        public DbSet<TagType> TagTypes { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //One to one relationship between CubeObject and Photo.
-            //If CubeObject is deleted, then photo is also deleted.
+
             //This is called "fluent API": https://docs.microsoft.com/en-us/ef/core/modeling/
             //And is a way to specify database relations explicitly for Entity Framework CORE (EF CORE)
 
@@ -82,15 +83,16 @@ namespace ObjectCubeServer.Models.DataAccess
                 .HasIndex(ts => ts.Name)
                 .IsUnique();
 
-            // Enforce that there are no duplicate tags within a tagset.
-            modelBuilder.Entity<Tag>()
-                .HasIndex(t => new { t.Name, t.TagsetId })
-                .IsUnique();
-
             //Many-to-one relationship, if tagset is deleted, then tags are also deleted.
             modelBuilder.Entity<Tagset>()
                 .HasMany(ts => ts.Tags)
                 .WithOne(t => t.Tagset)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //Many-to-one relationship, if tagset is deleted, then hierarchies are also deleted.
+            modelBuilder.Entity<Tagset>()
+                .HasMany(ts => ts.Hierarchies)
+                .WithOne(h => h.Tagset)
                 .OnDelete(DeleteBehavior.Cascade);
 
             //Ids of Tags are generated when added... Needed for some reason...
@@ -98,11 +100,9 @@ namespace ObjectCubeServer.Models.DataAccess
                .Property(t => t.Id)
                .ValueGeneratedOnAdd();
 
-            //Many-to-one relationship, if tagset is deleted, then hierarchies are also deleted.
-            modelBuilder.Entity<Tagset>()
-                .HasMany(ts => ts.Hierarchies)
-                .WithOne(h => h.Tagset)
-                .OnDelete(DeleteBehavior.Cascade);
+            //Every tag has exactly one tag type
+            modelBuilder.Entity<Tag>()
+                .HasOne(t => t.TagType);
 
             //Many-to-one relationship, if hierarchy is deleted, then nodes are also deleted.
             modelBuilder.Entity<Hierarchy>()
@@ -116,6 +116,45 @@ namespace ObjectCubeServer.Models.DataAccess
                 .HasOne(n => n.Tag)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //Typed Tags store a replicate of tagsetid
+            //Creates foreign key constraints for these properties
+            modelBuilder.Entity<AlphanumericalTag>()
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(at => at.TagsetIdReplicate);
+
+            modelBuilder.Entity<DateTag>()
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(dt => dt.TagsetIdReplicate);
+
+            modelBuilder.Entity<TimeTag>()
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(tt => tt.TagsetIdReplicate);
+
+            modelBuilder.Entity<NumericalTag>()
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(nt => nt.TagsetIdReplicate);
+
+            //Enforce that a typed tag is unqiue within a tagset
+            modelBuilder.Entity<DateTag>()
+                .HasIndex(dt => new { dt.TagsetIdReplicate, dt.Name })
+                .IsUnique();
+
+            modelBuilder.Entity<AlphanumericalTag>()
+                .HasIndex(at => new { at.TagsetIdReplicate, at.Name })
+                .IsUnique();
+
+            modelBuilder.Entity<TimeTag>()
+                .HasIndex(tt => new { tt.TagsetIdReplicate, tt.Name })
+                .IsUnique();
+
+            modelBuilder.Entity<NumericalTag>()
+                .HasIndex(nt => new { nt.TagsetIdReplicate, nt.Name })
+                .IsUnique();
 
             //Calling on model creating:
             base.OnModelCreating(modelBuilder);
@@ -135,7 +174,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc2000sql; User Id = photocube; Password = postgres;");
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc50tt_tagsetfix; User Id = photocube; Password = postgres;");
                     }
                     break;
                 case PlatformID.Win32NT: //Windows
@@ -145,7 +184,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = SQLTest; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\SQLTest.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = TPTTagsetId; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\TPTTagsetId.mdf");
                     }
                     break;
                 default:

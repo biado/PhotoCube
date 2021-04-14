@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -61,6 +62,8 @@ namespace ObjectCubeServer.Controllers
         #region HelperMethods:
         private Node RecursiveAddChildrenAndTags(Node parentNode)
         {
+            //we need to find the type of the tag which is at the root of the hierarchy
+
             List<Node> newChildNodes = new List<Node>();
             foreach (Node childNode in parentNode.Children)
             {
@@ -74,13 +77,14 @@ namespace ObjectCubeServer.Controllers
                             .ThenInclude(cn => cn.Tag)
                         .FirstOrDefault();
                 }
-                childNodeWithTagAndChildren.Children.Sort((cn1, cn2) => cn1.Tag.Name.CompareTo(cn2.Tag.Name));
+                childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }
             parentNode.Children = newChildNodes;
             return parentNode;
         }
+
         #endregion
     }
 }

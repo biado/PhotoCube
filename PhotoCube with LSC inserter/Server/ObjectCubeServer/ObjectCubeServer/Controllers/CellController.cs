@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -301,7 +302,7 @@ namespace ObjectCubeServer.Controllers
                     //.Include(co => co.ObjectTagRelations)
                     .Where(ts => ts.Id == parsedAxis.TagsetId)
                     .FirstOrDefault();
-                tags = Tagset.Tags.OrderBy(t => t.Name).ToList();
+                tags = Tagset.Tags.OrderBy(t => ((AlphanumericalTag)t).Name).ToList();
             }
             return tags
                 .Select(t => getAllCubeObjectsTaggedWith(t.Id))
@@ -353,7 +354,7 @@ namespace ObjectCubeServer.Controllers
                     .Where(n => n.Id == nodeId)
                     .FirstOrDefault();
             }
-            currentNode.Children.Sort((cn1, cn2) => cn1.Tag.Name.CompareTo(cn2.Tag.Name));
+            currentNode.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
             List<Node> newChildNodes = new List<Node>();
             currentNode.Children.ForEach(cn => newChildNodes.Add(fetchWholeHierarchyFromRootNode(cn.Id)));
             currentNode.Children = newChildNodes;

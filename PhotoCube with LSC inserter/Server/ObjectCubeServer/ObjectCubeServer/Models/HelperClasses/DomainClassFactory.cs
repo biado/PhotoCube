@@ -1,4 +1,5 @@
 ﻿using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace ObjectCubeServer.Models
         private static int tagId = 0;
         private static int hierarchyId = 0;
         private static int nodeId = 0;
+        private static int tagtypeId = 0;
 
         public static CubeObject NewCubeObject(string fileURI, FileType fileType, string thumbnailURI)
         {
@@ -46,17 +48,78 @@ namespace ObjectCubeServer.Models
             };
         }
 
-        public static Tag NewTag(string name, Tagset tagset)
+        public static TagType NewTagType(string description)
+        {
+            if (description == null) { throw new Exception("Given name was null."); }
+
+            tagtypeId++;
+            return new TagType()
+            {
+                Id = tagtypeId,
+                Description = description
+            };
+        }
+
+        public static AlphanumericalTag NewAlphanumericalTag(TagType tagtype, Tagset tagset, string name)
         {
             if (name == null) { throw new Exception("Given name was null."); }
             if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
 
             tagId++;
-            return new Tag()
+            return new AlphanumericalTag()
             {
-                Id =  tagId,
-                Name = name,
-                TagsetId = tagset.Id
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
+                Name = name
+            };
+        }
+
+        public static NumericalTag NewNumericalTag(TagType tagtype, Tagset tagset, int name)
+        {
+            if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
+
+            tagId++;
+            return new NumericalTag()
+            {
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
+                Name = name
+            };
+        }
+
+        public static TimeTag NewTimeTag(TagType tagtype, Tagset tagset, TimeSpan name)
+        {
+            if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
+            if (name == null) { throw new Exception("Given name was null."); }
+
+            tagId++;
+            return new TimeTag()
+            {
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
+                Name = name
+            };
+        }
+
+        public static DateTag NewDateTag(TagType tagtype, Tagset tagset, DateTime name)
+        {
+            if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
+            if (name == null) { throw new Exception("Given name was null."); }
+
+            tagId++;
+            return new DateTag()
+            {
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
+                Name = name
             };
         }
 
