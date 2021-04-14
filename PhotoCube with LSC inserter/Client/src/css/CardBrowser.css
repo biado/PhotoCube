@@ -32,7 +32,7 @@
 .taglist.cardmode {
   display: flex;
   flex-flow: row wrap;
-  padding-left: 5;
+  padding-left: 5px;
   color: rgb(200, 200, 200);
   list-style-type: none;
 }

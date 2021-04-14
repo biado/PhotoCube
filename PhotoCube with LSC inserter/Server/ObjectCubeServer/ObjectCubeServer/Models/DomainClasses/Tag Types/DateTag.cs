@@ -15,7 +15,7 @@ namespace ObjectCubeServer.Models.DomainClasses.TagTypes
         override
         public string GetTagName()
         {
-            return Name.ToString();
+            return Name.ToShortDateString();
         }
     }
 }

@@ -40,11 +40,6 @@ namespace ObjectCubeServer.Controllers
                 List<string> tagsFound;
                 using (var context = new ObjectContext())
                 {
-                    /*tagsFound = context.CubeObjects
-                        .Where(co => co.Id == cubeObjectId)
-                        .Select(co => co.ObjectTagRelations.Select(otr => otr.Tag)) //Map each OTR to a Tag
-                        .FirstOrDefault()
-                        .ToList();*/
                     tagsFound = context.ObjectTagRelations
                         .Where(otr => otr.ObjectId == cubeObjectId)
                         .Select(otr => otr.Tag.GetTagName())
