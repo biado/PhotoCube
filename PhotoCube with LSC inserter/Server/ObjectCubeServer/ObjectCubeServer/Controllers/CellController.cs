@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -184,8 +185,10 @@ namespace ObjectCubeServer.Controllers
                 }
             }
 
+            List<SimpleFileURICell> simpleCells = cells.Select(c => c.ToSimpleFileURICell()).ToList();
+
             //Return OK with json result:
-            return Ok(JsonConvert.SerializeObject(cells,
+            return Ok(JsonConvert.SerializeObject(simpleCells,
                 new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
         }
 
