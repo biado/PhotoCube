@@ -28,9 +28,10 @@ namespace ObjectCubeServer.Models.DomainClasses
 
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }
 
-        public string GetFileURI()
+        // To change the domain model cubeObject to public model cubeobjectFileURI
+        public CubeObjectFileURI ToCubeObjectFileUri()
         {
-            return this.FileURI;
+            return new CubeObjectFileURI(this.Id, this.FileURI);
         }
     }
 }
