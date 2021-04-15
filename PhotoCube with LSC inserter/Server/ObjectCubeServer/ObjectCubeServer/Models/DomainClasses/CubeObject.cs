@@ -7,7 +7,7 @@ namespace ObjectCubeServer.Models.DomainClasses
 {
     /// <summary>
     /// Represents an Object in the M^3 datamodel.
-    /// Has a FileURI and a ThumbnailURI (visual presentation of the object).
+    /// Has a FileURI and a ThumbnailURI (to be used to fetch the visual representation of the object from an external server).
     /// Is tagged with tags in ObjectTagRelation (many to many relation table to Tag).
     /// In the future it can represent different types of files.
     /// </summary>

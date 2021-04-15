@@ -7,7 +7,7 @@ namespace ObjectCubeServer.Models.DomainClasses
     /// <summary>
     /// Represents a cell in the cube.
     /// Has x,y,z coordinates and the CubeObjects associated with the Cell 
-    /// (based on which tags are on position x,y,z on X,Y,Z-axis.
+    /// (based on which tags are on position x,y,z on X,Y,Z-axis.)
     /// </summary>
     public class Cell
     {
