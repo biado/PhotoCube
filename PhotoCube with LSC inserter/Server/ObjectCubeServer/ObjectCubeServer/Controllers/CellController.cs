@@ -185,6 +185,7 @@ namespace ObjectCubeServer.Controllers
                 }
             }
 
+            // Convert cells to simpleFileURICells
             List<SimpleFileURICell> simpleCells = cells.Select(c => c.ToSimpleFileURICell()).ToList();
 
             //Return OK with json result:
@@ -238,7 +239,7 @@ namespace ObjectCubeServer.Controllers
                 .Select(hf => extractTagsFromHierarchyFilter(hf)) //Map into list of tags
                 .ToList();
 
-            //If cubeObject has tag in hierarchy, let it pass throgh the filter:
+            //If cubeObject has tag in hierarchy, let it pass through the filter:
             return cubeObjects
                 .Where(co => tagsPerHierarchyFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists (flattened hierarchies)
                         lstOfTags => co.ObjectTagRelations.Exists( //For each tag list, there must exist a cube object where:
@@ -259,8 +260,8 @@ namespace ObjectCubeServer.Controllers
 
         /// <summary>
         /// Given a boolean defined and a ParsedAxis, returns a List of List of CubeObjects.
-        /// The indexes in the outer list repressents each tag on an axis.
-        /// The indexes in the inner list reppressents the cube objects tagged with the tag.
+        /// The indexes in the outer list represents each tag on an axis.
+        /// The indexes in the inner list represents the cube objects tagged with the tag.
         /// </summary>
         /// <param name="defined"></param>
         /// <param name="parsedAxis"></param>
@@ -302,9 +303,7 @@ namespace ObjectCubeServer.Controllers
             {
                 var Tagset = context.Tagsets
                     .Include(ts => ts.Tags)
-                    //.Include(co => co.ObjectTagRelations)
-                    .Where(ts => ts.Id == parsedAxis.TagsetId)
-                    .FirstOrDefault();
+                    .FirstOrDefault(ts => ts.Id == parsedAxis.TagsetId);
                 tags = Tagset.Tags.OrderBy(t => ((AlphanumericalTag)t).Name).ToList();
             }
             return tags
@@ -319,9 +318,8 @@ namespace ObjectCubeServer.Controllers
         /// <returns></returns>
         private List<List<CubeObject>> getAllCubeObjectsFrom_Hierarchy_Axis(ParsedAxis parsedAxis)
         {
-            List<Node> hierarchyNodes;
             Node rootNode = fetchWholeHierarchyFromRootNode(parsedAxis.HierarchyNodeId);
-            hierarchyNodes = rootNode.Children;
+            List<Node> hierarchyNodes = rootNode.Children;
             return hierarchyNodes
                 .Select(n => getAllCubeObjectsTaggedWith(extractTagsFromHieararchy(n)) //Map hierarchy nodes to list of cube objects
                 .GroupBy(co => co.Id).Select(grouping => grouping.First()).ToList()) //Getting unique cubeobjects
@@ -354,8 +352,7 @@ namespace ObjectCubeServer.Controllers
                     .Include(n => n.Tag)
                     .Include(n => n.Children)
                         .ThenInclude(cn => cn.Tag)
-                    .Where(n => n.Id == nodeId)
-                    .FirstOrDefault();
+                    .FirstOrDefault(n => n.Id == nodeId);
             }
             currentNode.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
             List<Node> newChildNodes = new List<Node>();
@@ -367,16 +364,16 @@ namespace ObjectCubeServer.Controllers
         /// <summary>
         /// Fetches all CubeObjects tagged with tagId.
         /// </summary>
-        /// <param name="nodeId"></param>
+        /// <param name="tagId"></param>
         /// <returns></returns>
         private List<CubeObject> getAllCubeObjectsTaggedWith(int tagId)
         {
             List<CubeObject> cubeObjects;
             using (var context = new ObjectContext())
             {
-                cubeObjects = context.CubeObjects
-                    .Include(co => co.ObjectTagRelations)
-                    .Where(co => co.ObjectTagRelations.Where(otr => otr.TagId == tagId).Count() > 0) //Is tagged with tagId at least once
+                cubeObjects = context.ObjectTagRelations
+                    .Where(otr => otr.TagId == tagId)
+                    .Select(otr => otr.CubeObject)
                     .ToList();
             }
             return cubeObjects;
