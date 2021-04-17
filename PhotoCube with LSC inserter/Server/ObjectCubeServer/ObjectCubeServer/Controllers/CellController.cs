@@ -371,9 +371,9 @@ namespace ObjectCubeServer.Controllers
             List<CubeObject> cubeObjects;
             using (var context = new ObjectContext())
             {
-                cubeObjects = context.ObjectTagRelations
-                    .Where(otr => otr.TagId == tagId)
-                    .Select(otr => otr.CubeObject)
+                cubeObjects = context.CubeObjects
+                    .Include(co => co.ObjectTagRelations)
+                    .Where(co => co.ObjectTagRelations.Where(otr => otr.TagId == tagId).Count() > 0 ) //Is tagged with tagId at least once
                     .ToList();
             }
             return cubeObjects;
