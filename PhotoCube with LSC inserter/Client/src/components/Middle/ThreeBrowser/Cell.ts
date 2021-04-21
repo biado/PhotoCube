@@ -1,4 +1,4 @@
-import CubeObjectFileURI from './CubeObject';
+import CubeObjectFileURI from './CubeObjectFileURI';
 import * as THREE from 'three';
 import Position from './Position';
 

@@ -1,5 +1,5 @@
 import Axis from "./Axis";
-import CubeObjectFileURI from './CubeObject';
+import CubeObjectFileURI from './CubeObjectFileURI';
 import Tag from "./Tag";
 import { Filter } from "../../LeftDock/FacetedSearcher";
 
