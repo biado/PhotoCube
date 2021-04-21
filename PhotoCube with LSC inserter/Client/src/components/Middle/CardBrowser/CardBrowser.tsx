@@ -1,5 +1,5 @@
 import React, { Component, SyntheticEvent } from 'react';
-import CubeObject from '../ThreeBrowser/CubeObject';
+import CubeObjectFileURI from '../ThreeBrowser/CubeObjectFileURI';
 import Fetcher from '../ThreeBrowser/Fetcher';
 import '../../../css/CardBrowser.css';
 import { BrowsingModes } from '../../RightDock/BrowsingModeChanger';
@@ -10,7 +10,7 @@ import { env } from 'process';
  * The CardBrowser allows the user to browse each photo one by one.
  */
 export default class CardBrowser extends React.Component<{
-    cubeObjects: CubeObject[],
+    cubeObjectFileURIs: CubeObjectFileURI[],
     onBrowsingModeChanged : (browsingMode: BrowsingModes) => void
 }>{
     state = {
@@ -22,15 +22,15 @@ export default class CardBrowser extends React.Component<{
     }
 
     render(){
-        if(this.props.cubeObjects.length > 0){
+        if(this.props.cubeObjectFileURIs.length > 0){
             let fileName: string = "";
-            if(this.props.cubeObjects[this.state.photoIndex].FileURI) {
-                fileName = this.props.cubeObjects[this.state.photoIndex].FileURI!;
+            if(this.props.cubeObjectFileURIs[this.state.photoIndex].FileURI) {
+                fileName = this.props.cubeObjectFileURIs[this.state.photoIndex].FileURI!;
             }
             return(
                 <div className="grid-item cardBrowserContainer">
                     <div>
-                        <p>{"Showing photo: " + (this.state.photoIndex + 1) + " out of " + this.props.cubeObjects.length}</p><br/>
+                        <p>{"Showing photo: " + (this.state.photoIndex + 1) + " out of " + this.props.cubeObjectFileURIs.length}</p><br/>
                         <p>Filename: {fileName}</p><br/>
                         <p>Tags: {this.state.tagNamesWithCubeObjectId}.</p>
                     </div>
@@ -38,7 +38,7 @@ export default class CardBrowser extends React.Component<{
                         <img id="currentPhoto" 
                             className={this.state.currentPhotoClassName + " " + this.state.photoVisibility} 
                             onLoad={(e) => this.onImageLoad(e)} 
-                            src={process.env.REACT_APP_IMAGE_SERVER + this.props.cubeObjects[this.state.photoIndex].FileURI}></img>
+                            src={process.env.REACT_APP_IMAGE_SERVER + this.props.cubeObjectFileURIs[this.state.photoIndex].FileURI}></img>
                     </div>        
                 </div>
             );
@@ -54,8 +54,8 @@ export default class CardBrowser extends React.Component<{
      * Get's tags associated with each and updates state.
      */
     private async updateTagsInState() {
-        if(this.props.cubeObjects.length > 0){
-            await Fetcher.FetchTagsWithCubeObjectId(this.props.cubeObjects[this.state.photoIndex].Id)
+        if(this.props.cubeObjectFileURIs.length > 0){
+            await Fetcher.FetchTagsWithCubeObjectId(this.props.cubeObjectFileURIs[this.state.photoIndex].Id)
             .then((tags:Tag[]) => {
                 let result : string = "";
                 tags.forEach(t => result += t.Name + ", ");
@@ -99,7 +99,7 @@ export default class CardBrowser extends React.Component<{
     onKeydown(e: KeyboardEvent){
         //console.log(e.key);
         if(e.key == "ArrowRight"){
-            if(this.state.photoIndex < this.props.cubeObjects.length - 1){
+            if(this.state.photoIndex < this.props.cubeObjectFileURIs.length - 1){
                 this.setState({photoIndex: this.state.photoIndex + 1});
                 this.updateTagsInState();
             }

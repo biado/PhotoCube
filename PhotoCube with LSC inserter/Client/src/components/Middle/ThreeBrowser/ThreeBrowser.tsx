@@ -2,7 +2,6 @@ import * as React from 'react';
 import * as THREE from 'three';
 import Position from './Position';
 import '../../../css/ThreeBrowser.css';
-import stockImage from '../../../images/download.jpg';
 import helveticaRegular from '../../../fonts/helvetiker_regular.typeface.json';
 import Axis, {AxisTypeEnum, AxisDirection} from './Axis';
 import Cell from './Cell';
@@ -11,7 +10,7 @@ import Hierarchy from './Hierarchy';
 import Tagset from './Tagset';
 import HierarchyNode from './HierarchyNode';
 import { Raycaster } from 'three';
-import CubeObjectFileURI from './CubeObject';
+import CubeObjectFileURI from './CubeObjectFileURI';
 import ICell from './Cell';
 import { BrowsingState } from './BrowsingState';
 import PickedDimension from '../../RightDock/PickedDimension';
@@ -28,8 +27,8 @@ export default class ThreeBrowser extends React.Component<{
         //Props contract:
         onFileCountChanged: (fileCount: number) => void,
         previousBrowsingState: BrowsingState|null,
-        onOpenCubeInCardMode: (cubeObjects: CubeObjectFileURI[]) => void,
-        onOpenCubeInGridMode: (cubeObjects: CubeObjectFileURI[]) => void,
+        onOpenCubeInCardMode: (cubeObjectFileURIs: CubeObjectFileURI[]) => void,
+        onOpenCubeInGridMode: (cubeObjectFileURIs: CubeObjectFileURI[]) => void,
         filters: Filter[]
     }>{
 
@@ -303,7 +302,7 @@ export default class ThreeBrowser extends React.Component<{
             conMenu!.style.top = y;
             conMenu!.style.left = x;
             this.setState({showContextMenu: true});
-            this.contextMenuCubeObjects = intersects[0].object.userData.cubeObjects;
+            this.contextMenuCubeObjects = intersects[0].object.userData.cubeObjectFileURIs;
         }
         return false;
     }

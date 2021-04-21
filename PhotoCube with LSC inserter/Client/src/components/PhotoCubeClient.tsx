@@ -8,7 +8,7 @@ import RightDock from './RightDock/RightDock';
 import { BrowsingModes } from './RightDock/BrowsingModeChanger';
 import { BrowsingState } from './Middle/ThreeBrowser/BrowsingState';
 import PickedDimension from './RightDock/PickedDimension';
-import CubeObject from './Middle/ThreeBrowser/CubeObject';
+import CubeObjectFileURI from './Middle/ThreeBrowser/CubeObjectFileURI';
 import { Filter } from './LeftDock/FacetedSearcher';
 
 /**
@@ -27,7 +27,7 @@ export default class PhotoCubeClient extends React.Component {
   }
 
   threeBrowserBrowsingState : BrowsingState|null = null;
-  cubeObjects : CubeObject[] = [];
+  cubeObjectFileURIs : CubeObjectFileURI[] = [];
 
   render() {
     //Conditional rendering:
@@ -40,9 +40,9 @@ export default class PhotoCubeClient extends React.Component {
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
         filters={this.state.filters}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
-      currentBrowser = <GridBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
+      currentBrowser = <GridBrowser cubeObjectFileURIs={this.cubeObjectFileURIs} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Card){
-      currentBrowser = <CardBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
+      currentBrowser = <CardBrowser cubeObjectFileURIs={this.cubeObjectFileURIs} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }
 
     //Page returned:
@@ -119,29 +119,29 @@ export default class PhotoCubeClient extends React.Component {
     if(this.state.BrowsingMode == BrowsingModes.Cube){ //Going from cube to other:
       //Saving current browsingstate:
       this.threeBrowserBrowsingState = this.threeBrowser.current!.GetCurrentBrowsingState();
-      this.cubeObjects = this.threeBrowser.current!.GetUniqueCubeObjects()
+      this.cubeObjectFileURIs = this.threeBrowser.current!.GetUniqueCubeObjects()
     }
     this.setState({BrowsingMode: browsingMode});
   }
 
   /**
-   * Can be called from sub-components to open CubeObject array in CardMode.
+   * Can be called from sub-components to open CubeObjectFileURI array in CardMode.
    */
-  onOpenCubeInCardMode = (cubeObjects: CubeObject[]) => {
+  onOpenCubeInCardMode = (cubeObjectFileURIs: CubeObjectFileURI[]) => {
     console.log("Opening cube in card mode:");
     this.threeBrowserBrowsingState = this.threeBrowser.current!.GetCurrentBrowsingState();
-    this.cubeObjects = cubeObjects;
+    this.cubeObjectFileURIs = cubeObjectFileURIs;
     this.setState({BrowsingMode: BrowsingModes.Card});
     this.rightDock.current!.ChangeBrowsingMode(BrowsingModes.Card);
   }
 
   /**
-   * Can be called from sub-components to open CubeObject array in GridMode.
+   * Can be called from sub-components to open CubeObjectFileURI array in GridMode.
    */
-  onOpenCubeInGridMode = (cubeObjects: CubeObject[]) => {
+  onOpenCubeInGridMode = (cubeObjectFileURIs: CubeObjectFileURI[]) => {
     console.log("Opening cube in grid mode:");
     this.threeBrowserBrowsingState = this.threeBrowser.current!.GetCurrentBrowsingState();
-    this.cubeObjects = cubeObjects;
+    this.cubeObjectFileURIs = cubeObjectFileURIs;
     this.setState({BrowsingMode: BrowsingModes.Grid});
     this.rightDock.current!.ChangeBrowsingMode(BrowsingModes.Grid);
   }
