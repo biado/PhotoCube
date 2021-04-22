@@ -11,5 +11,11 @@ namespace ObjectCubeServer.Models.DomainClasses.TagTypes
 
         [Column("tagset_id")]
         public int TagsetIdReplicate { get; set; }
+
+        override
+        public string GetTagName()
+        {
+            return Name.ToShortDateString();
+        }
     }
 }
