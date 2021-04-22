@@ -170,6 +170,8 @@ public class ImageTagGenerator {
         sb.append(delimiter + "Date" + delimiter + date_time[0]);
         sb.append(delimiter + "Time" + delimiter + date_time[1]);
 
+        addDateTimeRelatedTags(sb, formattedMetadataLine[2]);
+
         // timezone (i=3) only use the city name as the tag (Europe/Dublin -> Timezone,,Dublin)
         String[] region_city = formattedMetadataLine[3].split("/");
         sb.append(delimiter + metadataColumnNames[3] + delimiter + region_city[1]);
@@ -181,6 +183,19 @@ public class ImageTagGenerator {
             }
         }
         return sb.toString();
+    }
+
+    private void addDateTimeRelatedTags(StringBuilder sb, String timestamp) {
+        DateTimeFormatter formatter = new DateTimeFormatter(timestamp);
+        sb.append(delimiter + "Day of week (Number)" + delimiter + formatter.getDayOfWeekNumber());
+        sb.append(delimiter + "Day of week (String)" + delimiter + formatter.getDayOfWeekString());
+        sb.append(delimiter + "Day within month" + delimiter + formatter.getDayWithinMonth());
+        sb.append(delimiter + "Day within year" + delimiter + formatter.getDayWithinYear());
+        sb.append(delimiter + "Month (Number)" + delimiter + formatter.getMonthNumber());
+        sb.append(delimiter + "Month (String)" + delimiter + formatter.getMonthString());
+        sb.append(delimiter + "Year" + delimiter + formatter.getYear());
+        sb.append(delimiter + "Hour" + delimiter + formatter.getHour());
+        sb.append(delimiter + "Minute" + delimiter + formatter.getMinute());
     }
 
     /**

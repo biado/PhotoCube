@@ -12,6 +12,7 @@ public class FilepathReader {
     public static String LSCTopic;
     public static String manualTagSetsVC;
     public static String manualTagSetsMD;
+    public static String DraftJson;
     public static String LSCHierarchiesOutput;
     public static String LSCImageTagsOutput;
     public static String OutputFolder;
@@ -32,6 +33,7 @@ public class FilepathReader {
         LSCTopic = prop.getProperty("LSCTopic");
         manualTagSetsVC = prop.getProperty("manualTagSetsVC");
         manualTagSetsMD = prop.getProperty("manualTagSetsMD");
+        DraftJson = prop.getProperty("DraftJson");
         LSCHierarchiesOutput = prop.getProperty("LSCHierarchiesOutput");
         LSCImageTagsOutput = prop.getProperty("LSCImageTagsOutput");
         OutputFolder = prop.getProperty("OutputFolder");
