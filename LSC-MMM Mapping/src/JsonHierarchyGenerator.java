@@ -97,9 +97,9 @@ public class JsonHierarchyGenerator {
         // for (JSTagset child : jshg.root.getChildren()) {
         //     System.out.println(child.getName());
         // }
-        // jshg.writeToHierarchyFile();
+        jshg.writeToHierarchyFile();
 
-        Map<String, String> tag_tagset_map = jshg.getTag_tagset_map();
-        tag_tagset_map.forEach((k,v) -> System.out.println(k + " : " + v));
+        // Map<String, String> tag_tagset_map = jshg.getTag_tagset_map();
+        // tag_tagset_map.forEach((k,v) -> System.out.println(k + " : " + v));
     }
 }
