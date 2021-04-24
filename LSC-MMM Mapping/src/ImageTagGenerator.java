@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,11 +33,13 @@ public class ImageTagGenerator {
 
     private Set<String> solutionFilenames;
     private Map<String, String> tag_tagset_map;
+    private Map<String, String> json_tag_tagset_map;
     private Map<String, String> minuteId_line_map;
     private StringBuilder solutionsInFront;
     private StringBuilder othersAtBack;
     private String[] metadataColumnNames;
     private MetadataFormatter metadataFormatter;
+    private FeatureFinder featureFinder;
 
     private static final String LSCVisualConcept = FilepathReader.LSCVisualConcept;
     private static final String LSCmetadata = FilepathReader.LSCMetadata;
@@ -47,12 +50,19 @@ public class ImageTagGenerator {
         HierarchyGenerator hg = new HierarchyGenerator();
         this.tag_tagset_map = hg.buildAndGetTag_Tagset_Map();
         hg.writeToHierarchyFile();
+        JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
+        jshg.writeToHierarchyFile();
+        this.json_tag_tagset_map = jshg.getTag_tagset_map();
+        this.featureFinder = new FeatureFinder();
         this.solutionsInFront = new StringBuilder();
         this.othersAtBack = new StringBuilder();
+        //TODO: VisualConcept file filename:metadataline map (match by minuteid)
         BufferedReader brVC = new BufferedReader(new FileReader(new File(LSCVisualConcept)));
         BufferedReader brMD = new BufferedReader(new FileReader(new File(LSCmetadata)));
         this.minuteId_line_map = buildMinuteID_Line_Map(brMD);
         buildStrings(brVC);
+        //TODO: change logic - go through lsc2020.txt, not visual concept
+        // for each line lsc2020 filename, maketagfromfeaturefinder(), maketagfrommetadata().
     }
 
     private Map<String,String> buildMinuteID_Line_Map(BufferedReader brMD) throws IOException {
@@ -82,9 +92,11 @@ public class ImageTagGenerator {
             StringBuilder sb = getCorrectStringBuilder(input[2]); // Make sure to put the solution images in the beginning of the output file.
 
             // File format: "FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)"
-            sb.append(makeImagePath(input[2]));
-            sb.append(makeTagsFromVisualConceptAttributes(input));
-            sb.append(makeTagsFromVisualConceptConcepts(input));
+            String imagePath = makeImagePath(input[2]);
+            sb.append(imagePath);
+            sb.append(makeTagsFromVisualConcept(imagePath));
+            // sb.append(makeTagsFromVisualConceptAttributes(input));
+            // sb.append(makeTagsFromVisualConceptConcepts(input));
             String minuteID = input[0];
             if (minuteId_line_map.containsKey(minuteID)) { // If the minute_id is in Metadata file, then make tags from metadata.
                 String metadataLine = minuteId_line_map.get(minuteID);
@@ -92,6 +104,19 @@ public class ImageTagGenerator {
             }
             sb.append("\n");
         }
+        brVC.close();
+    }
+
+    private String makeTagsFromVisualConcept(String imagePath) {
+        List<String> tagnames = featureFinder.findFeatures(imagePath);
+        StringBuilder sb = new StringBuilder();
+        for (String tagname : tagnames) {
+            if (json_tag_tagset_map.containsKey(tagname)) {
+                String tagsetName = json_tag_tagset_map.get(tagname);
+                sb.append(delimiter + tagsetName + delimiter + tagname);
+            }
+        }
+        return sb.toString();
     }
 
     private StringBuilder getCorrectStringBuilder(String imagePath) {

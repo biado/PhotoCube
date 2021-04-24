@@ -27,6 +27,24 @@ public class FeatureFinder {
         buildFeatureIndexTagnameMap();
     }
 
+    public List<String> findFeatures(String filename) {
+        List<String> tagnames = new ArrayList<>();
+        int row = -1;
+        if (filename_row_map.containsKey(filename)) {
+            row = filename_row_map.get(filename);
+        }
+        if (row != -1) {
+            List<Integer> featureIndex = (row_featureIndex_map.containsKey(row)) ? row_featureIndex_map.get(row) : new ArrayList<>();
+            for (int index : featureIndex) {
+                String tagname = featureIndex_tagname_map.get(index);
+                if (tagname != null) {
+                    tagnames.add(tagname);
+                }
+            }
+        }
+        return tagnames;
+    }
+
     private void buildFeatureIndexTagnameMap() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(new File(FeatureTags)));
         String line;
@@ -38,6 +56,7 @@ public class FeatureFinder {
             this.featureIndex_tagname_map.put(index, tagname);
             index++;
         }
+        br.close();
     }
 
     private void buildRowFeatureIndexMap() throws IOException {
@@ -49,6 +68,7 @@ public class FeatureFinder {
             this.row_featureIndex_map.put(row, featureIndexes);
             row++;
         }
+        br.close();
     }
 
     private List<Integer> makeFeatureIndexList(String line) {
@@ -94,7 +114,8 @@ public class FeatureFinder {
         // int row = ff.filename_row_map.get(path);
         // System.out.println(row);
         // String string = "[(12825, 0.4072059690952301), (12398, 0.07033496350049973), (5507, 0.06276247650384903), (12937, 0.040607064962387085), (12757, 0.0352744460105896)]";
-        List<Integer> featureIndexes = ff.row_featureIndex_map.get(ff.filename_row_map.get(path));
-        featureIndexes.forEach(i -> System.out.println(ff.featureIndex_tagname_map.get(i)));
+        // List<Integer> featureIndexes = ff.row_featureIndex_map.get(ff.filename_row_map.get(path));
+        // featureIndexes.forEach(i -> System.out.println(ff.featureIndex_tagname_map.get(i)));
+        System.out.println(ff.findFeatures(path));
     }
 }

@@ -15,15 +15,12 @@ import java.util.Map;
 public class HierarchyGenerator {
     private Map<String,Tagset> tagsets; // All the tagsets derived from LSC data set. (tagsetName, Tagset)
 
-    private static final String manualTagSetsVC = FilepathReader.manualTagSetsVC;
     private static final String manualTagSetsMD = FilepathReader.manualTagSetsMD;
     private static final String outputPath = FilepathReader.LSCHierarchiesOutput;
     
     public HierarchyGenerator() throws IOException, ParseException {
         this.tagsets = new HashMap<>();
-        BufferedReader br = new BufferedReader(new FileReader(new File(manualTagSetsVC)));
-        buildTagsetsMap(br);
-        br = new BufferedReader(new FileReader(new File(manualTagSetsMD)));
+        BufferedReader br = new BufferedReader(new FileReader(new File(manualTagSetsMD)));
         buildTagsetsMap(br);
     }
 

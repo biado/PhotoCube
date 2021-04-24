@@ -58,6 +58,7 @@ public class JsonHierarchyGenerator {
 
     public String buildHierarchyString() {
         // We decided not to have "root" as a tagset, but the children of root as tagsets.
+        // TODO: fix the implementation using the final json file. Note that currently "root/entity" is the root node of all nodes.
         JSTagset[] roots = this.root.getChildren();
         StringBuilder sb = new StringBuilder();
         for (JSTagset jsTagset : roots) {
@@ -83,7 +84,7 @@ public class JsonHierarchyGenerator {
     public void writeToHierarchyFile() {
         System.out.println("Started writing json tags (visual concepts) into the hierarchy file.");
             try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath, true));
                 writer.write(buildHierarchyString());
                 writer.close();
             } catch (IOException e) {
@@ -94,10 +95,10 @@ public class JsonHierarchyGenerator {
     public static void main(String[] args) throws FileNotFoundException {
         JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
         // System.out.println(jshg.buildHierarchyString());
-        // for (JSTagset child : jshg.root.getChildren()) {
-        //     System.out.println(child.getName());
-        // }
-        jshg.writeToHierarchyFile();
+        for (JSTagset child : jshg.root.getChildren()) {
+            System.out.println(child.getName());
+        }
+        // jshg.writeToHierarchyFile();
 
         // Map<String, String> tag_tagset_map = jshg.getTag_tagset_map();
         // tag_tagset_map.forEach((k,v) -> System.out.println(k + " : " + v));
