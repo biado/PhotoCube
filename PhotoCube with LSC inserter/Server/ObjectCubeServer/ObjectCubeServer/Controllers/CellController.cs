@@ -300,7 +300,7 @@ namespace ObjectCubeServer.Controllers
                 var Tagset = context.Tagsets
                     .Include(ts => ts.Tags)
                     //.Include(co => co.ObjectTagRelations)
-                    .Where(ts => ts.Id == parsedAxis.TagsetId)
+                    .Where(ts => ts.Id == parsedAxis.Id)
                     .FirstOrDefault();
                 tags = Tagset.Tags.OrderBy(t => ((AlphanumericalTag)t).Name).ToList();
             }
@@ -317,7 +317,7 @@ namespace ObjectCubeServer.Controllers
         private List<List<CubeObject>> getAllCubeObjectsFrom_Hierarchy_Axis(ParsedAxis parsedAxis)
         {
             List<Node> hierarchyNodes;
-            Node rootNode = fetchWholeHierarchyFromRootNode(parsedAxis.HierarchyNodeId);
+            Node rootNode = fetchWholeHierarchyFromRootNode(parsedAxis.Id);
             hierarchyNodes = rootNode.Children;
             return hierarchyNodes
                 .Select(n => getAllCubeObjectsTaggedWith(extractTagsFromHieararchy(n)) //Map hierarchy nodes to list of cube objects
@@ -332,7 +332,7 @@ namespace ObjectCubeServer.Controllers
         /// <returns></returns>
         private List<List<CubeObject>> getAllCubeObjectsFrom_HierarchyLeaf_Axis(ParsedAxis parsedAxis)
         {
-            Node currentNode = fetchWholeHierarchyFromRootNode(parsedAxis.HierarchyNodeId);
+            Node currentNode = fetchWholeHierarchyFromRootNode(parsedAxis.Id);
             List<CubeObject> cubeObjectsTaggedWithTagFromNode = getAllCubeObjectsTaggedWith(currentNode.TagId);
             return new List<List<CubeObject>>() { cubeObjectsTaggedWithTagFromNode };
         }
