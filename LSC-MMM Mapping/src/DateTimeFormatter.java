@@ -2,6 +2,10 @@ import java.time.LocalDateTime;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
+/**
+ * DateTimeFormatter takes in a timestamp from LSC Metadata, and formats it in different forms.
+ * Used to generate Date and Time related tags.
+ */
 public class DateTimeFormatter {
     private LocalDateTime localDateTime;
 

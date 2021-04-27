@@ -5,6 +5,7 @@ import java.util.Set;
 
 /**
  * Tagset is the entity that we store information of which tags belong to which tagset.
+ * Currently used for the tagsets generated from LSC metadata. (Timezone, Day of week)
  */
 public class Tagset {
     private static final String delimiter = ",,"; // Using 2 commas because 1) semantic_name column has some values that use ',' and 2) timestamp has ':'.
@@ -20,7 +21,7 @@ public class Tagset {
 
     /**
      * Using the given grouping information from the line, fills in the 2 Map fields.
-     * @param line a line from manual grouping files. (We use 2 files - manualTagsetVC and manualTagsetMD)
+     * @param line a line from manual grouping files. (We use manualTagsetMD.csv file)
      */
     public void putLineInMaps(String line) {
         String[] input = line.split(",");

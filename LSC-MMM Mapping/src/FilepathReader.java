@@ -10,9 +10,8 @@ public class FilepathReader {
     public static String LSCVisualConcept;
     public static String LSCMetadata;
     public static String LSCTopic;
-    public static String manualTagSetsVC;
     public static String manualTagSetsMD;
-    public static String DraftJson;
+    public static String JsonHierarchy;
     public static String LSCFilename;
     public static String ImageFeatureTop5;
     public static String FeatureTags;
@@ -34,9 +33,8 @@ public class FilepathReader {
         LSCVisualConcept = prop.getProperty("LSCVisualConcept");
         LSCMetadata = prop.getProperty("LSCMetadata");
         LSCTopic = prop.getProperty("LSCTopic");
-        manualTagSetsVC = prop.getProperty("manualTagSetsVC");
         manualTagSetsMD = prop.getProperty("manualTagSetsMD");
-        DraftJson = prop.getProperty("DraftJson");
+        JsonHierarchy = prop.getProperty("JsonHierarchy");
         LSCFilename = prop.getProperty("LSCFilename");
         ImageFeatureTop5 = prop.getProperty("ImageFeatureTop5");
         FeatureTags = prop.getProperty("FeatureTags");

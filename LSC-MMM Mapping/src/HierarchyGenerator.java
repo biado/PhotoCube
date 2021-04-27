@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * HierarchyGenerator keeps track of all the hierarchies and tagsets derived from the LSC data set.
+ * HierarchyGenerator keeps track of all the hierarchies and tagsets derived from the LSC Metadata.
  */
 public class HierarchyGenerator {
-    private Map<String,Tagset> tagsets; // All the tagsets derived from LSC data set. (tagsetName, Tagset)
+    private Map<String,Tagset> tagsets; // All the tagsets derived from LSC Metadata. (tagsetName, Tagset)
 
     private static final String manualTagSetsMD = FilepathReader.manualTagSetsMD;
     private static final String outputPath = FilepathReader.LSCHierarchiesOutput;
@@ -40,7 +40,7 @@ public class HierarchyGenerator {
     }
 
     /**
-     * Returns all the hierarchy information of all tagsets in the LSC data set.
+     * Returns all the hierarchy information of all tagsets in the LSC Metadata.
      * Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n
      */
     @Override
@@ -57,7 +57,7 @@ public class HierarchyGenerator {
     }
 
     /**
-     * Writes the hierarchy information in the LSC data set to a file.
+     * Writes the hierarchy information in the LSC Metadata to a file.
      * The path to output file is to specified in config.properties file.
      */
     public void writeToHierarchyFile() {
@@ -80,7 +80,7 @@ public class HierarchyGenerator {
     }
 
     /**
-     * Builds and returns the Map of all (tagName, tagsetName) pairs in the LSC data set.
+     * Builds and returns the Map of all (tagName, tagsetName) pairs in the LSC Metadata.
      * @return the Map of (tagName, tagsetName) pairs
      */
     public Map<String,String> buildAndGetTag_Tagset_Map() {

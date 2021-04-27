@@ -10,14 +10,16 @@ import java.util.Map;
 
 import com.google.gson.*;
 
+/**
+ * HierarchyGenerator keeps track of all the hierarchies and tagsets for semantic tags, derived from the ImageNet Shuffle and WordNet.
+ */
 public class JsonHierarchyGenerator {
     private static final String outputPath = FilepathReader.LSCHierarchiesOutput;
-    private static final String jsonFile = FilepathReader.DraftJson;
+    private static final String jsonFile = FilepathReader.JsonHierarchy;
     private Gson g;
     private JSTagset root;
     private Map<String, String> tag_tagset_map; // fx. Alex - People, cat - animal. Note the value is top tagset name.
 
-    
     public JsonHierarchyGenerator() throws FileNotFoundException {
         BufferedReader br = new BufferedReader(new FileReader(new File(jsonFile)));
         this.g = new Gson();
@@ -30,7 +32,7 @@ public class JsonHierarchyGenerator {
      * Returns the tag_tagset_map.
      * Entry examples: (Alex, People) (Cat, Animal)
      * Note that the value is top tagset name.
-     * @return
+     * @return the tag_tagset_map
      */
     public Map<String, String> getTag_tagset_map() {
         if (tag_tagset_map.isEmpty()) {
@@ -48,7 +50,7 @@ public class JsonHierarchyGenerator {
     }
 
     private void buildTagTagsetMapRecursive(String tagsetName, JSTagset current) {
-        this.tag_tagset_map.put(current.getName(), tagsetName);
+        this.tag_tagset_map.put(current.getName().replaceAll("_", " "), tagsetName);
         if (current.getChildren() != null) {
             for (JSTagset child : current.getChildren()) {
                 buildTagTagsetMapRecursive(tagsetName, child);
@@ -56,6 +58,10 @@ public class JsonHierarchyGenerator {
         }
     }
 
+    /**
+     * Returns all the hierarchy information of all tagsets WordNet Hierarchy json file (hierarchy.1.0.json).
+     * Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n
+     */
     public String buildHierarchyString() {
         // We decided not to have "root" as a tagset, but the children of root as tagsets.
         // TODO: fix the implementation using the final json file. Note that currently "root/entity" is the root node of all nodes.
@@ -78,7 +84,7 @@ public class JsonHierarchyGenerator {
     }
 
     /**
-     * Writes the hierarchy information in the LSC data set to a file.
+     * Writes the hierarchy information in the WordNet Hierarchy to a file.
      * The path to output file is to specified in config.properties file.
      */
     public void writeToHierarchyFile() {

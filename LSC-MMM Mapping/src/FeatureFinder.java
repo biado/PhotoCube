@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * FeatureFinder finds the semantic tags associated to the given LSC filename.
+ * Currently it finds max. 5 tags with top probability, duplicates removed.
+ */
 public class FeatureFinder {
     private static final String LSCFilename = FilepathReader.LSCFilename;
     private static final String ImageFeatureTop5 = FilepathReader.ImageFeatureTop5;
@@ -27,6 +31,11 @@ public class FeatureFinder {
         buildFeatureIndexTagnameMap();
     }
 
+    /**
+     * Finds the semantic tags associated to the given LSC filename.
+     * @param filename
+     * @return List of the semantic tags
+     */
     public List<String> findFeatures(String filename) {
         List<String> tagnames = new ArrayList<>();
         int row = -1;
@@ -73,6 +82,7 @@ public class FeatureFinder {
 
     private List<Integer> makeFeatureIndexList(String line) {
         List<Integer> featureIndexes = new ArrayList<>();
+        // It will be much better with regex, but focused on making it work.
         String replacedLine = line.replaceAll("[\\[\\ \\(\\]]", "");
         String[] splitTuples = replacedLine.split("\\)\\,");
         for (String tuple : splitTuples) {
@@ -88,14 +98,14 @@ public class FeatureFinder {
         String line;
         int row = 0;
         while ((line = br.readLine()) != null && !line.equals("")) {
-            String filename = makeImagePath(line);
+            String filename = makeImagePathFromLSCFilenames(line);
             this.filename_row_map.put(filename, row);
             row++;
         }
         br.close();
     }
 
-    private String makeImagePath(String imagePath) {
+    private String makeImagePathFromLSCFilenames(String imagePath) {
         // Omar's lsc2020.txt file contains filepaths looking like this: "./2015-02-23/b00000e.jpg"
         // We want to store only '2015-02-23/b00000e.jpg' in the ImageTags.csv file.
         // Decided to concatenate "[Image Server address]\\lsc2020\\" in the PhotoCube client code.
@@ -109,13 +119,7 @@ public class FeatureFinder {
 
     public static void main(String[] args) throws IOException {
         FeatureFinder ff = new FeatureFinder();
-        String path = Paths.get("2018-05-31/B00015011_21I6X0_20180531_230155E.JPG").toString();
-        // System.out.println(path);
-        // int row = ff.filename_row_map.get(path);
-        // System.out.println(row);
-        // String string = "[(12825, 0.4072059690952301), (12398, 0.07033496350049973), (5507, 0.06276247650384903), (12937, 0.040607064962387085), (12757, 0.0352744460105896)]";
-        // List<Integer> featureIndexes = ff.row_featureIndex_map.get(ff.filename_row_map.get(path));
-        // featureIndexes.forEach(i -> System.out.println(ff.featureIndex_tagname_map.get(i)));
+        String path = Paths.get("2018-05-14\\B00001004_21I6X0_20180514_091713E.JPG").toString();
         System.out.println(ff.findFeatures(path));
     }
 }
