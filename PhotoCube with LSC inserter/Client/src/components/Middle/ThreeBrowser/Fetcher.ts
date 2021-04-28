@@ -151,32 +151,33 @@ export default class Fetcher{
     //Not in use:
     //OTR = ObjectTagRelations
     //Filters instead of getting new.
-    static async FetchCubeObjectsWithTagsOTR(tag1: Tag, tag2: Tag|null, tag3: Tag|null){
-        // Using sessionStorage as cache:
-        let cachedValue = sessionStorage.getItem("cubeobject/fromTagIdWithOTR/" + tag1.Id);
-        let cubeObjectArrResult: CubeObject[];
-        if(cachedValue != null){ //Cache hit!
-            console.log("Cache hit!")
-            cubeObjectArrResult = JSON.parse(cachedValue);
-        }else{  //No cache hit, get data from server:
-            cubeObjectArrResult = await fetch(this.baseUrl + "cubeobject/fromTagIdWithOTR/" + tag1.Id)
-                .then(result => {return result.json();})
-                .then((cubeObjectArr: CubeObject[]) => {
-                    return cubeObjectArr
-                });
-            // Cache data using sessionStorage:
-            sessionStorage.setItem("cubeobject/fromTagIdWithOTR/" + tag1.Id, JSON.stringify(cubeObjectArrResult));
-        }
-        //Filter:
-        if(tag2 != null){ 
-            //Filters out CubeObjects not tagged with tag2:
-            cubeObjectArrResult = cubeObjectArrResult
-                .filter(co => co.ObjectTagRelations!.some(otr => otr.TagId === tag2.Id));
-        }if(tag3 != null){
-            //Filters out CubeObjects not tagged with tag3:
-            cubeObjectArrResult = cubeObjectArrResult
-                .filter(co => co.ObjectTagRelations!.some(otr => otr.TagId === tag3.Id));
-        }
-        return cubeObjectArrResult;
-    }
+    // static async FetchCubeObjectsWithTagsOTR(tag1: Tag, tag2: Tag|null, tag3: Tag|null){
+    //     // Using sessionStorage as cache:
+    //     let cachedValue = sessionStorage.getItem("cubeobject/fromTagIdWithOTR/" + tag1.Id);
+    //     let cubeObjectArrResult: CubeObject[];
+    //     if(cachedValue != null){ //Cache hit!
+    //         console.log("Cache hit!")
+    //         cubeObjectArrResult = JSON.parse(cachedValue);
+    //     }else{  //No cache hit, get data from server:
+    //         cubeObjectArrResult = await fetch(this.baseUrl + "cubeobject/fromTagIdWithOTR/" + tag1.Id)
+    //             .then(result => {return result.json();})
+    //             .then((cubeObjectArr: CubeObject[]) => {
+    //                 return cubeObjectArr
+    //             });
+    //         // Cache data using sessionStorage:
+    //         sessionStorage.setItem("cubeobject/fromTagIdWithOTR/" + tag1.Id, JSON.stringify(cubeObjectArrResult));
+    //     }
+    //     //Filter:
+    //     if(tag2 != null){ 
+    //         //Filters out CubeObjects not tagged with tag2:
+    //         cubeObjectArrResult = cubeObjectArrResult
+    //             .filter(co => co.ObjectTagRelations!.some(otr => otr.TagId === tag2.Id));
+    //     }if(tag3 != null){
+    //         //Filters out CubeObjects not tagged with tag3:
+    //         cubeObjectArrResult = cubeObjectArrResult
+    //             .filter(co => co.ObjectTagRelations!.some(otr => otr.TagId === tag3.Id));
+    //     }
+    //     return cubeObjectArrResult;
+    // }
+    // Commented out because change to CubeObject affected co => co.ObjectTagRelations!.some... part and thus not compiled.
 }
