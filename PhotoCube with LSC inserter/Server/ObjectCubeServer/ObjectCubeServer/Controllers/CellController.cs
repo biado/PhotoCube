@@ -319,7 +319,7 @@ namespace ObjectCubeServer.Controllers
         /// <returns></returns>
         private List<List<CubeObject>> getAllCubeObjectsFrom_Hierarchy_Axis(ParsedAxis parsedAxis)
         {
-            Node rootNode = fetchWholeHierarchyFromRootNode(parsedAxis.HierarchyNodeId);
+            Node rootNode = fetchWholeHierarchyFromRootNode(parsedAxis.Id);
             List<Node> hierarchyNodes = rootNode.Children;
             return hierarchyNodes
                 .Select(n => getAllCubeObjectsTaggedWith(extractTagsFromHieararchy(n)) //Map hierarchy nodes to list of cube objects
