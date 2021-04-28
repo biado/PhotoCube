@@ -9,12 +9,12 @@ namespace ObjectCubeServer.Models.PublicClasses
     /// Represents an Object in the M^3 datamodel. (Simplified public model)
     /// Has an Id (CubeObjectId) and a FileURI.
     /// </summary>
-    public class CubeObjectFileURI
+    public class PublicCubeObject
     {
         public int Id { get; set; }
         public string FileURI { get; set; }
 
-        public CubeObjectFileURI(int id, string fileUri)
+        public PublicCubeObject(int id, string fileUri)
         {
             this.Id = id;
             this.FileURI = fileUri;
