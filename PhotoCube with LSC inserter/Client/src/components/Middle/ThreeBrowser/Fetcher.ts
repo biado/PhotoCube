@@ -42,10 +42,8 @@ export default class Fetcher{
         console.log(axis.TitleString);
         return JSON.stringify( 
             {
-                AxisDirection: axis.AxisDirection,
                 AxisType: axis.AxisType,
-                TagsetId: axis.TagsetId,
-                HierarchyNodeId: axis.RootNodeId
+                Id: axis.Id,
             } 
         );
     }
