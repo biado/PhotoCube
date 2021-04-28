@@ -1,20 +1,20 @@
 import React, { Component, SyntheticEvent } from 'react';
 import '../../../css/GridBrowser.css';
-import CubeObjectFileURI from '../ThreeBrowser/CubeObjectFileURI';
+import CubeObject from '../ThreeBrowser/CubeObject';
 import Fetcher from '../ThreeBrowser/Fetcher';
 import { BrowsingModes } from '../../RightDock/BrowsingModeChanger';
 
 /**
  * The GridBrowser allows the user to browse a collection of photos side by side in a grid to get an overview.
- * this.props.cubeObjectFileURIs contains the cube object which photos are shown.
+ * this.props.cubeObjects contains the cube object which photos are shown.
  * this.props.onBrowsingModeChanged is a callback funtion that tells parent component that the browsing mode has been changed.
  */
 export default class GridBrowser extends React.Component<{
-    cubeObjectFileURIs: CubeObjectFileURI[],
+    cubeObjects: CubeObject[],
     onBrowsingModeChanged: (browsingMode: BrowsingModes) => void
 }>{
     render(){
-        let images = this.props.cubeObjectFileURIs.map((co, index) => <img 
+        let images = this.props.cubeObjects.map((co, index) => <img 
             key={"image-"+index} 
             className="image" 
             src={process.env.REACT_APP_IMAGE_SERVER + co.FileURI}

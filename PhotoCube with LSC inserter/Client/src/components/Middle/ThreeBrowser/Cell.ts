@@ -1,4 +1,4 @@
-import CubeObjectFileURI from './CubeObjectFileURI';
+import CubeObject from './CubeObject';
 import * as THREE from 'three';
 import Position from './Position';
 
@@ -12,7 +12,7 @@ export default interface ICell{
     z: number;
 
     //Data nessesary for cube to get own data.
-    CubeObjectFileURIs: CubeObjectFileURI[];
+    CubeObjects: CubeObject[];
 }
 
 /**
@@ -29,7 +29,7 @@ export default class Cell{
     z: number;
 
     //Data nessesary for cube to get own data.
-    CubeObjectFileURIs: CubeObjectFileURI[];
+    CubeObjects: CubeObject[];
     threeObject: THREE.Mesh | null;
 
     imageIndex: number = 0;
@@ -38,7 +38,7 @@ export default class Cell{
         scene:THREE.Scene, 
         textureLoader:THREE.TextureLoader, 
         addCubeCallback: (imageUrl: string, aPosition: Position) => THREE.Mesh, aPosition:Position, 
-        cubeObjectData: CubeObjectFileURI[]
+        cubeObjectData: CubeObject[]
         ){
         
         this.scene = scene;
@@ -47,10 +47,10 @@ export default class Cell{
         this.x = aPosition.x;
         this.y = aPosition.y;
         this.z = aPosition.z;
-        this.CubeObjectFileURIs = cubeObjectData;
+        this.CubeObjects = cubeObjectData;
         if(cubeObjectData.length > 0){
-            this.threeObject = addCubeCallback(process.env.REACT_APP_IMAGE_SERVER + this.CubeObjectFileURIs[0].FileURI, {x: this.x, y: this.y, z:this.z});
-            this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.CubeObjectFileURIs.length, cubeObjectFileURIs: this.CubeObjectFileURIs };
+            this.threeObject = addCubeCallback(process.env.REACT_APP_IMAGE_SERVER + this.CubeObjects[0].FileURI, {x: this.x, y: this.y, z:this.z});
+            this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.CubeObjects.length, cubeObjects: this.CubeObjects };
             //this.ToggleSwitchingImagesEveryXms(10000);
         }
         else{
