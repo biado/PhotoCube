@@ -259,12 +259,12 @@ namespace ConsoleAppForInteractingWithDatabase
                                     tagset = createNewTagset(tagsetName, tagsets);
 
                                     //Also creates a tag with same name:
-                                    Tag tagWithSameNameAsTagset =
+                                    /*Tag tagWithSameNameAsTagset =
                                         DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset,
                                             tagsetName);
                                     Dictionary<int, Tag> tagWithSameNameAsTagsetList = new Dictionary<int, Tag>();
                                     tagWithSameNameAsTagsetList[tagset.Id] = tagWithSameNameAsTagset;
-                                    tags[tagsetName] = tagWithSameNameAsTagsetList;
+                                    tags[tagsetName] = tagWithSameNameAsTagsetList;*/
                                 }
                                 else
                                 {
