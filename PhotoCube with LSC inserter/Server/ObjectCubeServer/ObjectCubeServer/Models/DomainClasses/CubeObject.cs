@@ -28,10 +28,10 @@ namespace ObjectCubeServer.Models.DomainClasses
 
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }
 
-        // To change the domain model cubeObject to public model cubeobjectFileURI
-        public CubeObjectFileURI ToCubeObjectFileUri()
+        // To change the domain model cubeObject to public model cubeObject
+        public PublicCubeObject GetPublicCubeObject()
         {
-            return new CubeObjectFileURI(this.Id, this.FileURI);
+            return new PublicCubeObject(this.Id, this.FileURI);
         }
     }
 }

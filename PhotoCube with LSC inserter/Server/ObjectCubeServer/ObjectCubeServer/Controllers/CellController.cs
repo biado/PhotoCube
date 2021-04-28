@@ -185,11 +185,11 @@ namespace ObjectCubeServer.Controllers
                 }
             }
 
-            // Convert cells to simpleFileURICells
-            List<SimpleFileURICell> simpleCells = cells.Select(c => c.ToSimpleFileURICell()).ToList();
+            // Convert cells to publicCells
+            List<PublicCell> publicCells = cells.Select(c => c.GetPublicCell()).ToList();
 
             //Return OK with json result:
-            return Ok(JsonConvert.SerializeObject(simpleCells,
+            return Ok(JsonConvert.SerializeObject(publicCells,
                 new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
         }
 
