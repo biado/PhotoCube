@@ -11,9 +11,8 @@ namespace ObjectCubeServer.Models.DomainClasses
     /// </summary>
     public class ParsedAxis
     {
-        public string AxisDirection { get; set; }
         public string AxisType { get; set; }
-        public int TagsetId { get; set; }
-        public int HierarchyNodeId { get; set; }
+        // Either Tagset or Node id
+        public int Id { get; set; }
     }
 }

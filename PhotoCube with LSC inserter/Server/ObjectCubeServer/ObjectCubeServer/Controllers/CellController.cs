@@ -303,7 +303,8 @@ namespace ObjectCubeServer.Controllers
             {
                 var Tagset = context.Tagsets
                     .Include(ts => ts.Tags)
-                    .FirstOrDefault(ts => ts.Id == parsedAxis.TagsetId);
+                    .FirstOrDefault(ts => ts.Id == parsedAxis.Id);
+
                 tags = Tagset.Tags.OrderBy(t => ((AlphanumericalTag)t).Name).ToList();
             }
             return tags
@@ -333,7 +334,7 @@ namespace ObjectCubeServer.Controllers
         /// <returns></returns>
         private List<List<CubeObject>> getAllCubeObjectsFrom_HierarchyLeaf_Axis(ParsedAxis parsedAxis)
         {
-            Node currentNode = fetchWholeHierarchyFromRootNode(parsedAxis.HierarchyNodeId);
+            Node currentNode = fetchWholeHierarchyFromRootNode(parsedAxis.Id);
             List<CubeObject> cubeObjectsTaggedWithTagFromNode = getAllCubeObjectsTaggedWith(currentNode.TagId);
             return new List<List<CubeObject>>() { cubeObjectsTaggedWithTagFromNode };
         }
