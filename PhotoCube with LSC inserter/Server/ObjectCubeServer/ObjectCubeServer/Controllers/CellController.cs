@@ -305,7 +305,8 @@ namespace ObjectCubeServer.Controllers
                     .Include(ts => ts.Tags)
                     .FirstOrDefault(ts => ts.Id == parsedAxis.Id);
 
-                tags = Tagset.Tags.OrderBy(t => ((AlphanumericalTag)t).Name).ToList();
+                Tagset.Tags.Sort();
+                tags = Tagset.Tags.ToList();
             }
             return tags
                 .Select(t => getAllCubeObjectsTaggedWith(t.Id))
