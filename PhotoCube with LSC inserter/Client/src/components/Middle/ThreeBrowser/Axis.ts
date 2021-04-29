@@ -85,8 +85,8 @@ export default class Axis{
         );
         this.LabelThreeObjects = this.Tags.map((tag,index) => {
             return addTextCallback(
-                tag.Name,     //Label name
-                {             //Position
+                tag.Name.toString(),     //Label name
+                {                        //Position
                     x:this.AxisDirection === AxisDirection.X ? index + 1 : 0,
                     y:this.AxisDirection === AxisDirection.Y ? index + 1 : 0,
                     z:this.AxisDirection === AxisDirection.Z ? index + 1 : 0,

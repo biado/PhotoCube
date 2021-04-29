@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ObjectCubeServer.Models.DomainClasses.TagTypes
 {
     [Table("time_tags")]
-    public class TimeTag : Tag
+    public class TimeTag : Tag, IComparable
     {
         [Column("name", TypeName = "Time")]
         public TimeSpan Name { get; set; }
@@ -16,6 +17,11 @@ namespace ObjectCubeServer.Models.DomainClasses.TagTypes
         public string GetTagName()
         {
             return Name.Hours + ":" + Name.Minutes;
+        }
+
+        public int CompareTo(object obj)
+        {
+            return Name.CompareTo(((TimeTag)obj).Name);
         }
     }
 }
