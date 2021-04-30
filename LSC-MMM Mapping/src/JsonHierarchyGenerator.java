@@ -6,7 +6,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.*;
 
@@ -42,11 +44,8 @@ public class JsonHierarchyGenerator {
     }
 
     private void buildTagTagsetMap() {
-        JSTagset[] roots = this.root.getChildren();
-        for (JSTagset jsTagset : roots) {
-            String tagsetName = jsTagset.getName();
-            buildTagTagsetMapRecursive(tagsetName, jsTagset);
-        }
+        String tagsetName = this.root.getName();
+        buildTagTagsetMapRecursive(tagsetName, this.root);
     }
 
     private void buildTagTagsetMapRecursive(String tagsetName, JSTagset current) {
@@ -63,22 +62,22 @@ public class JsonHierarchyGenerator {
      * Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n
      */
     public String buildHierarchyString() {
-        // We decided not to have "root" as a tagset, but the children of root as tagsets.
-        // TODO: fix the implementation using the final json file. Note that currently "root/entity" is the root node of all nodes.
-        JSTagset[] roots = this.root.getChildren();
+        // We decided to have "entity" as a tagset/rootNode of all tags.
+        Set<String> hierarchyStrings = new HashSet<>();
+        buildHierarchyStringRecursive(hierarchyStrings, this.root.getName(), this.root);
         StringBuilder sb = new StringBuilder();
-        for (JSTagset jsTagset : roots) {
-            String tagsetName = jsTagset.getName();
-            buildHierarchyStringRecursive(sb, tagsetName, jsTagset);
+        for (String hierarchyString : hierarchyStrings) {
+            sb.append(hierarchyString);
         }
         return sb.toString();
     }
 
-    private void buildHierarchyStringRecursive(StringBuilder sb, String tagsetName, JSTagset current) {
+    private void buildHierarchyStringRecursive(Set<String> hierarchyStrings, String tagsetName, JSTagset current) {
         if (current.getChildren() != null) {
-            current.getHierarchyString(sb, tagsetName);
+            String hierarchyString = current.getHierarchyString(tagsetName);
+            hierarchyStrings.add(hierarchyString);
             for (JSTagset child : current.getChildren()) {
-                buildHierarchyStringRecursive(sb, tagsetName, child);
+                buildHierarchyStringRecursive(hierarchyStrings, tagsetName, child);
             }
         }
     }
@@ -98,12 +97,36 @@ public class JsonHierarchyGenerator {
             }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
-        // System.out.println(jshg.buildHierarchyString());
-        for (JSTagset child : jshg.root.getChildren()) {
-            System.out.println(child.getName());
+    public String findNumDuplicateTags() {
+        Set<String> tags = new HashSet<>();
+        StringBuilder sb = new StringBuilder();
+        findNumDuplicateTagsRecursive(sb, tags, "root", this.root);
+        return sb.toString();
+    }
+
+    private void findNumDuplicateTagsRecursive(StringBuilder sb, Set<String> tags, String parentName, JSTagset current) {
+        String currentTagName = current.getName();
+        if(tags.contains(currentTagName)) {
+            sb.append(parentName + " : " + currentTagName + "\n");
+        } else {
+            tags.add(currentTagName);
         }
+        if (current.getChildren() != null) {
+            for (JSTagset child : current.getChildren()) {
+                findNumDuplicateTagsRecursive(sb, tags, currentTagName, child);
+            }
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
+        BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\lsc2020\\tags-and-hierarchies\\duplicatesFromJson.txt"));
+        writer.write(jshg.findNumDuplicateTags());
+        writer.close();
+        // System.out.println(jshg.buildHierarchyString());
+        // for (JSTagset child : jshg.root.getChildren()) {
+        //     System.out.println(child.getName());
+        // }
         // jshg.writeToHierarchyFile();
 
         // Map<String, String> tag_tagset_map = jshg.getTag_tagset_map();

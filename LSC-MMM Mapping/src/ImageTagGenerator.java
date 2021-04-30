@@ -221,7 +221,7 @@ public class ImageTagGenerator {
         System.out.println("Started writing tags into the image tag file.");
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
-                writer.write("FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)\n"); // File format
+                writer.write("FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)\r\n"); // File format
                 writer.write(this.solutionsInFront.toString());
                 writer.write(this.othersAtBack.toString());
                 writer.close();

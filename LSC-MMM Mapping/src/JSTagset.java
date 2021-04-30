@@ -32,7 +32,8 @@ public class JSTagset {
      * Returns the hierarchy information from this tagset as String.
      * Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n
      */
-    public void getHierarchyString(StringBuilder sb, String tagsetName) {
+    public String getHierarchyString(String tagsetName) {
+        StringBuilder sb = new StringBuilder();
         // case: leaf -> no hierarchy starting from this jsTagset
         if (this.children != null) { // case: parentNode -> We want to build a hierarchy string like TagsetName,,HierarchyName(==TagsetName),,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n
             sb.append(tagsetName + delimiter + tagsetName + delimiter + this.name.replaceAll("_", " "));
@@ -41,5 +42,6 @@ public class JSTagset {
             }
             sb.append("\n");
         }
+        return sb.toString();
     }
 }

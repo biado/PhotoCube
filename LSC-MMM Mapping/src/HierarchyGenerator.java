@@ -48,7 +48,7 @@ public class HierarchyGenerator {
         // build string with proper format
         // # Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)
         StringBuilder sb = new StringBuilder();
-        sb.append("# Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n");
+        sb.append("# Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\r\n");
         for (String tagsetName : tagsets.keySet()) {
             sb.append(tagsets.get(tagsetName));
         }
