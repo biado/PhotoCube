@@ -5,10 +5,12 @@
 public class JSTagset {
     private static final String delimiter = ",,"; // Using 2 commas because 1) semantic_name column has some values that use ',' and 2) timestamp has ':'.
     private String name;
+    private int id; // -1 if this tag is not used as actual tag for an image
     private JSTagset[] children;
 
-    public JSTagset(String name, JSTagset[] children) {
-        this.name = name;
+    public JSTagset(String name, int id, JSTagset[] children) {
+        this.name = name; // Gson doesn't seem to use this constructor, so "_" in the name has to be handled in the hierarchy string and image tag.
+        this.id = id;
         this.children = children;
     }
 
@@ -21,11 +23,27 @@ public class JSTagset {
     }
 
     /**
+     * Sets the name as the given parameter
+     * @param newName
+     */
+    public void setName(String newName) {
+        this.name = newName;
+    }
+
+    /**
      * Returns the children of this tagset
      * @return the children of this tagset
      */
     public JSTagset[] getChildren() {
         return this.children;
+    }
+
+    /**
+     * Returns the id of this tagset
+     * @return the id of this tagset
+     */
+    public int getId() {
+        return this.id;
     }
     
     /**

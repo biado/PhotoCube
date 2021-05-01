@@ -6,8 +6,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * FeatureFinder finds the semantic tags associated to the given LSC filename.
@@ -22,13 +24,16 @@ public class FeatureFinder {
     private Map<Integer, List<Integer>> row_featureIndex_map; // row: line index for filename (0 based), featureIndex: index for feature (0 based)
     private Map<Integer, String> featureIndex_tagname_map; // featureIndex: index for feature (0 based), tagname: name of the tag (only the first word in the lines of FeatureTags file)
 
-    public FeatureFinder() throws IOException {
+    private Set<String> homonyms;
+
+    public FeatureFinder(Set<String> homonyms) throws IOException {
         filename_row_map = new HashMap<>();
         buildFilenameRowMap();
         row_featureIndex_map = new HashMap<>();
         buildRowFeatureIndexMap();
         featureIndex_tagname_map = new HashMap<>();
         buildFeatureIndexTagnameMap();
+        this.homonyms = homonyms;
     }
 
     /**
@@ -40,13 +45,16 @@ public class FeatureFinder {
         List<String> tagnames = new ArrayList<>();
         int row = -1;
         if (filename_row_map.containsKey(filename)) {
-            row = filename_row_map.get(filename);
+            row = filename_row_map.get(filename); // Find the row of filename
         }
         if (row != -1) {
-            List<Integer> featureIndex = (row_featureIndex_map.containsKey(row)) ? row_featureIndex_map.get(row) : new ArrayList<>();
-            for (int index : featureIndex) {
+            List<Integer> featureIndex = (row_featureIndex_map.containsKey(row)) ? row_featureIndex_map.get(row) : new ArrayList<>(); // get the list of featureIndex
+            for (int index : featureIndex) { // for each index number, find the tagname
                 String tagname = featureIndex_tagname_map.get(index);
-                if (tagname != null) {
+                if (tagname != null) { // we found the tagname for the index number
+                    if (homonyms.contains(tagname)) { // There are multiple tags of different meanings for this tagname
+                        tagname = tagname + "(" + index + ")"; // Handle duplicates by concatenating id(=feature index) to the tagname
+                    }
                     tagnames.add(tagname);
                 }
             }
@@ -118,8 +126,8 @@ public class FeatureFinder {
     }
 
     public static void main(String[] args) throws IOException {
-        FeatureFinder ff = new FeatureFinder();
-        String path = Paths.get("2018-05-14\\B00001004_21I6X0_20180514_091713E.JPG").toString();
+        FeatureFinder ff = new FeatureFinder(new HashSet<>());
+        String path = Paths.get("2016-09-25/20160925_150243_000.jpg").toString();
         System.out.println(ff.findFeatures(path));
     }
 }

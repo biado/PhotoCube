@@ -56,7 +56,7 @@ public class ImageTagGenerator {
         JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
         jshg.writeToHierarchyFile();
         this.json_tag_tagset_map = jshg.getTag_tagset_map();
-        this.featureFinder = new FeatureFinder();
+        this.featureFinder = new FeatureFinder(jshg.getHomonyms());
         this.solutionsInFront = new StringBuilder();
         this.othersAtBack = new StringBuilder();
         buildFilenameSet();
@@ -96,6 +96,7 @@ public class ImageTagGenerator {
     }
     
     private void buildStrings() throws IOException, ParseException {
+        System.out.println("Started building image tag strings.");
         for (String filename : this.filenames) {
             StringBuilder sb = getCorrectStringBuilder(filename); // Make sure to put the solution images in the beginning of the output file.
             // File format: "FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)"
@@ -127,9 +128,9 @@ public class ImageTagGenerator {
         for (String tagname : tagnames) {
             concepts.add(tagname);
         }
-        // then look up the tagset and add to sb.
+        // then look up the tagsetName and add to sb.
         for (String tagname : concepts) {
-            if (json_tag_tagset_map.containsKey(tagname)) {
+            if (json_tag_tagset_map.containsKey(tagname)) { // Only the tag that appears in the json hierarchy file is tagged to the image.
                 String tagsetName = json_tag_tagset_map.get(tagname);
                 sb.append(delimiter + tagsetName + delimiter + tagname);
             }
@@ -236,7 +237,7 @@ public class ImageTagGenerator {
             // System.out.println(pathString);
             ImageTagGenerator itg = new ImageTagGenerator();
             // itg.writeToImageTagFile();
-            String path = Paths.get("2016-08-13/20160813_223746_000.jpg").toString();
+            String path = Paths.get("2016-09-25/20160925_150243_000.jpg").toString();
             System.out.println(itg.makeTagsFromVisualConcept(path));
             
             System.out.println("Done.");
