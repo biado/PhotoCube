@@ -1,5 +1,5 @@
 import Axis from "./Axis";
-import CubeObjectFileURI from './CubeObjectFileURI';
+import CubeObject from './CubeObject';
 import Tag from "./Tag";
 import { Filter } from "../../LeftDock/FacetedSearcher";
 
@@ -42,10 +42,8 @@ export default class Fetcher{
         console.log(axis.TitleString);
         return JSON.stringify( 
             {
-                AxisDirection: axis.AxisDirection,
                 AxisType: axis.AxisType,
-                TagsetId: axis.TagsetId,
-                HierarchyNodeId: axis.RootNodeId
+                Id: axis.Id,
             } 
         );
     }
@@ -133,21 +131,21 @@ export default class Fetcher{
     static async FetchCubeObjectsWithTag(tag: Tag){
         return await fetch(this.baseUrl + "cubeobject/fromTagId/" + tag.Id)
             .then(result => {return result.json();})
-            .then((cubeObjectArr: CubeObjectFileURI[]) => {return cubeObjectArr});
+            .then((cubeObjectArr: CubeObject[]) => {return cubeObjectArr});
     }
 
     //Not in use:
     static async FetchCubeObjectsWith2Tags(tag1: Tag, tag2: Tag){
         return await fetch(this.baseUrl + "cubeobject/from2TagIds/" + tag1.Id + "/" + tag2.Id)
             .then(result => {return result.json();})
-            .then((cubeObjectArr: CubeObjectFileURI[]) => {return cubeObjectArr});
+            .then((cubeObjectArr: CubeObject[]) => {return cubeObjectArr});
     }
 
     //Not in use:
     static async FetchCubeObjectsWith3Tags(tag1: Tag, tag2: Tag, tag3: Tag){
         return await fetch(this.baseUrl + "cubeobject/from3TagIds/" + tag1.Id + "/" + tag2.Id + "/" + tag3.Id)
             .then(result => {return result.json();})
-            .then((cubeObjectArr: CubeObjectFileURI[]) => {return cubeObjectArr});
+            .then((cubeObjectArr: CubeObject[]) => {return cubeObjectArr});
     }
 
     //Not in use:

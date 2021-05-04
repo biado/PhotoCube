@@ -16,11 +16,11 @@ namespace ObjectCubeServer.Models.DomainClasses
         public int z { get; set; }
         public List<CubeObject> CubeObjects { get; set; }
 
-        // To change the domain model cell to public model simpleFileURICell
-        public SimpleFileURICell ToSimpleFileURICell()
+        // To change the domain model cell to public model cell
+        public PublicCell GetPublicCell()
         {
-            List<CubeObjectFileURI> cubeObjectFileURIs = CubeObjects.Select(co => co.ToCubeObjectFileUri()).ToList();
-            return new SimpleFileURICell(this.x, this.y, this.z, cubeObjectFileURIs);
+            List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).ToList();
+            return new PublicCell(this.x, this.y, this.z, cubeObjects);
         }
     }
 }

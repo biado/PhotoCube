@@ -10,7 +10,7 @@ import Hierarchy from './Hierarchy';
 import Tagset from './Tagset';
 import HierarchyNode from './HierarchyNode';
 import { Raycaster } from 'three';
-import CubeObjectFileURI from './CubeObjectFileURI';
+import CubeObject from './CubeObject';
 import ICell from './Cell';
 import { BrowsingState } from './BrowsingState';
 import PickedDimension from '../../RightDock/PickedDimension';
@@ -27,8 +27,8 @@ export default class ThreeBrowser extends React.Component<{
         //Props contract:
         onFileCountChanged: (fileCount: number) => void,
         previousBrowsingState: BrowsingState|null,
-        onOpenCubeInCardMode: (cubeObjectFileURIs: CubeObjectFileURI[]) => void,
-        onOpenCubeInGridMode: (cubeObjectFileURIs: CubeObjectFileURI[]) => void,
+        onOpenCubeInCardMode: (cubeObjects: CubeObject[]) => void,
+        onOpenCubeInGridMode: (cubeObjects: CubeObject[]) => void,
         filters: Filter[]
     }>{
 
@@ -87,7 +87,7 @@ export default class ThreeBrowser extends React.Component<{
     //Used to find IntersectedObjects with this.raycaster:
     private boxMeshes: THREE.Mesh[] = [];
     private textMeshes: THREE.Mesh[] = [];
-    private contextMenuCubeObjects: CubeObjectFileURI[] = [];
+    private contextMenuCubeObjects: CubeObject[] = [];
 
     //Reusing THREE Geometries and Materials to save memory, to speed things up, and to dispose them after:
     private boxGeometry : THREE.BoxGeometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -302,7 +302,7 @@ export default class ThreeBrowser extends React.Component<{
             conMenu!.style.top = y;
             conMenu!.style.left = x;
             this.setState({showContextMenu: true});
-            this.contextMenuCubeObjects = intersects[0].object.userData.cubeObjectFileURIs;
+            this.contextMenuCubeObjects = intersects[0].object.userData.cubeObjects;
         }
         return false;
     }
@@ -565,28 +565,28 @@ export default class ThreeBrowser extends React.Component<{
         if(xDefined && yDefined && zDefined){   //X and Y and Z
             //Render all three axis
             let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, this.zAxis, this.props.filters);
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjectFileURIs)));
+            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined && yDefined){         //X and Y
             let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, null, this.props.filters);
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjectFileURIs)));
+            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined && zDefined){         //X and Z
             let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, null, this.zAxis, this.props.filters);
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjectFileURIs)));
+            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(yDefined && zDefined){         //Y and Z
             let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, this.yAxis, this.zAxis, this.props.filters);
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjectFileURIs)));
+            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined){                     //X
             let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, null, null, this.props.filters);
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjectFileURIs)));
+            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(yDefined){                     //Y
             let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, this.yAxis, null, this.props.filters);
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjectFileURIs)));
+            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(zDefined){                     //Z
             let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, null, this.zAxis, this.props.filters);
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjectFileURIs)));
+            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         } else if(!xDefined && !yDefined && !zDefined){
             let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, null, null, this.props.filters);
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjectFileURIs)));
+            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }
 
         this.cells = newCells;
@@ -596,7 +596,7 @@ export default class ThreeBrowser extends React.Component<{
         //Update filecount:
         let uniquePhotos: Set<string> = new Set();
         this.cells.forEach((cell: Cell) => 
-            cell.CubeObjectFileURIs.forEach(co => uniquePhotos.add(co.FileURI)));
+            cell.CubeObjects.forEach(co => uniquePhotos.add(co.FileURI)));
         this.props.onFileCountChanged(uniquePhotos.size);
     }
 
@@ -646,8 +646,8 @@ export default class ThreeBrowser extends React.Component<{
      */
     public GetUniqueCubeObjects(){
         let uniqueCubeObjectIds = new Set<number>();
-        let listOfUniqueCubeObjects : CubeObjectFileURI[] = [];
-        this.cells.forEach(c => c.CubeObjectFileURIs.forEach(co => {
+        let listOfUniqueCubeObjects : CubeObject[] = [];
+        this.cells.forEach(c => c.CubeObjects.forEach(co => {
             if(!uniqueCubeObjectIds.has(co.Id)){
                 listOfUniqueCubeObjects.push(co);
                 uniqueCubeObjectIds.add(co.Id);

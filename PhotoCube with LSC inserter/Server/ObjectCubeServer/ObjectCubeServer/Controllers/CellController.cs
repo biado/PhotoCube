@@ -185,11 +185,11 @@ namespace ObjectCubeServer.Controllers
                 }
             }
 
-            // Convert cells to simpleFileURICells
-            List<SimpleFileURICell> simpleCells = cells.Select(c => c.ToSimpleFileURICell()).ToList();
+            // Convert cells to publicCells
+            List<PublicCell> publicCells = cells.Select(c => c.GetPublicCell()).ToList();
 
             //Return OK with json result:
-            return Ok(JsonConvert.SerializeObject(simpleCells,
+            return Ok(JsonConvert.SerializeObject(publicCells,
                 new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
         }
 
@@ -303,8 +303,10 @@ namespace ObjectCubeServer.Controllers
             {
                 var Tagset = context.Tagsets
                     .Include(ts => ts.Tags)
-                    .FirstOrDefault(ts => ts.Id == parsedAxis.TagsetId);
-                tags = Tagset.Tags.OrderBy(t => ((AlphanumericalTag)t).Name).ToList();
+                    .FirstOrDefault(ts => ts.Id == parsedAxis.Id);
+
+                Tagset.Tags.Sort();
+                tags = Tagset.Tags.ToList();
             }
             return tags
                 .Select(t => getAllCubeObjectsTaggedWith(t.Id))
@@ -318,7 +320,7 @@ namespace ObjectCubeServer.Controllers
         /// <returns></returns>
         private List<List<CubeObject>> getAllCubeObjectsFrom_Hierarchy_Axis(ParsedAxis parsedAxis)
         {
-            Node rootNode = fetchWholeHierarchyFromRootNode(parsedAxis.HierarchyNodeId);
+            Node rootNode = fetchWholeHierarchyFromRootNode(parsedAxis.Id);
             List<Node> hierarchyNodes = rootNode.Children;
             return hierarchyNodes
                 .Select(n => getAllCubeObjectsTaggedWith(extractTagsFromHieararchy(n)) //Map hierarchy nodes to list of cube objects
@@ -333,7 +335,7 @@ namespace ObjectCubeServer.Controllers
         /// <returns></returns>
         private List<List<CubeObject>> getAllCubeObjectsFrom_HierarchyLeaf_Axis(ParsedAxis parsedAxis)
         {
-            Node currentNode = fetchWholeHierarchyFromRootNode(parsedAxis.HierarchyNodeId);
+            Node currentNode = fetchWholeHierarchyFromRootNode(parsedAxis.Id);
             List<CubeObject> cubeObjectsTaggedWithTagFromNode = getAllCubeObjectsTaggedWith(currentNode.TagId);
             return new List<List<CubeObject>>() { cubeObjectsTaggedWithTagFromNode };
         }
