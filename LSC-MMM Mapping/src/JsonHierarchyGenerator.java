@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,47 +21,66 @@ import com.google.gson.*;
  */
 public class JsonHierarchyGenerator {
     private static final String outputPath = FilepathReader.LSCHierarchiesOutput;
+    private static final String jsonOutput = FilepathReader.UniqueTagHierarchy;
     private static final String jsonFile = FilepathReader.JsonHierarchy;
     private Gson g;
     private JSTagset root;
     private Map<String, String> tag_tagset_map; // fx. Alex - People, cat - animal. Note the value is top tagset name. No "_" in the tagName.
-    private Map<String, List<JSTagset>> tagName_duplicateTagsetList_map; // fx. (white, < white-person, white-color ...>) as an entry. No "_" in the tagName.
-    private Set<String> homonyms; // If there were more than 1 entry in tagName_duplicateTagsetList_map, we put the tagname here to check if it had duplicates. 'white', not 'white(id)'. No "_" in the tagName.
+    private Map<String, Set<JSTagset>> tagName_duplicateTagsetSet_map; // fx. (white, < white-person, white-color ...>) as an entry. No "_" in the tagName.
+    private Set<String> homonyms; // If there were more than 1 entry in tagName_duplicateTagsetSet_map, we put the tagname here to check if it had duplicates. 'white', not 'white(id)'. No "_" in the tagName.
 
     public JsonHierarchyGenerator() throws FileNotFoundException {
         BufferedReader br = new BufferedReader(new FileReader(new File(jsonFile)));
         this.g = new Gson();
         this.root = g.fromJson(br, JSTagset.class);
-        this.tagName_duplicateTagsetList_map = new HashMap<>();
-        System.out.println("Started building tagname - List<JSTagset> map.");
-        buildTagNameDuplicateTagsetListMapRecursive(root);
+        this.tagName_duplicateTagsetSet_map = new HashMap<>();
+        System.out.println("Started building tagname - Set<JSTagset> map.");
+        buildTagNameDuplicateTagsetsMap();
         this.homonyms = new HashSet<>();
         changeTagNameOfHomonyms();
         this.tag_tagset_map = new HashMap<>();
         buildTagTagsetMap();
     }
 
-    private void buildTagNameDuplicateTagsetListMapRecursive(JSTagset current) {
-        // traverse root tree and put each JStagsets into tagname-tagsetList map
+    public void writeToJsonFile() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter writer = new FileWriter(jsonOutput)) {
+            gson.toJson(this.root, writer);
+        } catch (IOException e) {
+            e.printStackTrace();;
+        }
+    }
+
+    private void buildTagNameDuplicateTagsetsMap() {
+        // root - [timezone, day of week, enity]
+        // We do not include "root"
+        for (JSTagset child : this.root.getChildren()) {
+            buildTagNameDuplicateTagsetsMapRecursive(child);
+        }
+    }
+    private void buildTagNameDuplicateTagsetsMapRecursive(JSTagset current) {
+        // traverse children of "root" tree and put each JStagsets into tagname-tagsetSet map
+        // This method also cleans up the name, such that it replaces "_" to " ".
         String tagsetName = current.getName().replaceAll("_", " ");
+        current.setName(tagsetName);
         putInTagNameDuplicateTagsetListMap(tagsetName, current);
         if (current.getChildren() != null) {
             for (JSTagset child : current.getChildren()) {
-                buildTagNameDuplicateTagsetListMapRecursive(child);
+                buildTagNameDuplicateTagsetsMapRecursive(child);
             }
         }
     }
 
     private void putInTagNameDuplicateTagsetListMap(String tagsetName, JSTagset current) {
-        List<JSTagset> tagsets = (this.tagName_duplicateTagsetList_map.containsKey(tagsetName)) ? tagName_duplicateTagsetList_map.get(tagsetName) : new ArrayList<>();
+        Set<JSTagset> tagsets = (this.tagName_duplicateTagsetSet_map.containsKey(tagsetName)) ? tagName_duplicateTagsetSet_map.get(tagsetName) : new HashSet<>();
         tagsets.add(current);
-        tagName_duplicateTagsetList_map.put(tagsetName, tagsets);
+        tagName_duplicateTagsetSet_map.put(tagsetName, tagsets);
     }
 
     private void changeTagNameOfHomonyms() {
         System.out.println("Started making duplicate tag names unique, by concatenating id to the name.");
-        for (String tagName : tagName_duplicateTagsetList_map.keySet()) {
-            List<JSTagset> tagsets = tagName_duplicateTagsetList_map.get(tagName);
+        for (String tagName : tagName_duplicateTagsetSet_map.keySet()) {
+            Set<JSTagset> tagsets = tagName_duplicateTagsetSet_map.get(tagName);
             if (tagsets.size() > 1) { // More than 1 tagsets for a tagname means there are semantic duplicates (homonyms).
                 homonyms.add(tagName);
                 for (JSTagset jsTagset : tagsets) {
@@ -92,8 +113,12 @@ public class JsonHierarchyGenerator {
     }
 
     private void buildTagTagsetMap() {
-        String tagsetName = this.root.getName().replaceAll("_", " ");
-        buildTagTagsetMapRecursive(tagsetName, this.root);
+        // root - [timezone, day of week, enity]
+        // We do not include "root"
+        for (JSTagset child : this.root.getChildren()) {
+            String tagsetName = child.getName().replaceAll("_", " ");
+            buildTagTagsetMapRecursive(tagsetName, child);
+        }
     }
 
     private void buildTagTagsetMapRecursive(String tagsetName, JSTagset current) {
@@ -147,6 +172,8 @@ public class JsonHierarchyGenerator {
 
     public static void main(String[] args) throws IOException {
         JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
+        jshg.writeToJsonFile();
+
         // BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\lsc2020\\tags-and-hierarchies\\duplicatesFromJson.txt"));
         // writer.write(jshg.findNumDuplicateTags());
         // writer.close();
@@ -157,7 +184,7 @@ public class JsonHierarchyGenerator {
         //     System.out.println(child.getName());
         // }
         // System.out.println(drink.getHierarchyString("drink"));
-        System.out.println(jshg.buildHierarchyString());
+        
         // for (JSTagset child : jshg.root.getChildren()) {
         //     System.out.println(child.getName());
         // }

@@ -51,10 +51,10 @@ public class ImageTagGenerator {
 
     public ImageTagGenerator() throws IOException, ParseException {
         this.solutionFilenames = new SolutionListGenerator().getSolutionSet();
-        HierarchyGenerator hg = new HierarchyGenerator();
-        hg.writeToHierarchyFile();
+        // HierarchyGenerator hg = new HierarchyGenerator();
+        // hg.writeToHierarchyFile();
         JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
-        jshg.writeToHierarchyFile();
+        jshg.writeToJsonFile();
         this.json_tag_tagset_map = jshg.getTag_tagset_map();
         this.featureFinder = new FeatureFinder(jshg.getHomonyms());
         this.solutionsInFront = new StringBuilder();
