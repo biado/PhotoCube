@@ -2,7 +2,6 @@ import * as React from 'react';
 import * as THREE from 'three';
 import Position from './Position';
 import '../../../css/ThreeBrowser.css';
-import stockImage from '../../../images/download.jpg';
 import helveticaRegular from '../../../fonts/helvetiker_regular.typeface.json';
 import Axis, {AxisTypeEnum, AxisDirection} from './Axis';
 import Cell from './Cell';

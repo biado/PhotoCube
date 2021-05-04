@@ -1,53 +1,86 @@
-.cardBrowserContainer{
-    background-color: black;
-    overflow-y: hidden;
+.cardBrowserContainer {
+  background-color: black;
+  overflow-y: hidden;
 }
 
-.landscape{
-    width: 100%;
+.landscape {
+  width: 100%;
 }
 
-.portrait{
-    height: 100%;
+.portrait {
+  height: 100%;
 }
 
-.currentPhotoContainer{
-    width: 100%;
-    height: 100%;
-    text-align: center;
+.currentPhotoContainer {
+  width: 100%;
+  height: 100%;
+  text-align: center;
 }
 
-.hidden{
-    visibility: hidden;
+.hidden {
+  visibility: hidden;
 }
 
-.visible{
-    visibility: visible;
+.visible {
+  visibility: visible;
 }
 
-#spinner{
-    /*Placement:*/
-    position: absolute;
-    top: 45%;
-    left: 45%;
+.taglist.container {
+  display: flex;
+}
 
-    /*Style:*/
-    border: 16px solid black;
-    border-radius: 50%;
-    border-top: 16px solid #cbeaff;
-    width: 100px;
-    height: 100px;
-    -webkit-animation: spin 1s linear infinite; /* Safari */
-    animation: spin 1s linear infinite;
+.taglist.cardmode {
+  display: flex;
+  flex-flow: row wrap;
+  padding-left: 5px;
+  color: rgb(200, 200, 200);
+  list-style-type: none;
+}
+
+.taglist li {
+  padding-right: 5px;
+}
+
+.taglist li:after {
+  content: ", ";
+}
+
+/*Remove trailing comma*/
+.taglist li:last-child:after {
+  content: "";
+}
+
+#spinner {
+  /*Placement:*/
+  position: absolute;
+  top: 45%;
+  left: 45%;
+
+  /*Style:*/
+  border: 16px solid black;
+  border-radius: 50%;
+  border-top: 16px solid #cbeaff;
+  width: 100px;
+  height: 100px;
+  -webkit-animation: spin 1s linear infinite; /* Safari */
+  animation: spin 1s linear infinite;
 }
 
 /* Safari */
 @-webkit-keyframes spin {
-    0% { -webkit-transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); }
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
-  
+
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

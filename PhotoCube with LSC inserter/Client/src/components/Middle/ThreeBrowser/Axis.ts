@@ -36,9 +36,8 @@ export default class Axis{
     IsReady: boolean = true;
     
     PickedDimension: PickedDimension|null = null;
-    TagsetId: number = 0;
+    Id: number = 0;
     Tags: Tag[] = [];
-    RootNodeId: number = 0;
     Hierarchies: HierarchyNode[] = [];
 
     RemoveObjectsFromScene(scene: THREE.Scene){
@@ -56,7 +55,8 @@ export default class Axis{
 
         this.IsReady = false;
         this.AxisType = AxisTypeEnum.Tagset;
-        this.TagsetId = tagset.Id;
+        //Tagset id
+        this.Id = tagset.Id;
         //Sort tags alphabethically:
         tagset.Tags!.sort((a:Tag,b:Tag) => a.Name > b.Name ? 1 : a.Name < b.Name ? -1 : 0);
         this.Tags = tagset.Tags!;
@@ -85,8 +85,8 @@ export default class Axis{
         );
         this.LabelThreeObjects = this.Tags.map((tag,index) => {
             return addTextCallback(
-                tag.Name,     //Label name
-                {             //Position
+                tag.Name.toString(),     //Label name
+                {                        //Position
                     x:this.AxisDirection === AxisDirection.X ? index + 1 : 0,
                     y:this.AxisDirection === AxisDirection.Y ? index + 1 : 0,
                     z:this.AxisDirection === AxisDirection.Z ? index + 1 : 0,
@@ -105,7 +105,8 @@ export default class Axis{
         
         this.IsReady = false;
         this.AxisType = AxisTypeEnum.Hierarchy;
-        this.RootNodeId = hierarchy.Id;
+        //Rootnode id
+        this.Id = hierarchy.Id;
         this.Hierarchies = hierarchy.Children;
         this.Hierarchies.sort((a:HierarchyNode,b:HierarchyNode) => a.Tag.Name > b.Tag.Name ? 1 : a.Tag.Name < b.Tag.Name ? -1 : 0);
         
@@ -161,7 +162,8 @@ export default class Axis{
         
         this.IsReady = false;
         this.AxisType = AxisTypeEnum.HierarchyLeaf;
-        this.RootNodeId = hierarchy.Id;
+        //Rootnode id
+        this.Id = hierarchy.Id;
         this.Hierarchies = [hierarchy];
         
         let color: Colors = 

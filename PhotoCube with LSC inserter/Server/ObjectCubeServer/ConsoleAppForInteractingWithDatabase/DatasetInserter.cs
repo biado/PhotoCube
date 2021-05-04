@@ -257,14 +257,6 @@ namespace ConsoleAppForInteractingWithDatabase
                                 if (!tagsets.ContainsKey(tagsetName))
                                 {
                                     tagset = createNewTagset(tagsetName, tagsets);
-
-                                    //Also creates a tag with same name:
-                                    Tag tagWithSameNameAsTagset =
-                                        DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset,
-                                            tagsetName);
-                                    Dictionary<int, Tag> tagWithSameNameAsTagsetList = new Dictionary<int, Tag>();
-                                    tagWithSameNameAsTagsetList[tagset.Id] = tagWithSameNameAsTagset;
-                                    tags[tagsetName] = tagWithSameNameAsTagsetList;
                                 }
                                 else
                                 {
