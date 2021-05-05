@@ -42,7 +42,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 stopWatch.Start();
 
                 //Insert data:
-                new DatasetInserter(num);
+                new DatasetInsertSQLGenerator(num);
 
                 // Get the elapsed time as a TimeSpan value.
                 TimeSpan ts = stopWatch.Elapsed;

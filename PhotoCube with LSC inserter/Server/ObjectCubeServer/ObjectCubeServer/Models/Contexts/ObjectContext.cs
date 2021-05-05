@@ -184,7 +184,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = TPTTagsetId; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\TPTTagsetId.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = DrinkTest; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\DrinkTest.mdf");
                     }
                     break;
                 default:
