@@ -52,8 +52,8 @@ public class JsonHierarchyGenerator {
     }
 
     private void buildTagNameDuplicateTagsetsMap() {
-        // root - [timezone, day of week, enity]
-        // We do not include "root"
+        // ROOT - [timezone, day of week, enity]
+        // We do not include "ROOT"
         for (JSTagset child : this.root.getChildren()) {
             buildTagNameDuplicateTagsetsMapRecursive(child);
         }
@@ -113,8 +113,8 @@ public class JsonHierarchyGenerator {
     }
 
     private void buildTagTagsetMap() {
-        // root - [timezone, day of week, enity]
-        // We do not include "root"
+        // ROOT - [timezone, day of week, enity]
+        // We do not include "ROOT"
         for (JSTagset child : this.root.getChildren()) {
             String tagsetName = child.getName().replaceAll("_", " ");
             buildTagTagsetMapRecursive(tagsetName, child);
