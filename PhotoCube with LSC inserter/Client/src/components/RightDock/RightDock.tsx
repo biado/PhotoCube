@@ -33,7 +33,6 @@ export default class RightDock extends React.Component<{
                 <FileCount className={visibility} ref={this.fileCount}/>
                 <BrowsingModeChanger ref={this.browsingModeChanger} onBrowsingModeChanged={this.props.onBrowsingModeChanged} />
                 <Dimensions className={visibility} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/>
-                <HierarchyBrowser className={visibility} ref={this.hierarchyBrowser} onDimensionChanged={this.onDimensionChanged}/>
             </div>
         );
     }

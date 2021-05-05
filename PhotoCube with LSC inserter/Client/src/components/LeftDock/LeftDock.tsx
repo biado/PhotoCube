@@ -13,7 +13,6 @@ export default class LeftDock extends Component<{
     render() {
         return (
             <div id="LeftDock">
-		  		<FacetedSearcher className={this.props.hideControls ? "hide" : ""} onFiltersChanged={this.props.onFiltersChanged}/>
 	  		</div>
         );
         //Not in use: <BrowsingStateLoader className={classNames}/>

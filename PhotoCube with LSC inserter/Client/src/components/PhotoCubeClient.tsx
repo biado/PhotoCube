@@ -5,6 +5,7 @@ import ThreeBrowser from './Middle/ThreeBrowser/ThreeBrowser';
 import GridBrowser from './Middle/GridBrowser/GridBrowser';
 import CardBrowser from './Middle/CardBrowser/CardBrowser';
 import RightDock from './RightDock/RightDock';
+import { BottomDock } from './Middle/BottomDock/BottomDock';
 import { BrowsingModes } from './RightDock/BrowsingModeChanger';
 import { BrowsingState } from './Middle/ThreeBrowser/BrowsingState';
 import PickedDimension from './RightDock/PickedDimension';
@@ -50,7 +51,10 @@ export default class PhotoCubeClient extends React.Component {
         <div className="App grid-container">
           <LeftDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
             onFiltersChanged={this.onFiltersChanged}/>
-          {currentBrowser}
+           <div className="middle dock">
+            {currentBrowser}
+            <BottomDock/>
+          </div>
           <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
             ref={this.rightDock}
             onDimensionChanged={this.onDimensionChanged} 
