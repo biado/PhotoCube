@@ -189,10 +189,13 @@ public class ImageTagGenerator {
         String[] region_city = formattedMetadataLine[3].split("/");
         sb.append(delimiter + metadataColumnNames[3] + delimiter + region_city[1]);
 
+        // Skip latitude (i=4) and longitude (i=5) - It will be useful in the future, though.
+
         // Everything else
-        for (int i = 4; i < formattedMetadataLine.length; i++) {
+        for (int i = 6; i < formattedMetadataLine.length; i++) {
+            String columnName = metadataColumnNames[i];
             if (!formattedMetadataLine[i].equals("NULL")) {
-                sb.append(delimiter+ metadataColumnNames[i] + delimiter + formattedMetadataLine[i]);
+                sb.append(delimiter+ columnName + delimiter + formattedMetadataLine[i]);
             }
         }
         return sb.toString();
