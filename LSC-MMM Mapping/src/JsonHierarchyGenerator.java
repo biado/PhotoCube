@@ -34,7 +34,7 @@ public class JsonHierarchyGenerator {
         this.root = g.fromJson(br, JSTagset.class);
         this.tagName_duplicateTagsetList_map = new HashMap<>();
         System.out.println("Started building tagname - Set<JSTagset> map.");
-        buildTagNameDuplicateTagsetsMap();
+        buildTagNameDuplicateTagsetsMapRecursive(root);
         this.homonyms = new HashSet<>();
         changeTagNameOfHomonyms();
         this.tag_tagset_map = new HashMap<>();
@@ -54,13 +54,6 @@ public class JsonHierarchyGenerator {
         }
     }
 
-    private void buildTagNameDuplicateTagsetsMap() {
-        // ROOT - [timezone, day of week, enity]
-        // We do not include "ROOT"
-        for (JSTagset child : this.root.getChildren()) {
-            buildTagNameDuplicateTagsetsMapRecursive(child);
-        }
-    }
     private void buildTagNameDuplicateTagsetsMapRecursive(JSTagset current) {
         // traverse children of "root" tree and put each JStagsets into tagname-tagsetSet map
         // This method also cleans up the name, such that it replaces "_" to " ".
