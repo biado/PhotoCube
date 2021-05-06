@@ -8,7 +8,7 @@ namespace ObjectCubeServer.Models.DomainClasses
     public class ParsedFilter
     {
         public string type { get; set; }
-        public int tagId { get; set; }
-        public int nodeId { get; set; }
+        public int Id { get; set; }
+        public string name { get; set; }
     }
 }
