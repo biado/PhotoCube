@@ -15,7 +15,7 @@ import ICell from './Cell';
 import { BrowsingState } from './BrowsingState';
 import PickedDimension from '../../RightDock/PickedDimension';
 import { Colors } from './Colors';
-import { Filter } from '../../LeftDock/FacetedSearcher';
+import { Filter } from '../../Filter';
 
 const OrbitControls = require('three-orbitcontrols')
 

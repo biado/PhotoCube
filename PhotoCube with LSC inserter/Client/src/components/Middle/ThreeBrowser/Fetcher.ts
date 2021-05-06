@@ -1,7 +1,7 @@
 import Axis from "./Axis";
 import CubeObject from './CubeObject';
 import Tag from "./Tag";
-import { Filter } from "../../LeftDock/FacetedSearcher";
+import { Filter } from "../../Filter";
 
 /**
  * The static Fetcher class is used to fetch data from the server.

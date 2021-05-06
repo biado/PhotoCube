@@ -4,15 +4,7 @@ import Tagset from '../Middle/ThreeBrowser/Tagset';
 import '../../css/FacetedSearcher.css';
 import TagBasedSearcher from './TagBasedSearcher';
 import HierarchyBasedSearcher from './HierarchyBasedSearcher';
-
-/**
- * An interface for Filter. Now only supports tagId filtering, but can be expanded.
- */
-export interface Filter{
-    type: string, //Can be either "hierarchy" or "tag"
-    tagId: number,
-    nodeId: number
-}
+import { Filter } from '../Filter';
 
 /**
  * The FacetedSearcher component enables the user to use faceted search on the current browsing state with 

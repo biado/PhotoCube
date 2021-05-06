@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import '../../css/LeftDock.css';
-import FacetedSearcher, { Filter } from './FacetedSearcher';
+import { Filter } from '../Filter';
 
 /**
  * LeftDock is the left portion of the interface.
