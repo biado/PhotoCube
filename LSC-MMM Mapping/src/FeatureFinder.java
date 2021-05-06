@@ -52,8 +52,8 @@ public class FeatureFinder {
             for (int index : featureIndex) { // for each index number, find the tagname
                 String tagname = featureIndex_tagname_map.get(index); // all lowercase
                 if (tagname != null) { // we found the tagname for the index number
-                    String beautifiedName = StringBeautifier.toPrettyFeatureName(tagname);
-                    if (homonyms.contains(beautifiedName)) { // There are multiple tags of different meanings for this tagname
+                    String beautifiedName = StringBeautifier.toPrettyFeatureName(tagname); // change to consistent naming strategy (First letter capital, no underscore in the name)
+                    if (homonyms.contains(beautifiedName)) { // There are multiple tagsets of different meanings for this tagname
                         beautifiedName = beautifiedName + "(" + index + ")"; // Handle duplicates by concatenating id(=feature index) to the tagname
                     }
                     tagnames.add(beautifiedName);

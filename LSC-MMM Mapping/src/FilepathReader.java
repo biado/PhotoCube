@@ -15,7 +15,6 @@ public class FilepathReader {
     public static String LSCFilename;
     public static String ImageFeatureTop5;
     public static String FeatureTags;
-    public static String LSCHierarchiesOutput;
     public static String LSCImageTagsOutput;
     public static String UniqueTagHierarchy;
     public static String OutputFolder;
@@ -39,7 +38,6 @@ public class FilepathReader {
         LSCFilename = prop.getProperty("LSCFilename");
         ImageFeatureTop5 = prop.getProperty("ImageFeatureTop5");
         FeatureTags = prop.getProperty("FeatureTags");
-        LSCHierarchiesOutput = prop.getProperty("LSCHierarchiesOutput");
         LSCImageTagsOutput = prop.getProperty("LSCImageTagsOutput");
         UniqueTagHierarchy = prop.getProperty("UniqueTagHierarchy");
         OutputFolder = prop.getProperty("OutputFolder");

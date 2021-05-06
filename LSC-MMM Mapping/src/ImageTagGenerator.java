@@ -20,7 +20,7 @@ import java.util.Set;
  * It was needed because we were experimenting with databases with different number of objects from LSC data set and wanted all the databases to contain the solution images.
  * If the filename is in solutionFilenames, we will append the imageTag lines in the front stringBuilder, otherwise in the back stringBuilder.
  * 
- * Then it generates hierarchies from HierarchyGenerator and JsonHierarchyGenerator, and writes the hierarchy lines to a file.
+ * Then it generates hierarchies from the JsonHierarchyGenerator, and writes the hierarchy with new names(semantic duplicates handled) to a json file.
  * From JsonHierarchyGenerator, it gets the (tagName, tagsetName) Map.
  * 
  * Next step is to read in the LSC Filenames, Visual Concept and Metadata file, and create a (filename, metadata line) Map.
@@ -45,14 +45,12 @@ public class ImageTagGenerator {
     private Map<String, String> filename_metadataLine_map; // built by matching minute_id in Visual Concept and Metadata files.
 
     private static final String LSCFilename = FilepathReader.LSCFilename;
-    private static final String LSCVisualConcept = FilepathReader.LSCVisualConcept;
+    private static final String LSCVisualConcept = FilepathReader.LSCVisualConcept; // Still needed, merely to check minute_id
     private static final String LSCmetadata = FilepathReader.LSCMetadata;
     private static final String outputPath = FilepathReader.LSCImageTagsOutput;
 
     public ImageTagGenerator() throws IOException, ParseException {
         this.solutionFilenames = new SolutionListGenerator().getSolutionSet();
-        // HierarchyGenerator hg = new HierarchyGenerator();
-        // hg.writeToHierarchyFile();
         JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
         jshg.writeToJsonFile();
         this.json_tag_tagset_map = jshg.getTag_tagset_map();

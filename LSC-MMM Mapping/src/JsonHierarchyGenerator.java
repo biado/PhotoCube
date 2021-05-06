@@ -17,10 +17,9 @@ import java.util.Set;
 import com.google.gson.*;
 
 /**
- * HierarchyGenerator keeps track of all the hierarchies and tagsets for semantic tags, derived from the ImageNet Shuffle and WordNet.
+ * JsonHierarchyGenerator keeps track of all the hierarchies and tagsets for semantic tags in json, derived from the ImageNet Shuffle and WordNet.
  */
 public class JsonHierarchyGenerator {
-    private static final String outputPath = FilepathReader.LSCHierarchiesOutput;
     private static final String jsonOutput = FilepathReader.UniqueTagHierarchy;
     private static final String jsonFile = FilepathReader.JsonHierarchy;
     private Gson g;
@@ -42,6 +41,10 @@ public class JsonHierarchyGenerator {
         buildTagTagsetMap();
     }
 
+    /**
+     * Writes the hierarchy tree information in the WordNet Hierarchy to a json file.
+     * The path to output file is to specified in config.properties file.
+     */
     public void writeToJsonFile() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter writer = new FileWriter(jsonOutput)) {
@@ -64,7 +67,7 @@ public class JsonHierarchyGenerator {
         String tagsetName = StringBeautifier.toPrettyTagsetName(current);
         current.setName(tagsetName);
         putInTagNameDuplicateTagsetListMap(tagsetName, current);
-        if (current.getChildren() != null) {
+        if (current.getChildren() != null) { // if it has children (not a leaf)
             for (JSTagset child : current.getChildren()) {
                 buildTagNameDuplicateTagsetsMapRecursive(child);
             }
@@ -80,10 +83,11 @@ public class JsonHierarchyGenerator {
     private void changeTagNameOfHomonyms() {
         System.out.println("Started making duplicate tag names unique, by concatenating id to the name.");
         for (String tagName : tagName_duplicateTagsetList_map.keySet()) {
-            List<JSTagset> tagsets = tagName_duplicateTagsetList_map.get(tagName);
-            if (new HashSet<>(tagsets).size() > 1) { // More than 1 tagsets for a tagname means there are semantic duplicates (homonyms).
+            List<JSTagset> tagsets = tagName_duplicateTagsetList_map.get(tagName); // The list can have many tagsets that has same name and id, but different memory locations.
+            if (new HashSet<>(tagsets).size() > 1) { // Put the list in set, so the 'equal' tagset duplicates are removed.
+            // More than 1 tagsets in this hashset for a tagname means there are semantic duplicates (homonyms).
                 homonyms.add(tagName);
-                for (JSTagset jsTagset : tagsets) {
+                for (JSTagset jsTagset : tagsets) { // Looping the list, not the set. Because we want to change the name for the tagsets in different memory location with the same name.
                     String newName = jsTagset.getName() + "(" + jsTagset.getId() + ")";
                     jsTagset.setName(newName); // now the tagset name is name(id)
                 }
@@ -128,46 +132,6 @@ public class JsonHierarchyGenerator {
                 buildTagTagsetMapRecursive(tagsetName, child);
             }
         }
-    }
-
-    /**
-     * Returns all the hierarchy information of all tagsets WordNet Hierarchy json file (hierarchy.1.0.json).
-     * Format: TagsetName,,HierarchyName,,ParrentTagName,,ChildTag,,ChildTag,,ChildTag,,(...)\n
-     */
-    public String buildHierarchyString() {
-        // We decided to have "entity" as a tagset/rootNode of all tags.
-        Set<String> hierarchyStrings = new HashSet<>();
-        buildHierarchyStringRecursive(hierarchyStrings, this.root.getName().replaceAll("_", " "), this.root);
-        StringBuilder sb = new StringBuilder();
-        for (String hierarchyString : hierarchyStrings) {
-            sb.append(hierarchyString);
-        }
-        return sb.toString();
-    }
-
-    private void buildHierarchyStringRecursive(Set<String> hierarchyStrings, String tagsetName, JSTagset current) {
-        if (current.getChildren() != null) {
-            String hierarchyString = current.getHierarchyString(tagsetName);
-            hierarchyStrings.add(hierarchyString);
-            for (JSTagset child : current.getChildren()) {
-                buildHierarchyStringRecursive(hierarchyStrings, tagsetName, child);
-            }
-        }
-    }
-
-    /**
-     * Writes the hierarchy information in the WordNet Hierarchy to a file.
-     * The path to output file is to specified in config.properties file.
-     */
-    public void writeToHierarchyFile() {
-        System.out.println("Started writing json tags (visual concepts) into the hierarchy file.");
-            try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath, true));
-                writer.write(buildHierarchyString());
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
     }
 
     public static void main(String[] args) throws IOException {
