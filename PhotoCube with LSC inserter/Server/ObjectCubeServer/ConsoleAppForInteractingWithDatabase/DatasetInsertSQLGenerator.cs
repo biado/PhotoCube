@@ -164,8 +164,8 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             return new Dictionary<string, string>()
             {
-                {"Drink", "alphanumerical"}, // For testing
-                {"entity", "alphanumerical"},
+                {"Entity", "alphanumerical"},
+                {"Location name", "alphanumerical"},
                 {"Time", "time"},
                 {"Date", "date"},
                 {"Timezone", "alphanumerical"},
@@ -174,8 +174,16 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"Heart", "numerical"},
                 {"Calories", "numerical"},
                 {"Activity type", "alphanumerical"},
-                {"Steps", "numerical"}
-                // Need to add date/time derived tags
+                {"Steps", "numerical"},
+                {"Day of week (number)", "numerical"},
+                {"Day of week (string)", "alphanumerical"},
+                {"Day within month", "numerical"},
+                {"Day within year", "numerical"},
+                {"Month (number)", "numerical"},
+                {"Month (string)", "alphanumerical"},
+                {"Year", "numerical"},
+                {"Hour", "numerical"},
+                {"Minute", "numerical"}
             };
         }
 
@@ -549,7 +557,7 @@ namespace ConsoleAppForInteractingWithDatabase
                         //Insert typed tag next, including a replicate of tagset_id
                         case AlphanumericalTag at:
                             insertStatement += "INSERT INTO alphanumerical_tags(id, name, tagset_id) VALUES(" + at.Id +
-                                               ",'" + at.Name + "'," + at.TagsetId + "); \n";
+                                               ",'" + at.Name.Replace("'", "''") + "'," + at.TagsetId + "); \n";
                             break;
                         case NumericalTag nt:
                             insertStatement += "INSERT INTO numerical_tags(id, name, tagset_id) VALUES(" + nt.Id + "," +

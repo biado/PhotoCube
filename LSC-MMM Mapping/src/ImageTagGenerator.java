@@ -202,12 +202,12 @@ public class ImageTagGenerator {
 
     private void addDateTimeRelatedTags(StringBuilder sb, String timestamp) {
         DateTimeFormatter formatter = new DateTimeFormatter(timestamp);
-        sb.append(delimiter + "Day of week (Number)" + delimiter + formatter.getDayOfWeekNumber());
-        sb.append(delimiter + "Day of week (String)" + delimiter + formatter.getDayOfWeekString());
+        sb.append(delimiter + "Day of week (number)" + delimiter + formatter.getDayOfWeekNumber());
+        sb.append(delimiter + "Day of week (string)" + delimiter + formatter.getDayOfWeekString());
         sb.append(delimiter + "Day within month" + delimiter + formatter.getDayWithinMonth());
         sb.append(delimiter + "Day within year" + delimiter + formatter.getDayWithinYear());
-        sb.append(delimiter + "Month (Number)" + delimiter + formatter.getMonthNumber());
-        sb.append(delimiter + "Month (String)" + delimiter + formatter.getMonthString());
+        sb.append(delimiter + "Month (number)" + delimiter + formatter.getMonthNumber());
+        sb.append(delimiter + "Month (string)" + delimiter + formatter.getMonthString());
         sb.append(delimiter + "Year" + delimiter + formatter.getYear());
         sb.append(delimiter + "Hour" + delimiter + formatter.getHour());
         sb.append(delimiter + "Minute" + delimiter + formatter.getMinute());

@@ -50,12 +50,13 @@ public class FeatureFinder {
         if (row != -1) {
             List<Integer> featureIndex = (row_featureIndex_map.containsKey(row)) ? row_featureIndex_map.get(row) : new ArrayList<>(); // get the list of featureIndex
             for (int index : featureIndex) { // for each index number, find the tagname
-                String tagname = featureIndex_tagname_map.get(index);
+                String tagname = featureIndex_tagname_map.get(index); // all lowercase
                 if (tagname != null) { // we found the tagname for the index number
-                    if (homonyms.contains(tagname)) { // There are multiple tags of different meanings for this tagname
-                        tagname = tagname + "(" + index + ")"; // Handle duplicates by concatenating id(=feature index) to the tagname
+                    String beautifiedName = StringBeautifier.toPrettyFeatureName(tagname);
+                    if (homonyms.contains(beautifiedName)) { // There are multiple tags of different meanings for this tagname
+                        beautifiedName = beautifiedName + "(" + index + ")"; // Handle duplicates by concatenating id(=feature index) to the tagname
                     }
-                    tagnames.add(tagname);
+                    tagnames.add(beautifiedName);
                 }
             }
         }
@@ -126,8 +127,9 @@ public class FeatureFinder {
     }
 
     public static void main(String[] args) throws IOException {
-        FeatureFinder ff = new FeatureFinder(new HashSet<>());
-        String path = Paths.get("2016-09-25/20160925_150243_000.jpg").toString();
+        JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
+        FeatureFinder ff = new FeatureFinder(jshg.getHomonyms());
+        String path = Paths.get("2016-08-11/20160811_154301_000.jpg").toString();
         System.out.println(ff.findFeatures(path));
     }
 }
