@@ -10,7 +10,7 @@ import { BrowsingModes } from './RightDock/BrowsingModeChanger';
 import { BrowsingState } from './Middle/ThreeBrowser/BrowsingState';
 import PickedDimension from './RightDock/PickedDimension';
 import CubeObject from './Middle/ThreeBrowser/CubeObject';
-import { Filter } from './LeftDock/FacetedSearcher';
+import { Filter } from './Filter';
 
 /**
  * Root component of the PhotoCubeClient application, containing LeftDock, Middle 
@@ -53,7 +53,7 @@ export default class PhotoCubeClient extends React.Component {
             onFiltersChanged={this.onFiltersChanged}/>
            <div className="middle dock">
             {currentBrowser}
-            <BottomDock/>
+            <BottomDock onFiltersChanged={this.onFiltersChanged}/>
           </div>
           <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
             ref={this.rightDock}
@@ -72,11 +72,12 @@ export default class PhotoCubeClient extends React.Component {
   }
 
   /**
-   * Called if filters are changed in LeftDock.
+   * Called if filters are changed in Left and Bottom Dock.
    */
   onFiltersChanged = (filters: Filter[]) =>{
+    console.log(filters);
     let callback = () => { if(this.threeBrowser.current){ this.threeBrowser.current.RecomputeCells(); } }
-    this.setState({filters: filters}, callback);
+    this.setState({filters: [...this.state.filters, filters].flat()}, callback);
   }
 
   /**

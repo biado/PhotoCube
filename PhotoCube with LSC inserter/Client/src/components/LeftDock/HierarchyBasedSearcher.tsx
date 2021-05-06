@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter } from './FacetedSearcher';
+import { Filter } from '../Filter';
 import Fetcher from '../Middle/ThreeBrowser/Fetcher';
 import Hierarchy from '../Middle/ThreeBrowser/Hierarchy';
 import HierarchyNode from '../Middle/ThreeBrowser/HierarchyNode';
@@ -29,7 +29,7 @@ export default class HierarchyBasedSearcher extends React.Component<{
         );
     }
 
-    componentDidMount(){
+    /*componentDidMount(){
         this.renderHierarchies();
     }
 
@@ -38,7 +38,7 @@ export default class HierarchyBasedSearcher extends React.Component<{
      * If the checkbox is checked or unchecked, this.onChange is called, and the filter
      * is added to activaFilters.
      */
-    private async renderHierarchies(){
+    /*private async renderHierarchies(){
         let renderedHierarchies = await Fetcher.FetchHierarchies()
             .then((hierarchies:Hierarchy[]) => {
                 return hierarchies
@@ -60,7 +60,7 @@ export default class HierarchyBasedSearcher extends React.Component<{
      * @param node 
      * @param level 
      */
-    private renderNode(node: HierarchyNode, level: number){
+    /*private renderNode(node: HierarchyNode, level: number){
         let nodeLevelClassName : string = "nodeLevel-"+level;
         let inputElement = <input
             type="checkbox"
@@ -83,7 +83,7 @@ export default class HierarchyBasedSearcher extends React.Component<{
      * Adds a filter corresponding to the hierarchy, and calls this.props.onFiltersChanged.
      * @param e 
      */
-    private onChange(e: React.ChangeEvent<HTMLInputElement>){
+    /*private onChange(e: React.ChangeEvent<HTMLInputElement>){
         if(e.target.checked){
             //Add filter
             this.activeFilters.add( { type: e.target.name, tagId: 0, nodeId: parseInt(e.target.value) } );
@@ -97,7 +97,7 @@ export default class HierarchyBasedSearcher extends React.Component<{
             //Notify parent component of change:
             this.props.onFiltersChanged(Array.from(this.activeFilters));
         }
-    }
+    }*/
 
     /**
      * Clear filters, not currently used...
