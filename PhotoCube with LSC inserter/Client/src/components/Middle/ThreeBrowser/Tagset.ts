@@ -5,4 +5,5 @@
 export default interface Tagset{
     Id: number;
     Name: string;
+    Tags: [] | null;
 }

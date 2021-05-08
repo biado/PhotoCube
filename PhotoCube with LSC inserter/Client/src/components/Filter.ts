@@ -1,8 +1,8 @@
 /**
- * An interface for Filter. Now only supports tagId filtering, but can be expanded.
+ * An interface for Filter. Supports filtering with tags, tagsets and hierarchy nodes.
  */
  export interface Filter{
-    type: string, //Can be either "hierarchy" or "tag"
-    Id: number,
+    type: string,
+    Id: number, 
     name: string
 }
