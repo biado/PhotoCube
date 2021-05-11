@@ -187,7 +187,7 @@ public class ImageTagGenerator {
 
         // timezone (i=3) only use the city name as the tag (Europe/Dublin -> Timezone,,Dublin)
         String[] region_city = formattedMetadataLine[3].split("/");
-        sb.append(delimiter + metadataColumnNames[3] + delimiter + region_city[1]);
+        sb.append(delimiter + metadataColumnNames[3] + delimiter + StringBeautifier.toPrettyFeatureName(region_city[1]));
 
         // Skip latitude (i=4) and longitude (i=5) - It will be useful in the future, though.
 
@@ -195,7 +195,7 @@ public class ImageTagGenerator {
         for (int i = 6; i < formattedMetadataLine.length; i++) {
             String columnName = metadataColumnNames[i];
             if (!formattedMetadataLine[i].equals("NULL")) {
-                sb.append(delimiter+ columnName + delimiter + formattedMetadataLine[i]);
+                sb.append(delimiter+ columnName + delimiter + StringBeautifier.toPrettyFeatureName(formattedMetadataLine[i]));
             }
         }
         return sb.toString();
