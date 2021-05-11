@@ -5,19 +5,8 @@ import { VscBrowser } from 'react-icons/vsc';
 import { DimensionBrowser } from './DimensionBrowser';
 import { Filter } from '../../Filter';
 
-export const BottomDock = (props: {onFiltersChanged: (filters : Filter[]) => void}) => {
+export const BottomDock = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
     const [isExpanded, expand] = useState(false);
-    const [filters, setFilters] = useState<Filter[] | []>([]);
-
-    const addFilter = (filter : Filter) => {
-        setFilters([...filters, filter]);
-    }
-
-    useEffect(() => {  
-        if (filters.length !== 0) {
-        props.onFiltersChanged(filters);
-        }
-    }, [filters])
 
     return(
         <div className={isExpanded ? "bottom dock expanded" : "bottom dock"} >
@@ -28,7 +17,7 @@ export const BottomDock = (props: {onFiltersChanged: (filters : Filter[]) => voi
                 </div>
                 {isExpanded ? <MdExpandMore className="expand" onClick={e => expand(false)}/> : <MdExpandLess className="expand" onClick={e => expand(true)}/>}
             </div>
-            {isExpanded ? <DimensionBrowser onFilterAdded={addFilter}/> : null}
+            {isExpanded ? <DimensionBrowser activeFilters={props.activeFilters} onFiltersChanged={props.onFiltersChanged}/> : null}
         </div>
     )
 };

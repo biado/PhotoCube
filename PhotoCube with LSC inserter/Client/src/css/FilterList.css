@@ -1,0 +1,30 @@
+.filter.list li {
+  background-color: rgb(40, 40, 40);
+  color: rgb(200, 200, 200);
+  border-radius: 15px;
+  margin: 0 5px 7px 0;
+  padding: 5px;
+  padding-left: 12px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+}
+
+.filter.list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  list-style: none;
+  padding-left: 5px;
+}
+
+.clear.button {
+  border: none;
+  background: none;
+  display: flex;
+}
+
+#clear-icon {
+  color: rgb(200, 200, 200);
+  align-self: center;
+}

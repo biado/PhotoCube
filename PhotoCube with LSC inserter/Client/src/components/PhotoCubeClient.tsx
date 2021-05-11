@@ -12,17 +12,23 @@ import PickedDimension from './RightDock/PickedDimension';
 import CubeObject from './Middle/ThreeBrowser/CubeObject';
 import { Filter } from './Filter';
 
+
+interface ClientState {
+  BrowsingMode : BrowsingModes.Card | BrowsingModes.Cube | BrowsingModes.Grid,
+  filters: Filter[]
+}
+
 /**
  * Root component of the PhotoCubeClient application, containing LeftDock, Middle 
  * (either ThreeBrowser, GridBrowser or a CardBrowser) and RightDock.
  */
-export default class PhotoCubeClient extends React.Component {
+export default class PhotoCubeClient extends React.Component<ClientState> {
   //Component instance refferences to allow direct child method call:
   threeBrowser = React.createRef<ThreeBrowser>();
   rightDock = React.createRef<RightDock>();
   
   //State of PhotoCubeClient used to render different browsing modes.
-  state = {
+  state: ClientState = {
     BrowsingMode: BrowsingModes.Cube, //Check selected value in BrowsingModeChanger, or pass down prop.
     filters: [] //Needs to be part of state to rerender ThreeBrowser when changed
   }
@@ -49,17 +55,18 @@ export default class PhotoCubeClient extends React.Component {
     //Page returned:
     return (
         <div className="App grid-container">
-          <LeftDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
-            onFiltersChanged={this.onFiltersChanged}/>
+          <LeftDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} />
            <div className="middle dock">
             {currentBrowser}
-            <BottomDock onFiltersChanged={this.onFiltersChanged}/>
+            <BottomDock activeFilters={this.state.filters} onFiltersChanged={this.onFiltersChanged}/>
           </div>
           <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
             ref={this.rightDock}
             onDimensionChanged={this.onDimensionChanged} 
             onBrowsingModeChanged={this.onBrowsingModeChanged}
-            onClearAxis={this.onClearAxis}/>
+            onClearAxis={this.onClearAxis}
+            activeFilters={this.state.filters}
+            onFilterRemoved={this.onFilterRemoved}/>
         </div>
     );
   }
@@ -74,10 +81,17 @@ export default class PhotoCubeClient extends React.Component {
   /**
    * Called if filters are changed in Left and Bottom Dock.
    */
-  onFiltersChanged = (filters: Filter[]) =>{
-    console.log(filters);
-    let callback = () => { if(this.threeBrowser.current){ this.threeBrowser.current.RecomputeCells(); } }
-    this.setState({filters: [...this.state.filters, filters].flat()}, callback);
+  onFiltersChanged = (filter: Filter) =>{
+    let callback = () => { if(this.threeBrowser.current){ this.threeBrowser.current.RecomputeCells(); }}
+    this.setState({filters: [...this.state.filters, filter].flat()}, callback);
+  }
+
+  /**
+   * Called if a filter is removed from the list in the Right Dock.
+   */
+  onFilterRemoved = (filterName : string) => {
+    let callback = () => { if(this.threeBrowser.current){ this.threeBrowser.current.RecomputeCells(); }}
+    this.setState({filters : this.state.filters.filter(filter => filter.name !== filterName)}, callback);
   }
 
   /**

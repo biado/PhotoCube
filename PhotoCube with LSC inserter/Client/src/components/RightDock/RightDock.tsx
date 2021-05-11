@@ -5,6 +5,8 @@ import BrowsingModeChanger, { BrowsingModes } from './BrowsingModeChanger';
 import Dimensions from './Dimensions';
 import HierarchyBrowser from './HierarchyBrowser';
 import PickedDimension from './PickedDimension';
+import { FilterList } from './FilterList';
+import { Filter } from '../Filter';
 
 /**
  * RightDock is the right portion of the interface.
@@ -15,7 +17,9 @@ export default class RightDock extends React.Component<{
         onDimensionChanged:(dimName: string, dimension:PickedDimension) => void,
         onBrowsingModeChanged:(browsingmode: BrowsingModes) => void,
         onClearAxis:(axisName: string) => void,
-        hideControls: boolean
+        hideControls: boolean,
+        activeFilters: Filter[],
+        onFilterRemoved: (filterName: string) => void
     }>{
 
     private fileCount = React.createRef<FileCount>();
@@ -33,6 +37,7 @@ export default class RightDock extends React.Component<{
                 <FileCount className={visibility} ref={this.fileCount}/>
                 <BrowsingModeChanger ref={this.browsingModeChanger} onBrowsingModeChanged={this.props.onBrowsingModeChanged} />
                 <Dimensions className={visibility} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/>
+                <FilterList className ={visibility} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved}/>
             </div>
         );
     }
