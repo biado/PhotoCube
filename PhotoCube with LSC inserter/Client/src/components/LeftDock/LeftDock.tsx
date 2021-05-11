@@ -8,7 +8,7 @@ import { Filter } from '../Filter';
  */
 export default class LeftDock extends Component<{
         hideControls: boolean,
-        onFiltersChanged : (filters: Filter[]) => void
+        //onFiltersChanged : (filters: Filter[]) => void
     }>{
     render() {
         return (
