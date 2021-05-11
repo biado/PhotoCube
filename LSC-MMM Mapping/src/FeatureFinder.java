@@ -129,7 +129,14 @@ public class FeatureFinder {
     public static void main(String[] args) throws IOException {
         JsonHierarchyGenerator jshg = new JsonHierarchyGenerator();
         FeatureFinder ff = new FeatureFinder(jshg.getHomonyms());
-        String path = Paths.get("2016-08-11/20160811_154301_000.jpg").toString();
-        System.out.println(ff.findFeatures(path));
+        // String path = Paths.get("2016-08-11/20160811_154301_000.jpg").toString();
+        // System.out.println(ff.findFeatures(path));
+        int corrupted = 0;
+        for (String filename : ff.filename_row_map.keySet()) {
+            if (filename.contains("._")) {
+                corrupted++;
+            }
+        }
+        System.out.println(corrupted);
     }
 }
