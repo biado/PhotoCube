@@ -55,6 +55,7 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ObjectTagRelation> ObjectTagRelations { get; set; }
         public DbSet<Hierarchy> Hierarchies { get; set; }
+        public DbSet<AlphanumericalTag> AlphanumericalTags { get; set; }
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
         
@@ -95,14 +96,13 @@ namespace ObjectCubeServer.Models.DataAccess
                 .WithOne(h => h.Tagset)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //Ids of Tags are generated when added... Needed for some reason...
-            modelBuilder.Entity<Tag>()
-               .Property(t => t.Id)
-               .ValueGeneratedOnAdd();
-
             //Every tag has exactly one tag type
             modelBuilder.Entity<Tag>()
                 .HasOne(t => t.TagType);
+
+            modelBuilder.Entity<Tag>()
+                .HasMany(t => t.Nodes)
+                .WithOne(t => t.Tag);
 
             //Many-to-one relationship, if hierarchy is deleted, then nodes are also deleted.
             modelBuilder.Entity<Hierarchy>()
@@ -114,7 +114,9 @@ namespace ObjectCubeServer.Models.DataAccess
             //If a Node is deleted the tag is not deleted.
             modelBuilder.Entity<Node>()
                 .HasOne(n => n.Tag)
-                .WithMany()
+                .WithMany(n => n.Nodes)
+                .HasForeignKey("tag_id")
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
             //Typed Tags store a replicate of tagsetid
@@ -174,7 +176,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc50api_dimensionfix; User Id = photocube; Password = postgres;");
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc50tag-nodesfix; User Id = photocube; Password = postgres;");
                     }
                     break;
                 case PlatformID.Win32NT: //Windows

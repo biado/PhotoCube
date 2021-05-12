@@ -18,7 +18,7 @@ namespace ObjectCubeServer.Models.DomainClasses
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("tag_id")]
+        [NotMapped]
         public int TagId { get; set; }
         public Tag Tag { get; set; }
 
