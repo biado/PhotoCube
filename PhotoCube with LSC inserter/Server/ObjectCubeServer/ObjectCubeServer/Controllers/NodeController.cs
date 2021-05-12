@@ -9,6 +9,8 @@ using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Collections;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -49,11 +51,59 @@ namespace ObjectCubeServer.Controllers
             {
                 nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 nodeFound = RecursiveAddChildrenAndTags(nodeFound);
-                return Ok(JsonConvert.SerializeObject(nodeFound));
+                return Ok(JsonConvert.SerializeObject(nodeFound,
+                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
             }
         }
 
+        // GET: api/Node/name=coffee
+        [HttpGet("name={tag}")]
+        public IActionResult GetNodeByName(string tag)
+        {
+            List<Node> nodesFound;
+            using (var context = new ObjectContext())
+            {
+                nodesFound = context.AlphanumericalTags
+                    .Include(at => at.Nodes)
+                    .Where(at => at.Name.Equals(tag))
+                    .Select(at => at.Nodes)
+                    .FirstOrDefault();
+            }
+
+            var result = new List<List<PublicNode>>();
+            foreach(Node node in nodesFound)
+            {
+                var publicNodes = new List<PublicNode>() {
+                     new PublicNode(node.Id, tag), GetParentNode(node)
+                };
+                result.Add(publicNodes);
+ 
+            }
+
+            if (result == null)
+            {
+                return null;
+            }
+            return Ok(JsonConvert.SerializeObject(result));
+            
+        }
+
         #region HelperMethods:
+        private PublicNode GetParentNode(Node child)
+        {
+            PublicNode parentNode;
+            using (var context = new ObjectContext())
+            {
+                parentNode = context.Nodes
+                    .Where(n => n.Children.Contains(child))
+                    .Include(n => n.Tag)
+                    .Select(n => new PublicNode(n.Id,((AlphanumericalTag)n.Tag).Name))
+                    .FirstOrDefault();
+            }
+
+            return parentNode;
+        }
+
         private Node RecursiveAddChildrenAndTags(Node parentNode)
         {
             List<Node> newChildNodes = new List<Node>();
