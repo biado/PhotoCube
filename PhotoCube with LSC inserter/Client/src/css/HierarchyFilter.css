@@ -1,0 +1,8 @@
+.hierarchy.explorer {
+  width: 50%;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: row;
+}

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import Position from './Position';
 
 /**
- * Interface repressenting a primitive cell object. Used to create cells classes from.
+ * Interface representing a primitive cell object. Used to create cells classes from.
  */
 export default interface ICell{
     //Coordinates:

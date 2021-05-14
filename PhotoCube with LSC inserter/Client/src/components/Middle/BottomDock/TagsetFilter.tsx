@@ -4,11 +4,12 @@ import Fetcher from '../ThreeBrowser/Fetcher';
 import Tagset from '../ThreeBrowser/Tagset';
 import Dropdown, { Option } from 'react-dropdown';
 import 'react-dropdown/style.css';
+import '../../../css/TagsetFilter.css';
 
 export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
 
     const [options, setDropdownOptions] = useState<Option[]>([]);
-    const [selected, setChoice] = useState<Tagset | null>(null);
+    const [selectedTagset, updateSelection] = useState<Tagset | null>(null);
     const [buttonDisabled, disableButton] = useState<boolean>(false);
 
     useEffect(() =>  {
@@ -23,9 +24,9 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
 
     const addFilter = () => {
         const filter: Filter = {
-            Id: selected!.Id,
+            Id: selectedTagset!.Id,
             type: "tagset",
-            name: selected!.Name 
+            name: selectedTagset!.Name 
         }
         if (!props.activeFilters.some(af => af.name === filter.name)) {
             props.onFiltersChanged(filter);
@@ -34,7 +35,7 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
     }
 
     const updateDropdown = (e: Option) => {
-        setChoice({Id: parseInt(e.value), Name: e.label!.toString(), Tags: null});
+        updateSelection({Id: parseInt(e.value), Name: e.label!.toString(), Tags: null});
         disableButton(props.activeFilters.some(af => af.name == e.label!.toString()));
     }
 

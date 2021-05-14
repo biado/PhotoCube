@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import '../../../css/BottomDock.css';
 import { MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { VscBrowser } from 'react-icons/vsc';

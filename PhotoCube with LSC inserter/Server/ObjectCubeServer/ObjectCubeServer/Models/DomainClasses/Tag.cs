@@ -26,8 +26,6 @@ namespace ObjectCubeServer.Models.DomainClasses
         public int TagsetId { get; set; }
         public Tagset Tagset { get; set; }
 
-        public List<Node> Nodes { get; set; }
-
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }
 
         public abstract string GetTagName();

@@ -1,7 +1,7 @@
 import PickedDimension from "../../RightDock/PickedDimension";
 
 /**
- * Interface for object repressenting a previous ThreeBrowser Browsing State.
+ * Interface for object representing a previous ThreeBrowser Browsing State.
  */
 export interface BrowsingState{
     xAxisPickedDimension: PickedDimension|null;

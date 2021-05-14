@@ -55,7 +55,6 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ObjectTagRelation> ObjectTagRelations { get; set; }
         public DbSet<Hierarchy> Hierarchies { get; set; }
-        public DbSet<AlphanumericalTag> AlphanumericalTags { get; set; }
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
         
@@ -100,10 +99,6 @@ namespace ObjectCubeServer.Models.DataAccess
             modelBuilder.Entity<Tag>()
                 .HasOne(t => t.TagType);
 
-            modelBuilder.Entity<Tag>()
-                .HasMany(t => t.Nodes)
-                .WithOne(t => t.Tag);
-
             //Many-to-one relationship, if hierarchy is deleted, then nodes are also deleted.
             modelBuilder.Entity<Hierarchy>()
                 .HasMany(h => h.Nodes)
@@ -114,8 +109,7 @@ namespace ObjectCubeServer.Models.DataAccess
             //If a Node is deleted the tag is not deleted.
             modelBuilder.Entity<Node>()
                 .HasOne(n => n.Tag)
-                .WithMany(n => n.Nodes)
-                .HasForeignKey("tag_id")
+                .WithMany()
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 

@@ -75,6 +75,34 @@ export default class Fetcher{
     }
 
     /**
+     * Fetches a single Node and it's immediate parent with user-defined 
+     * search term.
+     * @param searchterm
+     */
+     static async FetchNodeByName(searchterm: string){
+        return await fetch(Fetcher.baseUrl + "/node/name=" + searchterm)
+            .then(result => {return result.json()});
+    }
+
+    /**
+     * Fetches a node's parentnode.
+     * @param nodeId
+     */
+     static async FetchParentNode(nodeId: number){
+        return await fetch(Fetcher.baseUrl + "/node/" + nodeId + "/parent")
+            .then(result => {return result.json()});
+    }
+
+    /**
+     * Fetches a node's children. 
+     * @param nodeId
+     */
+     static async FetchChildNodes(nodeId: number){
+        return await fetch(Fetcher.baseUrl + "/node/" + nodeId + "/children")
+            .then(result => {return result.json()});
+    }
+
+    /**
      * Returns all tagsets.
      */
     static async FetchTagsets(){

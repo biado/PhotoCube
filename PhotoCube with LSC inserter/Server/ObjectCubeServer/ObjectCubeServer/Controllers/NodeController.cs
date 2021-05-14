@@ -56,36 +56,73 @@ namespace ObjectCubeServer.Controllers
             }
         }
 
-        // GET: api/Node/name=coffee
+        // GET: api/Node/name=wood
         [HttpGet("name={tag}")]
         public IActionResult GetNodeByName(string tag)
         {
             List<Node> nodesFound;
             using (var context = new ObjectContext())
             {
-                nodesFound = context.AlphanumericalTags
-                    .Include(at => at.Nodes)
-                    .Where(at => at.Name.Equals(tag))
-                    .Select(at => at.Nodes)
-                    .FirstOrDefault();
+                nodesFound = context.Nodes
+                    .Include(n => n.Tag)
+                    .Where(n => ((AlphanumericalTag)n.Tag).Name.Equals(tag))
+                    .ToList();
             }
 
-            var result = new List<List<PublicNode>>();
-            foreach(Node node in nodesFound)
+            if (nodesFound != null)
             {
-                var publicNodes = new List<PublicNode>() {
-                     new PublicNode(node.Id, tag), GetParentNode(node)
-                };
-                result.Add(publicNodes);
- 
+                var result = new List<PublicNode>();
+                foreach (Node node in nodesFound)
+                {
+                    var publicNode = new PublicNode(node.Id, tag)
+                    {
+                        ParentNode = GetParentNode(node)
+                    };
+                    result.Add(publicNode);
+                }
+                return Ok(JsonConvert.SerializeObject(result));
             }
+            return null;
+        }
 
-            if (result == null)
+        // GET: api/Node/123/Parent
+        [HttpGet("{nodeId}/parent")]
+        public IActionResult GetParentNode(int nodeId)
+        {
+            PublicNode parentNode;
+            using (var context = new ObjectContext())
+            {
+                var childNode = context.Nodes
+                    .Where(n => n.Id == nodeId)
+                    .FirstOrDefault();
+                parentNode = GetParentNode(childNode);
+            }
+            if (parentNode == null)
             {
                 return null;
             }
+            List<PublicNode> result = new List<PublicNode>(){ parentNode };
             return Ok(JsonConvert.SerializeObject(result));
-            
+        }
+
+        // GET: api/Node/123/Children
+        [HttpGet("{nodeId}/children")]
+        public IActionResult GetChildNodes(int nodeId)
+        {
+            IEnumerable childNodes;
+            using (var context = new ObjectContext())
+            {
+                childNodes = context.Nodes
+                    .Include(n => n.Children)
+                    .Where(n => n.Id == nodeId)
+                    .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag)cn.Tag).Name)))
+                    .FirstOrDefault();
+            }
+            if (childNodes == null)
+            {
+                return null;
+            }
+            return Ok(JsonConvert.SerializeObject(childNodes));
         }
 
         #region HelperMethods:
