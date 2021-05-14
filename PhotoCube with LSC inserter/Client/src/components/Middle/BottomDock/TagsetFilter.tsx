@@ -40,9 +40,9 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
     }
 
     return (
-        <div className="tagset dropdown">
+        <div className="filter">
             <Dropdown options={options} placeholder="Select a tagset" onChange={e => updateDropdown(e)}/>
-            <button disabled={buttonDisabled} onClick={() => addFilter()}>Add Filter</button>
+            <button className="add button" disabled={buttonDisabled} onClick={() => addFilter()}>Add Filter</button>
         </div>
     )
 }

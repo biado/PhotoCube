@@ -5,6 +5,19 @@ import { HierarchyBrowser } from './HierarchyBrowser';
 import { Node } from './Node';
 import { Option } from './Option';
 
+
+const SearchResults = (props: {
+    options: Option[], onOptionSelected: (e: React.MouseEvent<HTMLSelectElement, MouseEvent>) => void}) => {
+    return(
+        <div className="search results">
+            <h5>{props.options.length} occurence(s) found:</h5>
+            <select onClick={e => props.onOptionSelected(e)} id="node-dropdown">
+                {props.options.map(o => <option value={JSON.stringify(o)}>{o.NodeName}:{o.ParentnodeName}</option>)}
+            </select> 
+        </div>
+    )
+}
+
 export const HierarchyExplorer = () => {
     const [input, updateInput] = useState<string>("");
     const [options, updateOptions] = useState<Option[]>([]);
@@ -39,18 +52,13 @@ export const HierarchyExplorer = () => {
     }
 
     return (
-        <div className="hierarchy explorer">
+        <div className="filter">
             <form method="get">
-                <div className="search-bar">
-                    <input type="text" placeholder="Enter tag to search hierarchies" onChange={e => onInputGiven(e.target.value)}/>
-                    <button type="submit" onClick={e => onSearch(e)}>Search</button>
-                </div>
-                <select onClick={e => onOptionSelected(e)} name="node dropdown">
-                    {options.map(o => 
-                        <option value={JSON.stringify(o)}>{o.NodeName}:{o.ParentnodeName}</option>
-                    )}
-                 </select>
+                <input className="search field" type="text" placeholder="Search hierarchies" 
+                    onChange={e => onInputGiven(e.target.value)}/>
             </form>
+            <button className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
+                {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }
             {selectedNode !== null ? <HierarchyBrowser startNode={selectedNode}/> : null }
         </div>
     )

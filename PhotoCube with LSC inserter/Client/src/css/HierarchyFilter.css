@@ -2,7 +2,29 @@
   width: 50%;
 }
 
-.search-bar {
-  display: flex;
-  flex-direction: row;
+.search.field {
+  padding: 8px 0px 8px 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  border-radius: 2px;
+  font-size: 16px;
+  color: #333;
+  margin-right: 5px;
+}
+
+.submit.button {
+  height: fit-content;
+  align-self: center;
+  margin-right: 10px;
+}
+
+.search.results {
+  margin-top: 10px;
+}
+
+#node-dropdown {
+  margin-top: 5px;
+  width: 55%;
+  outline: none;
+  padding: 5px;
 }

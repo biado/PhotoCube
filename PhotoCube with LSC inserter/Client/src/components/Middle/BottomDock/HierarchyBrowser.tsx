@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Fetcher from '../ThreeBrowser/Fetcher';
 import { Node } from './Node';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
+import '../../../css/HierarchyBrowser.css'
 
 const BrowserNode = (props: {parent: Node}) => {
     const [childNodes, setChildren] = useState<Node[]>([]);
@@ -14,9 +15,9 @@ const BrowserNode = (props: {parent: Node}) => {
         setChildren(response);
     }
 
-    //add onclick to button, add to filters
+    //add onclick to button, add to filters (add to the top)
     return (
-        <ul>
+        <div className="hierarchy">
             <li>
                 <button>
                     {props.parent.Name}
@@ -25,11 +26,11 @@ const BrowserNode = (props: {parent: Node}) => {
                     <MdExpandLess onClick={() => onButtonClick()}/>}
             </li>
             {isExpanded ? <ul>
-                {childNodes.length > 0 ? childNodes.map((node: Node) => 
+                {(childNodes.length > 0) ? childNodes.map((node: Node) => 
                     <BrowserNode parent={node}/>)
                 : <li>No further children</li>}
             </ul> : null }
-        </ul>
+        </div>
     )
 }
 
@@ -56,12 +57,12 @@ export const HierarchyBrowser = (props: {startNode: Node}) => {
     }
 
     return (
-        <div>
-            <ul className="parent node">
-                {parentNode !== null ? <li><button>{parentNode.Name}</button></li> : <li>No further parent</li>}
+        <div className="scrollable">
+            <ul className="hierarchy">
+                {(parentNode !== null) ? <li><button>{parentNode.Name}</button></li> : <li>No further parent</li>}
                 <ul className="start node">
                     <li><button>{props.startNode.Name}</button></li>
-                    {childNodes.length > 0 ? 
+                    {(childNodes.length > 0) ? 
                     <ul className="child node">
                         {childNodes.map(n => <BrowserNode parent={n}/>)}
                     </ul> : <li>No further children</li>}

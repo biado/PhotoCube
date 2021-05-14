@@ -1,5 +1,24 @@
 #dimension-browser {
-  background-color: rgb(20, 20, 20);
+  background-color: rgb(40, 40, 40);
   display: flex;
   flex-direction: row;
+  border-top: 1px solid rgba(200, 200, 200, 0.2);
+}
+
+#dimension-browser h4 {
+  background-color: rgb(40, 40, 40);
+}
+
+.filter {
+  position: relative;
+  width: 100%;
+}
+
+.button {
+  padding: 5px 10px 5px 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  position: absolute;
+  right: 0;
 }
