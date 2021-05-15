@@ -4,7 +4,7 @@ import Fetcher from '../ThreeBrowser/Fetcher';
 import Tagset from '../ThreeBrowser/Tagset';
 import Dropdown, { Option } from 'react-dropdown';
 import 'react-dropdown/style.css';
-import '../../../css/TagsetFilter.css';
+import '../../../css/BottomDock/TagsetFilter.css';
 
 export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
 
@@ -23,11 +23,7 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
     }
 
     const addFilter = () => {
-        const filter: Filter = {
-            Id: selectedTagset!.Id,
-            type: "tagset",
-            name: selectedTagset!.Name 
-        }
+        const filter: Filter = createFilter(selectedTagset!.Name, selectedTagset!.Id, "tagset");
         if (!props.activeFilters.some(af => af.name === filter.name)) {
             props.onFiltersChanged(filter);
             disableButton(true);
@@ -40,9 +36,19 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
     }
 
     return (
-        <div className="filter">
+        <div className="Filter">
             <Dropdown options={options} placeholder="Select a tagset" onChange={e => updateDropdown(e)}/>
-            <button className="add button" disabled={buttonDisabled} onClick={() => addFilter()}>Add Filter</button>
+            <button className="add button" disabled={buttonDisabled} onClick={() => addFilter()}>Add filter</button>
         </div>
     )
+}
+
+// utility function
+export const createFilter = (tagName: string, id: number, type: string) => {
+    const filter: Filter = {
+        Id: id,
+        type: type,
+        name: tagName
+    }
+    return filter;
 }
