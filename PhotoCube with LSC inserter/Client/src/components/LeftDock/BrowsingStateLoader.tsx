@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import '../../css/BrowsingStateLoader.css'
 
 /**
- * Not in use. But couæd be used to save and load browsing states:
+ * Not in use. But could be used to save and load browsing states:
  */
 export default class BrowsingStateLoader extends Component<{
         className: string

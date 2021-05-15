@@ -10,21 +10,22 @@
   font-size: 16px;
   color: #333;
   margin-right: 5px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .submit.button {
   height: fit-content;
   align-self: center;
-  margin-right: 10px;
 }
 
 .search.results {
-  margin-top: 10px;
+  margin-top: 40px;
 }
 
 #node-dropdown {
-  margin-top: 5px;
-  width: 55%;
+  margin-top: 10px;
+  width: 90%;
   outline: none;
   padding: 5px;
 }

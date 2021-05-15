@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import '../../css/FileCount.css';
+import '../../css/RightDock/FileCount.css';
 
 /**
  * FileCount is a Component that shows how many unique photos the ThreeBrowser is currently showing.

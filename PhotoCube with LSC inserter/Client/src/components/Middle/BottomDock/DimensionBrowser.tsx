@@ -2,7 +2,7 @@ import React from 'react';
 import { Filter } from '../../Filter';
 import { HierarchyExplorer } from './HierarchyFilter';
 import { TagsetDropdown } from './TagsetFilter';
-import '../../../css/DimensionBrowser.css'
+import '../../../css/BottomDock/DimensionBrowser.css'
 
 export const DimensionBrowser = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[] }) => {
     return (

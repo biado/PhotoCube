@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import '../../../css/HierarchyFilter.css';
+import '../../../css/BottomDock/HierarchyFilter.css';
 import Fetcher from '../ThreeBrowser/Fetcher';
 import { HierarchyBrowser } from './HierarchyBrowser';
 import { Node } from './Node';
 import { Option } from './Option';
-
 
 const SearchResults = (props: {
     options: Option[], onOptionSelected: (e: React.MouseEvent<HTMLSelectElement, MouseEvent>) => void}) => {
@@ -52,13 +51,13 @@ export const HierarchyExplorer = () => {
     }
 
     return (
-        <div className="filter">
+        <div className="Filter">
             <form method="get">
                 <input className="search field" type="text" placeholder="Search hierarchies" 
                     onChange={e => onInputGiven(e.target.value)}/>
             </form>
             <button className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
-                {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }
+            {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }
             {selectedNode !== null ? <HierarchyBrowser startNode={selectedNode}/> : null }
         </div>
     )

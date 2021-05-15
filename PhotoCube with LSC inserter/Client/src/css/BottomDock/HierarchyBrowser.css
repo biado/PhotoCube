@@ -1,0 +1,54 @@
+.hierarchy.browser {
+  margin-top: 20px;
+}
+
+.scrollable.hierarchy {
+  height: 300px;
+  margin-top: 10px;
+  margin-bottom: 0;
+  overflow: hidden;
+  overflow-x: scroll;
+  overflow-y: scroll;
+  padding-left: 0;
+}
+
+.hierarchy.browser h5 {
+  font-weight: bold;
+}
+
+.hierarchy ul {
+  list-style-type: none;
+  background-color: rgb(20, 20, 20);
+  margin-right: 10%;
+  border-radius: 2px;
+  padding-left: 30px;
+}
+
+.hierarchy.node {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 2px;
+}
+
+.hierarchy.node button {
+  padding: 0 15px 0 15px;
+  min-width: 45%;
+}
+
+.hierarchy.children {
+  width: 100%;
+}
+
+.expand.hierarchy {
+  background-color: rgba(239, 239, 239, 0.877);
+  align-self: center;
+  color: rgb(20, 20, 20);
+  border: 1.6px outset rgb(133, 133, 133);
+  width: 15px;
+  border-radius: 2px;
+  border-image: initial;
+}
+
+.add.button.hierarchy {
+  margin-right: 10%;
+}

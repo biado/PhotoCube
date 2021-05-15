@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import Fetcher from '../ThreeBrowser/Fetcher';
 import { Node } from './Node';
+import { createFilter } from './TagsetFilter';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
-import '../../../css/HierarchyBrowser.css'
+import '../../../css/BottomDock/HierarchyBrowser.css'
+import { Filter } from '../../Filter';
 
 const BrowserNode = (props: {parent: Node}) => {
     const [childNodes, setChildren] = useState<Node[]>([]);
@@ -15,20 +17,19 @@ const BrowserNode = (props: {parent: Node}) => {
         setChildren(response);
     }
 
-    //add onclick to button, add to filters (add to the top)
     return (
         <div className="hierarchy">
-            <li>
+            <li className="hierarchy node">
                 <button>
                     {props.parent.Name}
                 </button>
-                {!isExpanded ? <MdExpandMore onClick={() => onButtonClick()}/> : 
-                    <MdExpandLess onClick={() => onButtonClick()}/>}
+                {!isExpanded ? <MdExpandMore className="expand hierarchy" onClick={() => onButtonClick()}/> : 
+                    <MdExpandLess className="expand hierarchy" onClick={() => onButtonClick()}/>}
             </li>
-            {isExpanded ? <ul>
+            {isExpanded ? <ul className="hierarchy children">
                 {(childNodes.length > 0) ? childNodes.map((node: Node) => 
                     <BrowserNode parent={node}/>)
-                : <li>No further children</li>}
+                : <li><button disabled={true}>No further children</button></li>}
             </ul> : null }
         </div>
     )
@@ -37,6 +38,7 @@ const BrowserNode = (props: {parent: Node}) => {
 export const HierarchyBrowser = (props: {startNode: Node}) => {
     const [parentNode, setParent] = useState<Node|null>(null);
     const [childNodes, setChildren] = useState<Node[]>([]);
+    const [selectedNode, updateSelection] = useState<Node|null>(null);
 
     useEffect(() => {
         fetchParent(props.startNode.Id);
@@ -56,18 +58,26 @@ export const HierarchyBrowser = (props: {startNode: Node}) => {
         setChildren(response);
     }
 
+    const onButtonClick = (tagName: string, id: number) => {
+        const filter: Filter = createFilter(tagName, id, "hierarchy");
+    }
+
+    //with onclick update selection, add button adds filter
+    //disable button 
     return (
-        <div className="scrollable">
-            <ul className="hierarchy">
-                {(parentNode !== null) ? <li><button>{parentNode.Name}</button></li> : <li>No further parent</li>}
-                <ul className="start node">
-                    <li><button>{props.startNode.Name}</button></li>
-                    {(childNodes.length > 0) ? 
-                    <ul className="child node">
-                        {childNodes.map(n => <BrowserNode parent={n}/>)}
-                    </ul> : <li>No further children</li>}
+        <div className="hierarchy browser">
+            <h5>Browse hierarchy:</h5>
+            <ul className="scrollable hierarchy">
+                {(parentNode !== null) ? <li className="hierarchy node"><button>{parentNode.Name}</button></li> : 
+                    <li className="hierarchy node"><button disabled={true}>No further children</button></li>}
+                <ul>
+                    <li className="hierarchy node"><button>{props.startNode.Name}</button></li>
+                    {(childNodes.length > 0) ? <ul className="hierarchy children">
+                        {childNodes.map(n => <BrowserNode parent={n}/>)}</ul> :
+                        <ul><li className="hierarchy node"><button disabled={true}>No further children</button></li></ul>}
                 </ul>
             </ul>
+            <button className="add button hierarchy">Add filter</button>
         </div>
     )
 }

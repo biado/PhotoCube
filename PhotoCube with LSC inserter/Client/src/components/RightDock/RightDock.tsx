@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import '../../css/RightDock.css';
+import '../../css/RightDock/RightDock.css';
 import FileCount from './FileCount';
 import BrowsingModeChanger, { BrowsingModes } from './BrowsingModeChanger';
 import Dimensions from './Dimensions';

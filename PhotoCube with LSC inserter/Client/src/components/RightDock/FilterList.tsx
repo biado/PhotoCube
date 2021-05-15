@@ -1,6 +1,6 @@
 import React from 'react';
 import { Filter } from '../Filter';
-import '../../css/FilterList.css';
+import '../../css/RightDock/FilterList.css';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 
 export const FilterList = 
