@@ -39,8 +39,6 @@ export const HierarchyExplorer = () => {
 
     async function onSearch(e: React.MouseEvent<HTMLButtonElement, MouseEvent>){
         e.preventDefault();
-        //set input to lowercase! or maybe not :D
-        //return "no results" if response empty
         const response = await Fetcher.FetchNodeByName(input);
         const options = response.map((node: Node) => ({
             NodeId: node.Id,

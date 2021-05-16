@@ -14,11 +14,6 @@
   box-sizing: border-box;
 }
 
-.submit.button {
-  height: fit-content;
-  align-self: center;
-}
-
 .search.results {
   margin-top: 40px;
 }

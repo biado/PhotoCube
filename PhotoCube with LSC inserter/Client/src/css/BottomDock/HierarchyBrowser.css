@@ -35,6 +35,11 @@
   min-width: 45%;
 }
 
+.hierarchy.node button.active {
+  background-color: rgb(230, 230, 250);
+  border-radius: 2px;
+}
+
 .hierarchy.children {
   width: 100%;
 }

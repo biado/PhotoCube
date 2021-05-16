@@ -7,7 +7,6 @@
   padding-left: 12px;
   width: fit-content;
   display: flex;
-  align-items: center;
 }
 
 .filter.list {
@@ -22,6 +21,9 @@
   border: none;
   background: none;
   display: flex;
+  margin: 0;
+  padding: 0 5px 0 5px;
+  position: relative;
 }
 
 #clear-icon {
