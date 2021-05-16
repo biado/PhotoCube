@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../../css/BottomDock/HierarchyFilter.css';
+import { Filter } from '../../Filter';
 import Fetcher from '../ThreeBrowser/Fetcher';
 import { HierarchyBrowser } from './HierarchyBrowser';
 import { Node } from './Node';
@@ -17,7 +18,7 @@ const SearchResults = (props: {
     )
 }
 
-export const HierarchyExplorer = () => {
+export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
     const [input, updateInput] = useState<string>("");
     const [options, updateOptions] = useState<Option[]>([]);
     const [selectedNode, updateSelection] = useState<Node|null>(null);
@@ -56,7 +57,7 @@ export const HierarchyExplorer = () => {
             </form>
             <button className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
             {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }
-            {selectedNode !== null ? <HierarchyBrowser startNode={selectedNode}/> : null }
+            {selectedNode !== null ? <HierarchyBrowser startNode={selectedNode} activeFilters={props.activeFilters} onFiltersChanged={props.onFiltersChanged}/> : null }
         </div>
     )
 }

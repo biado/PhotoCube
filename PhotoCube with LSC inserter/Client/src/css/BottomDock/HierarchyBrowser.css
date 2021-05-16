@@ -9,11 +9,17 @@
   overflow: hidden;
   overflow-x: scroll;
   overflow-y: scroll;
-  padding-left: 0;
+  padding-left: 10px;
+  padding-top: 10px;
 }
 
 .hierarchy.browser h5 {
   font-weight: bold;
+}
+
+#parent label {
+  border-bottom-right-radius: 2px;
+  border-top-right-radius: 2px;
 }
 
 .hierarchy ul {
@@ -30,14 +36,21 @@
   margin-bottom: 2px;
 }
 
-.hierarchy.node button {
-  padding: 0 15px 0 15px;
+.hierarchy.node label {
+  background-color: rgb(239, 239, 239);
+  font: 400 13.3333px Arial;
+  border: none;
+  border-bottom-left-radius: 2px;
+  border-top-left-radius: 2px;
+  padding: 2px 10px 2px 0;
   min-width: 45%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
-.hierarchy.node button.active {
-  background-color: rgb(230, 230, 250);
-  border-radius: 2px;
+input[type="radio"] {
+  margin-top: 0;
 }
 
 .hierarchy.children {
@@ -48,10 +61,10 @@
   background-color: rgba(239, 239, 239, 0.877);
   align-self: center;
   color: rgb(20, 20, 20);
-  border: 1.6px outset rgb(133, 133, 133);
   width: 15px;
-  border-radius: 2px;
-  border-image: initial;
+  border-bottom-right-radius: 2px;
+  border-top-right-radius: 2px;
+  padding: 2px 0 2px 0;
 }
 
 .add.button.hierarchy {

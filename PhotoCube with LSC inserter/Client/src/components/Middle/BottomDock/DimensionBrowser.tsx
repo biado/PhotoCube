@@ -13,7 +13,7 @@ export const DimensionBrowser = (props: {onFiltersChanged: (filter: Filter) => v
             </div>
             <div className="hierarchy explorer">
                 <h4 className="Header">Hierarchy filter:</h4>
-                <HierarchyExplorer/>
+                <HierarchyExplorer activeFilters={props.activeFilters.filter(af => af.type === 'hierarchy')} onFiltersChanged={props.onFiltersChanged}/>
             </div>
         </div>
     )

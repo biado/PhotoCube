@@ -8,14 +8,10 @@ import { MdExpandMore, MdExpandLess } from 'react-icons/md';
 import '../../../css/BottomDock/HierarchyBrowser.css'
 
 const BrowserNode = 
-    (props: {node: Node, fetchChildren: () => Promise<any>, hideChildren: () => void}) => {
+    (props: {node: Node, fetchChildren: () => Promise<any>, 
+        hideChildren: () => void, select: (node: Node) => void}) => {
 
     const [isExpanded, expand] = useState(false);
-    const [isSelected, updateSelection] = useState(false);
-
-    const onButtonClick = () => {
-        updateSelection(!isSelected);
-    }
 
     const onExpand = () => {
         props.fetchChildren();
@@ -29,14 +25,10 @@ const BrowserNode =
 
     return (
         <li className="hierarchy node">
-            {isSelected ?
-            <button className="active" onClick={() => onButtonClick()}>
+            <label>
+                <input onClick={() => props.select(props.node)} type="radio" name="node"/>
                 {props.node.Name}
-            </button> 
-            : <button onClick={() => onButtonClick()}>
-                {props.node.Name}
-            </button> 
-            }
+            </label><br/>
             {!isExpanded ? 
             <MdExpandMore className="expand hierarchy" onClick={() => onExpand()}/>  
             :  <MdExpandLess className="expand hierarchy" onClick={() => onCollapse()}/>}
@@ -44,21 +36,27 @@ const BrowserNode =
     )
 }
 
-const BrowserNodeWithChildren = (props: {parent: Node, showChildren: boolean}) => {
+const BrowserNodeWithChildren = 
+    (props: {parent: Node, showChildren: boolean, select: (node: Node) => void}) => {
     const [childrenShown, showChildren] = useState(false);
     const [childNodes, setChildren] = useState<Node[]|null>(null);
 
     useEffect(() => {
+        //hide list of previous children
+        showChildren(false);
         if (props.showChildren) {
-            fetchChildren().then(() => showChildren(true));
+            //reset list of children before fetching
+            setChildren(null);
+            fetchChildren();
         }
-    }, [])
+    }, [props.parent])
 
     async function fetchChildren() {
         if (childNodes === null) {
-            const response = await fetchChildNodes(props.parent.Id);
-            setChildren(response);
-        }
+            await fetchChildNodes(props.parent.Id).then(response => {
+                setChildren(response);
+            });
+        } 
         showChildren(true);
     }
 
@@ -68,19 +66,22 @@ const BrowserNodeWithChildren = (props: {parent: Node, showChildren: boolean}) =
 
     return (
         <div className="hierarchy">
-            <BrowserNode node={props.parent} fetchChildren={fetchChildren} hideChildren={hideChildren}/>
+            <BrowserNode node={props.parent} fetchChildren={fetchChildren} hideChildren={hideChildren} select={props.select}/>
             {childrenShown ? 
             <ul className="hierarchy children">
-                {(childNodes!.length > 0) ? childNodes!.map((node: Node) => 
-                    <BrowserNodeWithChildren parent={node} showChildren={false}/>)
+                {(childNodes !== null) ? childNodes!.map((node: Node) => 
+                    <BrowserNodeWithChildren parent={node} showChildren={false} select={props.select}/>)
                     : <li><button disabled={true}>No further children</button></li>}
             </ul> : null }
         </div>
     )
 }
 
-export const HierarchyBrowser = (props: {startNode: Node}) => {
+export const HierarchyBrowser = 
+    (props: {startNode: Node, activeFilters: Filter[],
+         onFiltersChanged: (filter: Filter) => void}) => {
     const [parentNode, setParent] = useState<Node|null>(null);
+    const [selectedNode, updateSelection] = useState<Node|null>(null);
 
     useEffect(() => {
         fetchParent(props.startNode.Id);
@@ -94,22 +95,29 @@ export const HierarchyBrowser = (props: {startNode: Node}) => {
         }
     }
 
+    const onButtonClick = () => {
+        const filter: Filter = createFilter(selectedNode!.Name, selectedNode!.Id, "hierarchy");
+        if (!props.activeFilters.some(af => af.Id == filter.Id)) {
+            props.onFiltersChanged(filter);
+        }
+    }
+
     return (
         <div className="hierarchy browser">
             <h5>Browse hierarchy:</h5>
             <ul className="scrollable hierarchy">
-                {(parentNode !== null) ? <li className="hierarchy node"><button>{parentNode.Name}</button></li> : 
-                    <li className="hierarchy node"><button disabled={true}>No further parent</button></li>}
+                {(parentNode !== null) ? <li id="parent" className="hierarchy node"><label><input type="radio" name="node"/>{parentNode.Name}</label></li> 
+                : <li className="hierarchy node"><button disabled={true}>No further parent</button></li>}
                 <ul>
-                    <BrowserNodeWithChildren parent={props.startNode} showChildren={true}/> 
+                    <BrowserNodeWithChildren parent={props.startNode} showChildren={true} select={updateSelection}/> 
                 </ul>
             </ul>
-            <button className="add button hierarchy">Add filter</button>
+            <button className="add button hierarchy" disabled={selectedNode === null} onClick={() => onButtonClick()}>Add filter</button>
         </div>
     )
 }
 
-// utility function
+//utility function
 async function fetchChildNodes(nodeId: number){
     const response = await Fetcher.FetchChildNodes(nodeId);
     let children = [];

@@ -1,8 +1,30 @@
 import React, { Component } from 'react';
 import '../../css/Dimensions.css'
-import DimensionPickerModal from './DimensionPickerModal';
+import { Filter } from '../Filter';
 import PickedDimension from './PickedDimension';
 
+export const FilterDropdown = 
+    (props: {activeFilters: Filter[], onDimensionPicked: (dimension:PickedDimension) => void}) => {
+
+    const createDimension = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        console.log(e.currentTarget.value);
+        const filter: Filter = JSON.parse(e.currentTarget.value);
+        const dimension = ({
+            id: filter.Id,
+            name: filter.name,
+            type: filter.type
+        }) as PickedDimension;
+        props.onDimensionPicked(dimension);
+    }
+    
+    return (
+        <select className="Filter Selector" onChange={(e) => createDimension(e)}>
+            <option value="" selected disabled hidden>Select filter</option>
+            {props.activeFilters.map(af => 
+                <option value={JSON.stringify(af)}>{af.name}</option>)}
+        </select>
+    )
+}
 /**
  * Component repressenting a Dimension, can be either X, Y or Z based on this.props.xyz.
  * Used in RightDock to choose values for dimensions.
@@ -10,7 +32,8 @@ import PickedDimension from './PickedDimension';
 class Dimension extends Component<{
     xyz: string,
     onDimensionChanged:(dimName: string, dimension:PickedDimension) => void,
-    onClearAxis: (axisName:string) => void
+    onClearAxis: (axisName:string) => void,
+    activeFilters: Filter[]
     }>{
 
     state = {
@@ -21,16 +44,14 @@ class Dimension extends Component<{
     
     render(){
         return(
-            <div>
+            <div className="Dimension">
                 <p>{this.props.xyz}-Axis:</p><br/>
                 {this.renderDimensionTypeAndName()}
-                <div className="width100">
-                    <div className="displayInline width50"><DimensionPickerModal onDimensionPicked={this.dimensionPicked}/></div>
-                    <div className="displayInline width50">
-                        <button 
-                            className="width100" 
-                            onClick={() => this.onClearAxis(this.props.xyz)}>Clear</button>
-                    </div>
+                <div className="Dimension Selector">
+                    <FilterDropdown activeFilters={this.props.activeFilters} onDimensionPicked={this.dimensionPicked}/>
+                    <button onClick={() => this.onClearAxis(this.props.xyz)}>
+                        Clear
+                    </button>
                 </div>
             </div>
         );

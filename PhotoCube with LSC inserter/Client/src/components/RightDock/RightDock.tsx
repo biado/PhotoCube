@@ -36,7 +36,7 @@ export default class RightDock extends React.Component<{
             <div id="RightDock">
                 <FileCount className={visibility} ref={this.fileCount}/>
                 <BrowsingModeChanger ref={this.browsingModeChanger} onBrowsingModeChanged={this.props.onBrowsingModeChanged} />
-                <Dimensions className={visibility} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/>
+                <Dimensions className={visibility} activeFilters={this.props.activeFilters} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/>
                 <FilterList className ={visibility} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved}/>
             </div>
         );

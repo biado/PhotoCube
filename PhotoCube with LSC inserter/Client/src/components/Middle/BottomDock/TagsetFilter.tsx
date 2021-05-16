@@ -43,7 +43,7 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
     )
 }
 
-// utility function
+//utility function
 export const createFilter = (tagName: string, id: number, type: string) => {
     const filter: Filter = {
         Id: id,
