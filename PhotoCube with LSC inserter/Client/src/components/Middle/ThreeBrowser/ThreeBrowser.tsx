@@ -16,6 +16,7 @@ import { BrowsingState } from './BrowsingState';
 import PickedDimension from '../../RightDock/PickedDimension';
 import { Colors } from './Colors';
 import { Filter } from '../../Filter';
+import { Node } from '../BottomDock/Node';
 
 const OrbitControls = require('three-orbitcontrols')
 
@@ -507,9 +508,8 @@ export default class ThreeBrowser extends React.Component<{
 
         switch(dimension.type){
             case "hierarchy":
-                let hierarchy: Hierarchy = await Fetcher.FetchHierarchy(dimension.id);
-                let rootNode: HierarchyNode = await Fetcher.FetchNode(hierarchy.RootNodeId);
-                axis.TitleString = hierarchy.Name + " (hierarchy)";
+                let rootNode: HierarchyNode = await Fetcher.FetchNode(dimension.id);
+                axis.TitleString = rootNode.Tag.Name + " (hierarchy)";
                 axis.AddHierarchy(rootNode, this.addTextCallback, this.addLineCallback);
                 break;
             case "tagset":

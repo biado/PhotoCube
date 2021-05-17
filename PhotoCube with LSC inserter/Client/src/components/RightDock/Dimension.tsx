@@ -7,7 +7,6 @@ export const FilterDropdown =
     (props: {activeFilters: Filter[], onDimensionPicked: (dimension:PickedDimension) => void}) => {
 
     const createDimension = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        console.log(e.currentTarget.value);
         const filter: Filter = JSON.parse(e.currentTarget.value);
         const dimension = ({
             id: filter.Id,
