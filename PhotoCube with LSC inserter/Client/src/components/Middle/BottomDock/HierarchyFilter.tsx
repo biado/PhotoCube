@@ -1,3 +1,4 @@
+import { time, timeStamp } from 'console';
 import React, { useState } from 'react';
 import '../../../css/BottomDock/HierarchyFilter.css';
 import { Filter } from '../../Filter';
@@ -8,6 +9,7 @@ import { Option } from './Option';
 
 const SearchResults = (props: {
     options: Option[], onOptionSelected: (e: React.MouseEvent<HTMLSelectElement, MouseEvent>) => void}) => {
+
     return(
         <div className="search results">
             <h5>{props.options.length} occurence(s) found:</h5>
@@ -28,7 +30,6 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
     }
 
     const onOptionSelected = (e: React.MouseEvent<HTMLSelectElement, MouseEvent>) => {
-        e.preventDefault();
         const selected: Option = JSON.parse(e.currentTarget.value);
         const node: Node = {
             Id: selected.NodeId,
@@ -36,6 +37,7 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
             ParentNode: null
         }
         updateSelection(node);
+        console.log(selected);
     }
 
     async function onSearch(e: React.MouseEvent<HTMLButtonElement, MouseEvent>){

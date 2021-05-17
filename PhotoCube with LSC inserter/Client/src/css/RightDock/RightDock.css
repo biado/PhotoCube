@@ -1,17 +1,20 @@
-#RightDock{
-    background-color: rgb(20, 20, 20);
-    height: 100%!;
-    margin:0;
-    padding:0;
+#RightDock {
+  background-color: rgb(20, 20, 20);
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.Header{
-    padding: 3%;
-    color: rgb(200, 200, 200);
-    background-color: rgb(40, 40, 40);
-    margin:0;
+.Header {
+  padding: 3%;
+  color: rgb(200, 200, 200);
+  background-color: rgb(40, 40, 40);
+  margin: 0;
 }
 
-.Content{
-    margin: 3%;
+.Content {
+  margin: 3%;
 }

@@ -6,9 +6,7 @@
   height: 300px;
   margin-top: 10px;
   margin-bottom: 0;
-  overflow: hidden;
   overflow-x: scroll;
-  overflow-y: scroll;
   padding-left: 10px;
   padding-top: 10px;
 }

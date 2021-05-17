@@ -9,12 +9,24 @@
   display: flex;
 }
 
+#filterlist-flexbox {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#filterlist-container {
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
 .filter.list {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   list-style: none;
   padding-left: 5px;
+  margin-top: 10px;
 }
 
 .clear.button {

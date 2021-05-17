@@ -97,12 +97,7 @@ namespace ObjectCubeServer.Controllers
                     .FirstOrDefault();
                 parentNode = GetParentNode(childNode);
             }
-            if (parentNode == null)
-            {
-                return null;
-            }
-            List<PublicNode> result = new List<PublicNode>(){ parentNode };
-            return Ok(JsonConvert.SerializeObject(result));
+            return Ok(JsonConvert.SerializeObject(parentNode));
         }
 
         // GET: api/Node/123/Children

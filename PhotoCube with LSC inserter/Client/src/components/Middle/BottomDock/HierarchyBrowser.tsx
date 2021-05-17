@@ -44,15 +44,14 @@ const BrowserNodeWithChildren =
     useEffect(() => {
         //hide list of previous children
         showChildren(false);
+        //show immediate children of startnode
         if (props.showChildren) {
-            //reset list of children before fetching
-            setChildren(null);
-            fetchChildren();
+            getChildren();
         }
-    }, [props.parent])
+    }, [props.parent.Id])
 
-    async function fetchChildren() {
-        if (childNodes === null) {
+    async function getChildren() {
+        if (props.showChildren || childNodes === null) {
             await fetchChildNodes(props.parent.Id).then(response => {
                 setChildren(response);
             });
@@ -66,10 +65,10 @@ const BrowserNodeWithChildren =
 
     return (
         <div className="hierarchy">
-            <BrowserNode node={props.parent} fetchChildren={fetchChildren} hideChildren={hideChildren} select={props.select}/>
+            <BrowserNode node={props.parent} fetchChildren={getChildren} hideChildren={hideChildren} select={props.select}/>
             {childrenShown ? 
             <ul className="hierarchy children">
-                {(childNodes !== null) ? childNodes!.map((node: Node) => 
+                {(childNodes !== null && childNodes!.length > 0) ? childNodes!.map((node: Node) => 
                     <BrowserNodeWithChildren parent={node} showChildren={false} select={props.select}/>)
                     : <li><button disabled={true}>No further children</button></li>}
             </ul> : null }
@@ -85,19 +84,20 @@ export const HierarchyBrowser =
 
     useEffect(() => {
         fetchParent(props.startNode.Id);
-    }, [props.startNode])
+    }, [props.startNode.Id])
 
     async function fetchParent(nodeId: number) {
         const response = await Fetcher.FetchParentNode(nodeId);
-        if (response.length > 0) {
-            const parent = response[0]
-            setParent(parent);
+        if (response !== null) {
+            setParent(response);
+        } else {
+            setParent(null);
         }
     }
 
     const onButtonClick = () => {
         const filter: Filter = createFilter(selectedNode!.Name, selectedNode!.Id, "hierarchy");
-        if (!props.activeFilters.some(af => af.Id == filter.Id)) {
+        if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
         }
     }
