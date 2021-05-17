@@ -1,10 +1,16 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
+import { useState } from 'react';
 import '../../css/Dimensions.css'
 import { Filter } from '../Filter';
 import PickedDimension from './PickedDimension';
 
 export const FilterDropdown = 
     (props: {activeFilters: Filter[], onDimensionPicked: (dimension:PickedDimension) => void}) => {
+    const [options, updateOptions] = useState<Filter[]>([]);
+
+    useEffect(() => {
+        updateOptions(props.activeFilters.slice().reverse());
+    }, [props.activeFilters])
 
     const createDimension = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const filter: Filter = JSON.parse(e.currentTarget.value);
@@ -19,7 +25,7 @@ export const FilterDropdown =
     return (
         <select className="Filter Selector" onChange={(e) => createDimension(e)}>
             <option value="" selected disabled hidden>Select filter</option>
-            {props.activeFilters.map(af => 
+            {options.map(af => 
                 <option value={JSON.stringify(af)}>{af.name}</option>)}
         </select>
     )
