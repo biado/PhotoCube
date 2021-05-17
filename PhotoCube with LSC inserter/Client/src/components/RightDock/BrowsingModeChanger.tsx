@@ -1,5 +1,5 @@
 import React, { Component, SyntheticEvent } from 'react';
-import '../../css/BrowsingModeChanger.css';
+import '../../css/RightDock/BrowsingModeChanger.css';
 
 /**
  * BrowserModeChanger is a Component where the user can pick the current browsingmode.

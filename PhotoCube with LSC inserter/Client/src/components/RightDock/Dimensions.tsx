@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import '../../css/Dimensions.css';
+import '../../css/RightDock/Dimensions.css';
 import { Filter } from '../Filter';
 import Dimension from './Dimension';
 import PickedDimension from './PickedDimension';

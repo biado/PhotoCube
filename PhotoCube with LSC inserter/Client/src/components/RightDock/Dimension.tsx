@@ -1,6 +1,6 @@
 import React, { Component, useEffect } from 'react';
 import { useState } from 'react';
-import '../../css/Dimensions.css'
+import '../../css/RightDock/Dimensions.css'
 import { Filter } from '../Filter';
 import PickedDimension from './PickedDimension';
 
