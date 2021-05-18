@@ -17,8 +17,8 @@ const SearchResults = (props: {
     return(
         <div className="search results">
             <h5>{props.options.length} occurence(s) found:</h5>
-            <select onChange={e => props.onOptionSelected(e)} id="node-dropdown">
-                <option key={0} value="" selected disabled hidden>Select filter</option>
+            <select defaultValue="" onChange={e => props.onOptionSelected(e)} id="node-dropdown">
+                <option key={0} value="" disabled hidden>Select filter</option>
                 {props.options.map(o => <option key={o.NodeId} value={JSON.stringify(o)}>{o.NodeName}:{o.ParentnodeName}</option>)}
             </select> 
         </div>

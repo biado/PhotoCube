@@ -82,7 +82,7 @@ namespace ObjectCubeServer.Controllers
                 }
                 return Ok(JsonConvert.SerializeObject(result));
             }
-            return null;
+            return NotFound();
         }
 
         // GET: api/Node/123/Parent
@@ -112,10 +112,6 @@ namespace ObjectCubeServer.Controllers
                     .Where(n => n.Id == nodeId)
                     .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag)cn.Tag).Name)))
                     .FirstOrDefault();
-            }
-            if (childNodes == null)
-            {
-                return null;
             }
             return Ok(JsonConvert.SerializeObject(childNodes));
         }
