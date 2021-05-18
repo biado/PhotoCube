@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import '../../css/RightDock/RightDock.css';
 import FileCount from './FileCount';
 import BrowsingModeChanger, { BrowsingModes } from './BrowsingModeChanger';

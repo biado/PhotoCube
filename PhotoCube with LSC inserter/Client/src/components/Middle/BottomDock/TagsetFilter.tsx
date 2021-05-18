@@ -35,7 +35,7 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
 
     const updateDropdown = (e: Option) => {
         updateSelection({Id: parseInt(e.value), Name: e.label!.toString(), Tags: null});
-        disableButton(props.activeFilters.some(af => af.name == e.label!.toString()));
+        disableButton(props.activeFilters.some(af => af.Id === parseInt(e.value)));
     }
 
     return (

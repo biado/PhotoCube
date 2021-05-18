@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import '../../css/LeftDock.css';
-import { Filter } from '../Filter';
 
 /**
  * LeftDock is the left portion of the interface.

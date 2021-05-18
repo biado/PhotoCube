@@ -2,7 +2,6 @@ import React, { Component, useEffect } from 'react';
 import { useState } from 'react';
 import '../../css/RightDock/Dimensions.css'
 import { Filter } from '../Filter';
-import { Option } from '../Middle/BottomDock/Option';
 import PickedDimension from './PickedDimension';
 
 /**

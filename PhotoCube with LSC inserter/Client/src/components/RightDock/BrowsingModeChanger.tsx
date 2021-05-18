@@ -1,4 +1,4 @@
-import React, { Component, SyntheticEvent } from 'react';
+import React from 'react';
 import '../../css/RightDock/BrowsingModeChanger.css';
 
 /**

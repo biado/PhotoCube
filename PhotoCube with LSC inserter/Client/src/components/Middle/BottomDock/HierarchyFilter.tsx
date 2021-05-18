@@ -1,4 +1,3 @@
-import { time, timeStamp } from 'console';
 import React, { useState } from 'react';
 import '../../../css/BottomDock/HierarchyFilter.css';
 import { Filter } from '../../Filter';
