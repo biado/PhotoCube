@@ -3,6 +3,9 @@ import { Filter } from '../Filter';
 import '../../css/RightDock/FilterList.css';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 
+/**
+ * List component used in the right dock to visualise all active filters.
+ */
 export const FilterList = 
     (props: {activeFilters: Filter[], className: string, onFilterRemoved: (filterName: string) => void}) => {
     return (

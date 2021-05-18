@@ -4,6 +4,10 @@ import '../../css/RightDock/Dimensions.css'
 import { Filter } from '../Filter';
 import PickedDimension from './PickedDimension';
 
+/**
+ * Dropdown component associated with each one of the three dimensions.
+ * One active filter can be selected and projected on an axis. 
+ */
 export const FilterDropdown = 
     (props: {activeFilters: Filter[], onDimensionPicked: (dimension:PickedDimension) => void}) => {
     const [options, updateOptions] = useState<Filter[]>([]);
@@ -31,7 +35,7 @@ export const FilterDropdown =
     )
 }
 /**
- * Component repressenting a Dimension, can be either X, Y or Z based on this.props.xyz.
+ * Component representing a Dimension, can be either X, Y or Z based on this.props.xyz.
  * Used in RightDock to choose values for dimensions.
  */
 class Dimension extends Component<{

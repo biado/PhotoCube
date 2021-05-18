@@ -1,7 +1,6 @@
 import React, { Component, SyntheticEvent } from 'react';
 import '../../../css/GridBrowser.css';
-import CubeObject from '../ThreeBrowser/CubeObject';
-import Fetcher from '../ThreeBrowser/Fetcher';
+import CubeObject from '../CubeBrowser/CubeObject';
 import { BrowsingModes } from '../../RightDock/BrowsingModeChanger';
 
 /**

@@ -4,6 +4,10 @@ import { HierarchyExplorer } from './HierarchyFilter';
 import { TagsetDropdown } from './TagsetFilter';
 import '../../../css/BottomDock/DimensionBrowser.css'
 
+/**
+ * Component representing the dimension browser in the bottom dock. 
+ * Contains functionality to add tagset and hierarchy filters. 
+ */
 export const DimensionBrowser = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[] }) => {
     return (
         <div id="dimension-browser">

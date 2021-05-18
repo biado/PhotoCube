@@ -5,15 +5,19 @@ import { VscBrowser } from 'react-icons/vsc';
 import { DimensionBrowser } from './DimensionBrowser';
 import { Filter } from '../../Filter';
 
+/**
+ * Component representing the bottom dock. 
+ * Can be expanded and collapsed, hiding the CubeBrowser.
+ */
 export const BottomDock = 
     (props: {onFiltersChanged: (filter: Filter) => void,
         activeFilters: Filter[], hideControls: boolean}) => {
     const [isExpanded, expand] = useState(false);
 
-    //let visibility: string = props.hideControls ? "hide" : "";
+    let visibility: string = props.hideControls ? "hide" : "";
 
     return(
-        <div className={isExpanded ? "bottom dock expanded" : "bottom dock"} >
+        <div className={isExpanded ? "bottom dock expanded" : "bottom dock " + visibility} >
             <div className="dimensionbrowser header">
                 <div className="dock name">
                     <VscBrowser id="browser-icon" />

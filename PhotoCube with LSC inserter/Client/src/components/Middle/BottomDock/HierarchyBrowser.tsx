@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import Fetcher from '../ThreeBrowser/Fetcher';
+import Fetcher from '../CubeBrowser/Fetcher';
 import { Node } from './Node';
 import { createFilter } from './TagsetFilter';
 import { Filter } from '../../Filter';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
 import '../../../css/BottomDock/HierarchyBrowser.css'
 
+/**
+ * Component for displaying a single node whose immediate children can be shown or hidden.
+ */
 const BrowserNode = 
     (props: {node: Node, fetchChildren: () => Promise<any>, 
         hideChildren: () => void, onSelect: (node: Node) => void}) => {
@@ -36,6 +39,9 @@ const BrowserNode =
     )
 }
 
+/**
+ * Component for fetching and displaying a node's immediate children. 
+ */
 const BrowserNodeWithChildren = 
     (props: {parent: Node, showChildren: boolean, onSelect: (node: Node) => void}) => {
     const [childrenShown, showChildren] = useState(false);
@@ -76,6 +82,10 @@ const BrowserNodeWithChildren =
     )
 }
 
+/**
+ * Component for browsing a hierarchy.
+ * A node is selected from the search results and its immediate parent and children are shown.
+ */
 export const HierarchyBrowser = 
     (props: {startNode: Node, activeFilters: Filter[],
          onFiltersChanged: (filter: Filter) => void}) => {

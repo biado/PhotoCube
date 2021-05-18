@@ -1,9 +1,9 @@
 import React, { Component, SyntheticEvent } from 'react';
-import CubeObject from '../ThreeBrowser/CubeObject';
-import Fetcher from '../ThreeBrowser/Fetcher';
+import CubeObject from '../CubeBrowser/CubeObject';
+import Fetcher from '../CubeBrowser/Fetcher';
 import '../../../css/CardBrowser.css';
 import { BrowsingModes } from '../../RightDock/BrowsingModeChanger';
-import Tag from '../ThreeBrowser/Tag';
+import Tag from '../CubeBrowser/Tag';
 import { env } from 'process';
 
 /**

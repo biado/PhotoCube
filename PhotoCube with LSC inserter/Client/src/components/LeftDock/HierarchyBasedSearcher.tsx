@@ -1,8 +1,8 @@
 import React from 'react';
 import { Filter } from '../Filter';
-import Fetcher from '../Middle/ThreeBrowser/Fetcher';
-import Hierarchy from '../Middle/ThreeBrowser/Hierarchy';
-import HierarchyNode from '../Middle/ThreeBrowser/HierarchyNode';
+import Fetcher from '../Middle/CubeBrowser/Fetcher';
+import Hierarchy from '../Middle/CubeBrowser/Hierarchy';
+import HierarchyNode from '../Middle/CubeBrowser/HierarchyNode';
 
 /**
  * Hierarchy based faceted search component.

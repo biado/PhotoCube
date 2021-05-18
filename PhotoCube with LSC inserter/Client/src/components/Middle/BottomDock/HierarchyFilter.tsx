@@ -2,11 +2,16 @@ import { time, timeStamp } from 'console';
 import React, { useState } from 'react';
 import '../../../css/BottomDock/HierarchyFilter.css';
 import { Filter } from '../../Filter';
-import Fetcher from '../ThreeBrowser/Fetcher';
+import Fetcher from '../CubeBrowser/Fetcher';
 import { HierarchyBrowser } from './HierarchyBrowser';
 import { Node } from './Node';
 import { Option } from './Option';
 
+
+/**
+ * Component for displaying search results.
+ * Hierarchy nodes associated with the same tag will be displayed as separate options. 
+ */
 const SearchResults = (props: {
     options: Option[], onOptionSelected: (e: React.MouseEvent<HTMLSelectElement, MouseEvent>) => void}) => {
 
@@ -20,6 +25,10 @@ const SearchResults = (props: {
     )
 }
 
+/**
+ * Component for browsing hierarchies and adding filters.
+ * Consists of a search field, a search results component and the hierarchy browser.
+ */
 export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
     const [input, updateInput] = useState<string>("");
     const [options, updateOptions] = useState<Option[]>([]);

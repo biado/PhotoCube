@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Filter } from '../../Filter';
-import Fetcher from '../ThreeBrowser/Fetcher';
-import Tagset from '../ThreeBrowser/Tagset';
+import Fetcher from '../CubeBrowser/Fetcher';
+import Tagset from '../CubeBrowser/Tagset';
 import Dropdown, { Option } from 'react-dropdown';
 import 'react-dropdown/style.css';
 import '../../../css/BottomDock/TagsetFilter.css';
 
+/**
+ * Component for browsing and adding tagset filters. 
+ */
 export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
 
     const [options, setDropdownOptions] = useState<Option[]>([]);

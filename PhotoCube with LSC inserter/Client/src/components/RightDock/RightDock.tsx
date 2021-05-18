@@ -3,14 +3,13 @@ import '../../css/RightDock/RightDock.css';
 import FileCount from './FileCount';
 import BrowsingModeChanger, { BrowsingModes } from './BrowsingModeChanger';
 import Dimensions from './Dimensions';
-import HierarchyBrowser from './HierarchyBrowser';
 import PickedDimension from './PickedDimension';
 import { FilterList } from './FilterList';
 import { Filter } from '../Filter';
 
 /**
  * RightDock is the right portion of the interface.
- * PhotoCubeClient.tsx contains: LeftDock, Middle and RightDock.
+ * PhotoCubeClient.tsx contains: LeftDock, Middle, including Bottom Dock, and RightDock.
  */
 export default class RightDock extends React.Component<{
         //Props contract:
@@ -23,7 +22,6 @@ export default class RightDock extends React.Component<{
     }>{
 
     private fileCount = React.createRef<FileCount>();
-    private hierarchyBrowser = React.createRef<HierarchyBrowser>();
     private browsingModeChanger = React.createRef<BrowsingModeChanger>();
 
     constructor(props: any){
@@ -44,15 +42,9 @@ export default class RightDock extends React.Component<{
 
     onDimensionChanged = (dimName: string, dimension:PickedDimension) => {
         this.props.onDimensionChanged(dimName, dimension);
-        if(dimension.type == "hierarchy"){
-            if(this.hierarchyBrowser.current) this.hierarchyBrowser.current.RenderHierarchy(dimName, dimension);
-        }else if(dimension.type == "tagset"){
-            if(this.hierarchyBrowser.current) this.hierarchyBrowser.current.ClearHierarchy(dimName);
-        }
     }
 
     onClearAxis = (axisName: string) => {
-        if(this.hierarchyBrowser.current){ this.hierarchyBrowser.current.ClearHierarchy(axisName); }
         this.props.onClearAxis(axisName);
     }
 

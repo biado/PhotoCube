@@ -16,7 +16,7 @@ export default interface ICell{
 }
 
 /**
- * Repressents a Cell in the hypercube in the ThreeBrowser.
+ * Repressents a Cell in the hypercube in the CubeBrowser.
  */
 export default class Cell{
     //Reference to Scene.
