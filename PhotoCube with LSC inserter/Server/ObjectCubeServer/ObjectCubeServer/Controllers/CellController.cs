@@ -38,159 +38,286 @@ namespace ObjectCubeServer.Controllers
          *     &filters=[{"type":"tag","tagId":42,"nodeId":0}]
          * 
         */
-        public IActionResult Get(string xAxis, string yAxis, string zAxis, string filters)
+        public IActionResult Get(string xAxis, string yAxis, string zAxis, string filters, string currentPage, string pageSize)
         {
-            bool xDefined = xAxis != null;
-            bool yDefined = yAxis != null;
-            bool zDefined = zAxis != null;
-            bool filtersDefined = filters != null;
-            //Parsing:
-            ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : null;
-            ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : null;
-            ParsedAxis axisZ = zDefined ? JsonConvert.DeserializeObject<ParsedAxis>(zAxis) : null;
-            List<ParsedFilter> filtersList = filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
-            //Extracting cubeObjects:
-            List<List<CubeObject>> xAxisCubeObjects = getAllCubeObjectsFromAxis(xDefined, axisX);
-            List<List<CubeObject>> yAxisCubeObjects = getAllCubeObjectsFromAxis(yDefined, axisY);
-            List<List<CubeObject>> zAxisCubeObjects = getAllCubeObjectsFromAxis(zDefined, axisZ);
-            //Creating Cells:
-            List<Cell> cells = new List<Cell>();
+            using (var coContext = new ObjectContext())
+            {
+                bool xDefined = xAxis != null;
+                bool yDefined = yAxis != null;
+                bool zDefined = zAxis != null;
+                bool filtersDefined = filters != null;
+                //Parsing:
+                ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : null;
+                ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : null;
+                ParsedAxis axisZ = zDefined ? JsonConvert.DeserializeObject<ParsedAxis>(zAxis) : null;
+                List<ParsedFilter> filtersList =
+                    filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
+                int currentPageNumber = parseCurrentPage(currentPage);
+                int pageSizeNumber = parsePageSize(pageSize);
+                var skip = (currentPageNumber - 1) * pageSizeNumber;
 
-            if (xDefined && yDefined && zDefined) //XYZ
-            {
-                cells =
-                    xAxisCubeObjects.SelectMany((colist1, index1) =>
-                    yAxisCubeObjects.SelectMany((colist2, index2) =>
-                    zAxisCubeObjects.Select((colist3, index3) => new Cell()
+                //Creating Cells:
+                List<Cell> cells = new List<Cell>();
+
+                Page<PublicCell> result = instantiatePageResult(currentPageNumber, pageSizeNumber);
+                // If there are no axis or filters, it means it will call for the whole data set.
+                // We don't want to get all 190K cubeObjects in this case, but get only small number (1st page) and return fast.
+                if (!xDefined && !yDefined && !zDefined && !filtersDefined)
+                {
+                    result.FileCount = coContext.CubeObjects.Count();
+                    var totalPages = (double) result.FileCount / pageSizeNumber;
+                    result.PageCount = (int) Math.Ceiling(totalPages);
+
+                    cells = new List<Cell>()
                     {
-                        x = index1 + 1,
-                        y = index2 + 1,
-                        z = index3 + 1,
-                        CubeObjects = colist1
-                            .Where(co => colist2.Exists(co2 => co2.Id == co.Id) && //Where co is in colist2 and in colist3
-                            colist3.Exists(co3 => co3.Id == co.Id))
-                            .ToList()
-                    }))).ToList();
-            }
-            else if (xDefined && yDefined)  //XY
-            {
-                cells =
-                    xAxisCubeObjects.SelectMany((colist1, index1) =>
-                    yAxisCubeObjects.Select((colist2, index2) =>
-                    new Cell()
+                        new Cell()
+                        {
+                            x = 1,
+                            y = 1,
+                            z = 1,
+                            CubeObjects = coContext.CubeObjects.Skip(skip).Take(pageSizeNumber).ToList()
+                        }
+                    };
+                    // Convert cells to publicCells
+                    result.Results = cells.Select(c => c.GetPublicCell()).ToList();
+
+                    //Return OK with json result:
+                    return Ok(JsonConvert.SerializeObject(result,
+                        new JsonSerializerSettings() {ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
+                }
+
+                IEnumerable<CubeObject> filteredCubeObjects = coContext.CubeObjects.Include(co => co.ObjectTagRelations);
+                //Filtering:
+                if (filtersDefined && filtersList.Count > 0)
+                {
+                    //Devide filters:
+                    List<ParsedFilter> tagFilters = filtersList.Where(f => f.type.Equals("tag")).ToList();
+                    List<ParsedFilter> hierarchyFilters = filtersList.Where(f => f.type.Equals("hierarchy")).ToList();
+
+                    //Apply filters:
+                    if (tagFilters.Count > 0)
                     {
-                        x = index1 + 1,
-                        y = index2 + 1,
-                        z = 0,
-                        CubeObjects = colist1
-                            .Where(co => colist2.Exists(co2 => co2.Id == co.Id)) //Where co is in colist2 as well
-                            .ToList()
-                    })).ToList();
-            }
-            else if (xDefined && zDefined)  //XZ
-            {
-                cells =
-                    xAxisCubeObjects.SelectMany((colist1, index1) =>
-                    zAxisCubeObjects.Select((colist2, index2) =>
-                    new Cell()
-                    {
-                        x = index1 + 1,
-                        y = 0,
-                        z = index2 + 1,
-                        CubeObjects = colist1
-                            .Where(co => colist2.Exists(co2 => co2.Id == co.Id)) //Where co is in colist2 as well
-                            .ToList()
-                    })).ToList();
-            }
-            else if (yDefined && zDefined)  //YZ
-            {
-                cells =
-                    yAxisCubeObjects.SelectMany((colist1, index1) =>
-                    zAxisCubeObjects.Select((colist2, index2) =>
-                    new Cell()
-                    {
-                        x = 0,
-                        y = index1 + 1,
-                        z = index2 + 1,
-                        CubeObjects = colist1
-                            .Where(co => colist2.Exists(co2 => co2.Id == co.Id)) //Where co is in colist2 as well
-                            .ToList()
-                    })).ToList();
-            }
-            else if (xDefined)               //X
-            {
-                cells =
-                    xAxisCubeObjects.Select((colist1, index1) =>
-                    new Cell()
-                    {
-                        x = index1 + 1,
-                        y = 1,
-                        z = 0,
-                        CubeObjects = colist1
-                    }).ToList();
-            }
-            else if (yDefined)                //Y
-            {
-                cells =
-                    yAxisCubeObjects.Select((colist1, index1) =>
-                    new Cell()
-                    {
-                        x = 1,
-                        y = index1 + 1,
-                        z = 0,
-                        CubeObjects = colist1
-                    }).ToList();
-            }
-            else if (zDefined)                //Z
-            {
-                cells =
-                    zAxisCubeObjects.Select((colist1, index1) =>
-                    new Cell()
-                    {
-                        x = 0,
-                        y = 1,
-                        z = index1 + 1,
-                        CubeObjects = colist1
-                    }).ToList();
-            }
-            else if (!xDefined && !yDefined && !zDefined) //If X Y and Z are not defined, show all:
-            {
-                cells = new List<Cell>(){
-                    new Cell() {
-                        x = 1,
-                        y = 1,
-                        z = 1,
-                        CubeObjects = getAllCubeObjects()
+                        filteredCubeObjects = filterCubeObjectsWithTagFilters(filteredCubeObjects, tagFilters);
                     }
-                };
-            }
-            //If cells have no cubeObjects, remove them:
-            cells.RemoveAll(c => c.CubeObjects.Count == 0);
 
-            //Filtering:
-            if(filtersDefined && filtersList.Count > 0)
+                    if (hierarchyFilters.Count > 0)
+                    {
+                        filteredCubeObjects =
+                            filterCubeObjectsWithHierarchyFilters(filteredCubeObjects, hierarchyFilters);
+                    }
+                }
+
+                //Extracting cubeObjects:
+                List<List<CubeObject>> xAxisCubeObjects = getAllCubeObjectsFromAxis(xDefined, axisX, filteredCubeObjects);
+                List<List<CubeObject>> yAxisCubeObjects = getAllCubeObjectsFromAxis(yDefined, axisY, filteredCubeObjects);
+                List<List<CubeObject>> zAxisCubeObjects = getAllCubeObjectsFromAxis(zDefined, axisZ, filteredCubeObjects);
+
+                if (xDefined && yDefined && zDefined) //XYZ
+                {
+                    cells =
+                        xAxisCubeObjects.SelectMany((colist1, index1) =>
+                            yAxisCubeObjects.SelectMany((colist2, index2) =>
+                                zAxisCubeObjects.Select((colist3, index3) => new Cell()
+                                {
+                                    x = index1 + 1,
+                                    y = index2 + 1,
+                                    z = index3 + 1,
+                                    CubeObjects = colist1.Intersect(colist2).Intersect(colist3).Skip(skip).Take(pageSizeNumber).ToList()
+                                }))).ToList();
+                }
+                else if (xDefined && yDefined) //XY
+                {
+                    cells =
+                        xAxisCubeObjects.SelectMany((colist1, index1) =>
+                            yAxisCubeObjects.Select((colist2, index2) =>
+                                new Cell()
+                                {
+                                    x = index1 + 1,
+                                    y = index2 + 1,
+                                    z = 0,
+                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSizeNumber).ToList() //Where co is in colist2 as well
+                                })).ToList();
+                }
+                else if (xDefined && zDefined) //XZ
+                {
+                    cells =
+                        xAxisCubeObjects.SelectMany((colist1, index1) =>
+                            zAxisCubeObjects.Select((colist2, index2) =>
+                                new Cell()
+                                {
+                                    x = index1 + 1,
+                                    y = 0,
+                                    z = index2 + 1,
+                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSizeNumber).ToList() //Where co is in colist2 as well
+                                })).ToList();
+                }
+                else if (yDefined && zDefined) //YZ
+                {
+                    cells =
+                        yAxisCubeObjects.SelectMany((colist1, index1) =>
+                            zAxisCubeObjects.Select((colist2, index2) =>
+                                new Cell()
+                                {
+                                    x = 0,
+                                    y = index1 + 1,
+                                    z = index2 + 1,
+                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSizeNumber).ToList()
+                                })).ToList();
+                }
+                else if (xDefined) //X
+                {
+                    cells =
+                        xAxisCubeObjects.Select((colist1, index1) =>
+                            new Cell()
+                            {
+                                x = index1 + 1,
+                                y = 1,
+                                z = 0,
+                                CubeObjects = colist1.Skip(skip).Take(pageSizeNumber).ToList()
+                            }).ToList();
+                }
+                else if (yDefined) //Y
+                {
+                    cells =
+                        yAxisCubeObjects.Select((colist1, index1) =>
+                            new Cell()
+                            {
+                                x = 1,
+                                y = index1 + 1,
+                                z = 0,
+                                CubeObjects = colist1.Skip(skip).Take(pageSizeNumber).ToList()
+                            }).ToList();
+                }
+                else if (zDefined) //Z
+                {
+                    cells =
+                        zAxisCubeObjects.Select((colist1, index1) =>
+                            new Cell()
+                            {
+                                x = 0,
+                                y = 1,
+                                z = index1 + 1,
+                                CubeObjects = colist1.Skip(skip).Take(pageSizeNumber).ToList()
+                            }).ToList();
+                }
+                else if (!xDefined && !yDefined && !zDefined) //If X Y and Z are not defined, show all:
+                {
+                    cells = new List<Cell>()
+                    {
+                        new Cell()
+                        {
+                            x = 1,
+                            y = 1,
+                            z = 1,
+                            CubeObjects = filteredCubeObjects.Skip(skip).Take(pageSizeNumber).ToList()
+                        }
+                    };
+                }
+
+                //If cells have no cubeObjects, remove them:
+                cells.RemoveAll(c => !c.CubeObjects.Any());
+
+                result = updateRowCountAndPageCount(result, filteredCubeObjects, xAxisCubeObjects, yAxisCubeObjects, zAxisCubeObjects, cells, pageSizeNumber);
+
+                // Convert cells to publicCells
+                result = GetPublicCellsInThisPage(result, cells, currentPageNumber, pageSizeNumber);
+
+                //Return OK with json result:
+                return Ok(JsonConvert.SerializeObject(result,
+                    new JsonSerializerSettings() {ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
+            }
+        }
+
+        private Page<PublicCell> updateRowCountAndPageCount(Page<PublicCell> result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells, int pageSizeNumber)
+        {
+            IEnumerable<CubeObject> xUnion = new List<CubeObject>();
+            IEnumerable<CubeObject> yUnion = new List<CubeObject>();
+            IEnumerable<CubeObject> zUnion = new List<CubeObject>();
+
+            if (xAxisCubeObjects != null)
             {
-                //Devide filters:
-                List<ParsedFilter> tagFilters = filtersList.Where(f => f.type.Equals("tag")).ToList();
-                List<ParsedFilter> hierarchyFilters = filtersList.Where(f => f.type.Equals("hierarchy")).ToList();
-
-                //Apply filters:
-                if(tagFilters.Count > 0)
+                foreach (List<CubeObject> cubeObjects in xAxisCubeObjects)
                 {
-                    cells.ForEach(c => c.CubeObjects = filterCubeObjectsWithTagFilters(c.CubeObjects, tagFilters));
+                    xUnion = xUnion.Union(cubeObjects);
                 }
-                if(hierarchyFilters.Count > 0)
+            }
+            if (yAxisCubeObjects != null)
+            {
+                foreach (List<CubeObject> cubeObjects in yAxisCubeObjects)
                 {
-                    cells.ForEach(c => c.CubeObjects = filterCubeObjectsWithHierarchyFilters(c.CubeObjects, hierarchyFilters));
+                    yUnion = yUnion.Union(cubeObjects);
                 }
             }
 
-            // Convert cells to publicCells
-            List<PublicCell> publicCells = cells.Select(c => c.GetPublicCell()).ToList();
+            if (zAxisCubeObjects != null)
+            {
+                foreach (List<CubeObject> cubeObjects in zAxisCubeObjects)
+                {
+                    zUnion = zUnion.Union(cubeObjects);
+                }
+            }
 
-            //Return OK with json result:
-            return Ok(JsonConvert.SerializeObject(publicCells,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            // initial assignment
+            IEnumerable<CubeObject> axisIntersection;
+            if (xUnion.Any()) axisIntersection = xUnion;
+            else if (yUnion.Any()) axisIntersection = yUnion;
+            else if (zUnion.Any()) axisIntersection = zUnion;
+            else axisIntersection = filteredCubeObjects;
+
+            // intersect for axis
+            if (xUnion.Any()) axisIntersection = axisIntersection.Intersect(xUnion);
+            if (yUnion.Any()) axisIntersection = axisIntersection.Intersect(yUnion);
+            if (zUnion.Any()) axisIntersection = axisIntersection.Intersect(zUnion);
+
+            result.FileCount = axisIntersection.Distinct().Count();
+            var totalpage = (double)result.FileCount / pageSizeNumber;
+            result.PageCount = (int)Math.Ceiling(totalpage);
+            return result;
+        }
+
+        private Page<PublicCell> instantiatePageResult(int currentPage, int pageSize)
+        {
+            var result = new Page<PublicCell>();
+            result.CurrentPage = currentPage;
+            result.PageSize = pageSize;
+
+            return result;
+        }
+
+        private int parsePageSize(string pageSize)
+        {
+            if (Int32.TryParse(pageSize, out int pageSizeNumber)) // parsed successfully
+            {
+                pageSizeNumber = pageSizeNumber > 10 ? 10 : pageSizeNumber;
+            }
+            else
+            {
+                pageSizeNumber = 10;
+            }
+
+            return pageSizeNumber;
+        }
+
+        private int parseCurrentPage(string currentPage)
+        {
+            if (Int32.TryParse(currentPage, out int currentPageNumber)) // parsed successfully
+            {
+                currentPageNumber = currentPageNumber < 1 ? 1 : currentPageNumber;
+            }
+            else
+            {
+                currentPageNumber = 1;
+            }
+
+            return currentPageNumber;
+        }
+
+        private Page<PublicCell> GetPublicCellsInThisPage(Page<PublicCell> result, List<Cell> cells, int currentPage, int pageSize)
+        {
+            var skip = (currentPage - 1) * pageSize;
+            result.Results = cells.Select(c => c.GetPublicCell(skip, pageSize)).ToList();
+
+            return result;
         }
 
         #region HelperMethods:
@@ -217,7 +344,7 @@ namespace ObjectCubeServer.Controllers
         /// <param name="cubeObjects"></param>
         /// <param name="tagFilters"></param>
         /// <returns></returns>
-        private List<CubeObject> filterCubeObjectsWithTagFilters(List<CubeObject> cubeObjects, List<ParsedFilter> tagFilters)
+        private List<CubeObject> filterCubeObjectsWithTagFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> tagFilters)
         {
             return cubeObjects
                 .Where(co =>
@@ -232,7 +359,7 @@ namespace ObjectCubeServer.Controllers
         /// <param name="cubeObjects"></param>
         /// <param name="hierarchyFilters"></param>
         /// <returns></returns>
-        private List<CubeObject> filterCubeObjectsWithHierarchyFilters(List<CubeObject> cubeObjects, List<ParsedFilter> hierarchyFilters)
+        private List<CubeObject> filterCubeObjectsWithHierarchyFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> hierarchyFilters)
         {
             //Getting all tags per hierarchy filter:
             List<List<Tag>> tagsPerHierarchyFilter = hierarchyFilters
@@ -266,21 +393,21 @@ namespace ObjectCubeServer.Controllers
         /// <param name="defined"></param>
         /// <param name="parsedAxis"></param>
         /// <returns></returns>
-        private List<List<CubeObject>> getAllCubeObjectsFromAxis(bool defined, ParsedAxis parsedAxis)
+        private List<List<CubeObject>> getAllCubeObjectsFromAxis(bool defined, ParsedAxis parsedAxis, IEnumerable<CubeObject> filteredCubeObjects)
         {
             if (defined)
             {
                 if (parsedAxis.AxisType.Equals("Tagset"))
                 {
-                    return getAllCubeObjectsFrom_Tagset_Axis(parsedAxis);
+                    return getAllCubeObjectsFrom_Tagset_Axis(parsedAxis, filteredCubeObjects);
                 }
                 else if (parsedAxis.AxisType.Equals("Hierarchy"))
                 {
-                    return getAllCubeObjectsFrom_Hierarchy_Axis(parsedAxis);
+                    return getAllCubeObjectsFrom_Hierarchy_Axis(parsedAxis, filteredCubeObjects);
                 }
                 else if (parsedAxis.AxisType.Equals("HierarchyLeaf")) //A HierarchyLeaf is a Node with no children.
                 {
-                    return getAllCubeObjectsFrom_HierarchyLeaf_Axis(parsedAxis);
+                    return getAllCubeObjectsFrom_HierarchyLeaf_Axis(parsedAxis, filteredCubeObjects);
                 }
                 else
                 {
@@ -295,7 +422,7 @@ namespace ObjectCubeServer.Controllers
         /// </summary>
         /// <param name="parsedAxis"></param>
         /// <returns></returns>
-        private List<List<CubeObject>> getAllCubeObjectsFrom_Tagset_Axis(ParsedAxis parsedAxis)
+        private List<List<CubeObject>> getAllCubeObjectsFrom_Tagset_Axis(ParsedAxis parsedAxis, IEnumerable<CubeObject> filteredCubeObjects)
         {
             //Getting tags from database:
             List<Tag> tags;
@@ -309,7 +436,7 @@ namespace ObjectCubeServer.Controllers
                 tags = Tagset.Tags.ToList();
             }
             return tags
-                .Select(t => getAllCubeObjectsTaggedWith(t.Id))
+                .Select(t => getAllCubeObjectsTaggedWith(t.Id, filteredCubeObjects))
                 .ToList();
         }
 
@@ -318,12 +445,12 @@ namespace ObjectCubeServer.Controllers
         /// </summary>
         /// <param name="parsedAxis"></param>
         /// <returns></returns>
-        private List<List<CubeObject>> getAllCubeObjectsFrom_Hierarchy_Axis(ParsedAxis parsedAxis)
+        private List<List<CubeObject>> getAllCubeObjectsFrom_Hierarchy_Axis(ParsedAxis parsedAxis, IEnumerable<CubeObject> filteredCubeObjects)
         {
             Node rootNode = fetchWholeHierarchyFromRootNode(parsedAxis.Id);
             List<Node> hierarchyNodes = rootNode.Children;
             return hierarchyNodes
-                .Select(n => getAllCubeObjectsTaggedWith(extractTagsFromHieararchy(n)) //Map hierarchy nodes to list of cube objects
+                .Select(n => getAllCubeObjectsTaggedWith(extractTagsFromHieararchy(n), filteredCubeObjects) //Map hierarchy nodes to list of cube objects
                 .GroupBy(co => co.Id).Select(grouping => grouping.First()).ToList()) //Getting unique cubeobjects
                 .ToList();
         }
@@ -333,10 +460,10 @@ namespace ObjectCubeServer.Controllers
         /// </summary>
         /// <param name="parsedAxis"></param>
         /// <returns></returns>
-        private List<List<CubeObject>> getAllCubeObjectsFrom_HierarchyLeaf_Axis(ParsedAxis parsedAxis)
+        private List<List<CubeObject>> getAllCubeObjectsFrom_HierarchyLeaf_Axis(ParsedAxis parsedAxis, IEnumerable<CubeObject> filteredCubeObjects)
         {
             Node currentNode = fetchWholeHierarchyFromRootNode(parsedAxis.Id);
-            List<CubeObject> cubeObjectsTaggedWithTagFromNode = getAllCubeObjectsTaggedWith(currentNode.TagId);
+            List<CubeObject> cubeObjectsTaggedWithTagFromNode = getAllCubeObjectsTaggedWith(currentNode.TagId, filteredCubeObjects);
             return new List<List<CubeObject>>() { cubeObjectsTaggedWithTagFromNode };
         }
 
@@ -368,17 +495,13 @@ namespace ObjectCubeServer.Controllers
         /// </summary>
         /// <param name="tagId"></param>
         /// <returns></returns>
-        private List<CubeObject> getAllCubeObjectsTaggedWith(int tagId)
+        private List<CubeObject> getAllCubeObjectsTaggedWith(int tagId, IEnumerable<CubeObject> filteredCubeObjects)
         {
             List<CubeObject> cubeObjects;
-            using (var context = new ObjectContext())
-            {
-                cubeObjects = context.CubeObjects
-                    .Include(co => co.ObjectTagRelations)
-                    .Where(co => co.ObjectTagRelations.Where(otr => otr.TagId == tagId).Count() > 0 ) //Is tagged with tagId at least once
+            cubeObjects = filteredCubeObjects
+                    .Where(co => co.ObjectTagRelations.Any(otr => otr.TagId == tagId) ) //Is tagged with tagId at least once
                     .ToList();
-            }
-            return cubeObjects;
+                return cubeObjects;
         }
         
         /// <summary>
@@ -387,12 +510,12 @@ namespace ObjectCubeServer.Controllers
         /// </summary>
         /// <param name="tags"></param>
         /// <returns></returns>
-        private List<CubeObject> getAllCubeObjectsTaggedWith(List<Tag> tags)
+        private List<CubeObject> getAllCubeObjectsTaggedWith(List<Tag> tags, IEnumerable<CubeObject> filteredCubeObjects)
         {
             List<CubeObject> cubeObjects = new List<CubeObject>();
             foreach (Tag t in tags)
             {
-                cubeObjects.AddRange(getAllCubeObjectsTaggedWith(t.Id));
+                cubeObjects.AddRange(getAllCubeObjectsTaggedWith(t.Id, filteredCubeObjects));
             }
             return cubeObjects;
         }

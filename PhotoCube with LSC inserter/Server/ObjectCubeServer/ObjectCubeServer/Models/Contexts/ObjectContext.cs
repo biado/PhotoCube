@@ -184,7 +184,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSCWholeFinal; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSCWholeFinal.mdf");
+                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSCWhole100; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSCWhole100.mdf");
                     }
                     break;
                 default:
