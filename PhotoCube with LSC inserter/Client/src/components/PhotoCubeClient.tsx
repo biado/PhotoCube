@@ -58,7 +58,10 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
           <LeftDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} />
            <div className="middle dock">
             {currentBrowser}
-            <BottomDock activeFilters={this.state.filters} onFiltersChanged={this.onFiltersChanged}/>
+            <BottomDock 
+              hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
+              activeFilters={this.state.filters} 
+              onFiltersChanged={this.onFiltersChanged}/>
           </div>
           <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
             ref={this.rightDock}

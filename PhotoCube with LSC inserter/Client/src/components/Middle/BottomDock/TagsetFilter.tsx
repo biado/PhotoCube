@@ -10,7 +10,7 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
 
     const [options, setDropdownOptions] = useState<Option[]>([]);
     const [selectedTagset, updateSelection] = useState<Tagset | null>(null);
-    const [buttonDisabled, disableButton] = useState<boolean>(false);
+    const [buttonDisabled, disableButton] = useState<boolean>(true);
 
     useEffect(() =>  {
         fetchTagsets(); 
@@ -24,7 +24,7 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
 
     const addFilter = () => {
         const filter: Filter = createFilter(selectedTagset!.Name, selectedTagset!.Id, "tagset");
-        if (!props.activeFilters.some(af => af.name === filter.name)) {
+        if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
         }

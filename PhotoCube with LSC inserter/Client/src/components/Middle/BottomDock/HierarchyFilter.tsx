@@ -57,7 +57,7 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
                 <input className="search field" type="text" placeholder="Search hierarchies" 
                     onChange={e => onInputGiven(e.target.value)}/>
             </form>
-            <button className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
+            <button disabled={input === ""} className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
             {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }
             {selectedNode !== null ? <HierarchyBrowser startNode={selectedNode} activeFilters={props.activeFilters} onFiltersChanged={props.onFiltersChanged}/> : null }
         </div>

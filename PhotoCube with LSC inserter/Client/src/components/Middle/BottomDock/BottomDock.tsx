@@ -5,8 +5,12 @@ import { VscBrowser } from 'react-icons/vsc';
 import { DimensionBrowser } from './DimensionBrowser';
 import { Filter } from '../../Filter';
 
-export const BottomDock = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
+export const BottomDock = 
+    (props: {onFiltersChanged: (filter: Filter) => void,
+        activeFilters: Filter[], hideControls: boolean}) => {
     const [isExpanded, expand] = useState(false);
+
+    //let visibility: string = props.hideControls ? "hide" : "";
 
     return(
         <div className={isExpanded ? "bottom dock expanded" : "bottom dock"} >
