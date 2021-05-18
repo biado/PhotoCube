@@ -2,6 +2,7 @@ import React, { Component, useEffect } from 'react';
 import { useState } from 'react';
 import '../../css/RightDock/Dimensions.css'
 import { Filter } from '../Filter';
+import { Option } from '../Middle/BottomDock/Option';
 import PickedDimension from './PickedDimension';
 
 /**
@@ -9,14 +10,18 @@ import PickedDimension from './PickedDimension';
  * One active filter can be selected and projected on an axis. 
  */
 export const FilterDropdown = 
-    (props: {activeFilters: Filter[], onDimensionPicked: (dimension:PickedDimension) => void}) => {
+    (props: {activeFilters: Filter[], onDimensionPicked: (dimension:PickedDimension) => void,
+    cleared: boolean}) => {
     const [options, updateOptions] = useState<Filter[]>([]);
+    const [selected, updateSelection] = useState<string>("");
 
     useEffect(() => {
         updateOptions(props.activeFilters.slice().reverse());
-    }, [props.activeFilters])
+        if (props.cleared) { updateSelection(""); }
+    }, [props.activeFilters, props.cleared])
 
     const createDimension = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        updateSelection(e.currentTarget.value);
         const filter: Filter = JSON.parse(e.currentTarget.value);
         const dimension = ({
             id: filter.Id,
@@ -27,8 +32,8 @@ export const FilterDropdown =
     }
     
     return (
-        <select className="Filter Selector" defaultValue={""} onChange={(e) => createDimension(e)}>
-            <option key={0} value="" disabled hidden>Select filter</option>
+        <select className="Filter Selector" value={selected} onChange={(e) => createDimension(e)}>
+            <option key={0} value={"true"}>Select filter</option>
             {options.map(af => 
                 <option key={af.Id} value={JSON.stringify(af)}>{af.name}</option>)}
         </select>
@@ -57,7 +62,10 @@ class Dimension extends Component<{
                 <p>{this.props.xyz}-Axis:</p><br/>
                 {this.renderDimensionTypeAndName()}
                 <div className="Dimension Selector">
-                    <FilterDropdown activeFilters={this.props.activeFilters} onDimensionPicked={this.dimensionPicked}/>
+                    <FilterDropdown 
+                        cleared={this.state.DimensionName == null} 
+                        activeFilters={this.props.activeFilters} 
+                        onDimensionPicked={this.dimensionPicked}/>
                     <button onClick={() => this.onClearAxis(this.props.xyz)}>
                         Clear
                     </button>

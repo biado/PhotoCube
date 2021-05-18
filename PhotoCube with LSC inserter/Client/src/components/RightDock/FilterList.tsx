@@ -14,7 +14,7 @@ export const FilterList =
             <div id="filterlist-container">
                 <ul className="filter list scrollable">
                     {props.activeFilters.map(filter => 
-                    <li>{filter.name}<button className="clear button" onClick={e => props.onFilterRemoved(filter.name)}>
+                    <li key={filter.Id}>{filter.name}<button className="clear button" onClick={e => props.onFilterRemoved(filter.name)}>
                         <AiOutlineCloseCircle id="clear-icon"/></button></li>
                     )}
                 </ul>

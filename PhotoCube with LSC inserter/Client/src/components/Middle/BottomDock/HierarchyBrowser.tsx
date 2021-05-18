@@ -123,7 +123,12 @@ export const HierarchyBrowser =
         <div className="hierarchy browser">
             <h5>Browse hierarchy:</h5>
             <ul className="scrollable hierarchy">
-                {(parentNode !== null) ? <li id="parent" className="hierarchy node"><label><input type="radio" name="node"/>{parentNode.Name}</label></li> 
+                {(parentNode !== null) ? 
+                <li id="parent" className="hierarchy node">
+                    <label>
+                        <input onChange={() => onSelect(parentNode)} type="radio" name="node"/>{parentNode.Name}
+                    </label>
+                </li> 
                 : <li key={0} className="hierarchy node"><button disabled={true}>No further parent</button></li>}
                 <ul>
                     <BrowserNodeWithChildren parent={props.startNode} showChildren={true} onSelect={onSelect}/> 
