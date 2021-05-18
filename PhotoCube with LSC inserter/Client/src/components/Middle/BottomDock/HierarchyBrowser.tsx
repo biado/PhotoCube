@@ -27,7 +27,7 @@ const BrowserNode =
     }
 
     return (
-        <li className="hierarchy node">
+        <li key={props.node.Id} className="hierarchy node">
             <label>
                 <input onClick={() => props.onSelect(props.node)} type="radio" name="node"/>
                 {props.node.Name}
@@ -76,7 +76,7 @@ const BrowserNodeWithChildren =
             <ul className="hierarchy children">
                 {(childNodes !== null && childNodes!.length > 0) ? childNodes!.map((node: Node) => 
                     <BrowserNodeWithChildren parent={node} showChildren={false} onSelect={props.onSelect}/>)
-                    : <li><button disabled={true}>No further children</button></li>}
+                    : <li key={0}><button disabled={true}>No further children</button></li>}
             </ul> : null }
         </div>
     )
@@ -124,7 +124,7 @@ export const HierarchyBrowser =
             <h5>Browse hierarchy:</h5>
             <ul className="scrollable hierarchy">
                 {(parentNode !== null) ? <li id="parent" className="hierarchy node"><label><input type="radio" name="node"/>{parentNode.Name}</label></li> 
-                : <li className="hierarchy node"><button disabled={true}>No further parent</button></li>}
+                : <li key={0} className="hierarchy node"><button disabled={true}>No further parent</button></li>}
                 <ul>
                     <BrowserNodeWithChildren parent={props.startNode} showChildren={true} onSelect={onSelect}/> 
                 </ul>

@@ -170,7 +170,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc50tag-nodesfix; User Id = photocube; Password = postgres;");
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc100-pagination; User Id = photocube; Password = postgres;");
                     }
                     break;
                 case PlatformID.Win32NT: //Windows

@@ -27,10 +27,10 @@ export const FilterDropdown =
     }
     
     return (
-        <select className="Filter Selector" onChange={(e) => createDimension(e)}>
-            <option value="" selected disabled hidden>Select filter</option>
+        <select className="Filter Selector" defaultValue={""} onChange={(e) => createDimension(e)}>
+            <option key={0} value="" disabled hidden>Select filter</option>
             {options.map(af => 
-                <option value={JSON.stringify(af)}>{af.name}</option>)}
+                <option key={af.Id} value={JSON.stringify(af)}>{af.name}</option>)}
         </select>
     )
 }

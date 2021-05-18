@@ -13,13 +13,14 @@ import { Option } from './Option';
  * Hierarchy nodes associated with the same tag will be displayed as separate options. 
  */
 const SearchResults = (props: {
-    options: Option[], onOptionSelected: (e: React.MouseEvent<HTMLSelectElement, MouseEvent>) => void}) => {
+    options: Option[], onOptionSelected: (e: React.ChangeEvent<HTMLSelectElement>) => void}) => {
 
     return(
         <div className="search results">
             <h5>{props.options.length} occurence(s) found:</h5>
-            <select onClick={e => props.onOptionSelected(e)} id="node-dropdown">
-                {props.options.map(o => <option value={JSON.stringify(o)}>{o.NodeName}:{o.ParentnodeName}</option>)}
+            <select onChange={e => props.onOptionSelected(e)} id="node-dropdown">
+                <option key={0} value="" selected disabled hidden>Select filter</option>
+                {props.options.map(o => <option key={o.NodeId} value={JSON.stringify(o)}>{o.NodeName}:{o.ParentnodeName}</option>)}
             </select> 
         </div>
     )
@@ -38,7 +39,7 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
         updateInput(input);
     }
 
-    const onOptionSelected = (e: React.MouseEvent<HTMLSelectElement, MouseEvent>) => {
+    const onOptionSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selected: Option = JSON.parse(e.currentTarget.value);
         const node: Node = {
             Id: selected.NodeId,
@@ -46,7 +47,6 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
             ParentNode: null
         }
         updateSelection(node);
-        console.log(selected);
     }
 
     async function onSearch(e: React.MouseEvent<HTMLButtonElement, MouseEvent>){

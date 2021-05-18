@@ -65,7 +65,7 @@ namespace ObjectCubeServer.Controllers
             {
                 nodesFound = context.Nodes
                     .Include(n => n.Tag)
-                    .Where(n => ((AlphanumericalTag)n.Tag).Name.Equals(tag))
+                    .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tag.ToLower()))
                     .ToList();
             }
 
@@ -74,7 +74,7 @@ namespace ObjectCubeServer.Controllers
                 var result = new List<PublicNode>();
                 foreach (Node node in nodesFound)
                 {
-                    var publicNode = new PublicNode(node.Id, tag)
+                    var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
                     {
                         ParentNode = GetParentNode(node)
                     };
