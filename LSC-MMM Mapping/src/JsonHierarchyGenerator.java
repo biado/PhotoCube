@@ -55,7 +55,7 @@ public class JsonHierarchyGenerator {
     }
 
     private void buildTagNameDuplicateTagsetsMapRecursive(JSTag current) {
-        // traverse children of "root" tree and put each JStagsets into tagname-tagsetSet map
+        // traverse children of "root" tree and collect duplicate tags
         // This method also cleans up the name, such that it replaces "_" to " ".
         String tagsetName = StringBeautifier.toPrettyTagsetName(current);
         current.setName(tagsetName);
