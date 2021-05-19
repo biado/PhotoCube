@@ -2,7 +2,7 @@
 
 namespace ObjectCubeServer.Models.PublicClasses
 {
-    public class PageBase
+    public class Page
     {
         public int CurrentPage { get; set; }
         public int PageCount { get; set; }

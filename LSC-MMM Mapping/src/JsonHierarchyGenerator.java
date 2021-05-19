@@ -17,7 +17,7 @@ import java.util.Set;
 import com.google.gson.*;
 
 /**
- * JsonHierarchyGenerator keeps track of all the hierarchies and tagsets for semantic tags in json, derived from the ImageNet Shuffle and WordNet.
+ * JsonHierarchyGenerator keeps track of all the hierarchies for semantic tags in json, including their semantic duplicates. Semantic tags have been derived from the ImageNet Shuffle and WordNet.
  */
 public class JsonHierarchyGenerator {
     private static final String jsonOutput = FilepathReader.UniqueTagHierarchy;

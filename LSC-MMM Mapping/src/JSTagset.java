@@ -1,10 +1,10 @@
 import java.util.Objects;
 
 /**
- * JSTagset is the entity that we store information of which tags belong to which tagset. JS stands for Json, which is the input file format.
+ * A JSTag represents a tag in the JSON hierarchy input file. JS stands for Json, which is the input file format. A JSTag stores information about the structure of the hierarchy by storing an array of child tags.
  * Currently used for the semantic tags and their hierarchies extracted using ImageNetShuffle and WordNet.
  */
-public class JSTagset {
+public class JSTag {
     private String name;
     private Integer id; // -1 if this tag is not used as actual tag for an image. Not int but Integer to force null when writing to json file. (If int it writes 0)
     private JSTagset[] children;

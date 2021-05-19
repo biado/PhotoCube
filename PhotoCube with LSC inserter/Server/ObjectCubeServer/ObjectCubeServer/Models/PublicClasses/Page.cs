@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ObjectCubeServer.Models.PublicClasses
 {
-    public class Page<T> : PageBase where T : class
+    public class PublicPage<T> : PageBase where T : class
     {
         public IList<T> Results { get; set; }
 

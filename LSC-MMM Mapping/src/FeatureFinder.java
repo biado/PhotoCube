@@ -37,7 +37,7 @@ public class FeatureFinder {
     }
 
     /**
-     * Finds the semantic tags associated to the given LSC filename.
+     * Finds the semantic tags associated with the given LSC filename.
      * @param filename
      * @return List of the semantic tags
      */
