@@ -16,7 +16,7 @@ public class FilepathReader {
     public static String ImageFeatureTop5;
     public static String FeatureTags;
     public static String LSCImageTagsOutput;
-    public static String UniqueTagHierarchy;
+    public static String UniqueTagHierarchyOutput;
     public static String OutputFolder;
 
     static { // initialize static fields
@@ -39,7 +39,7 @@ public class FilepathReader {
         ImageFeatureTop5 = prop.getProperty("ImageFeatureTop5");
         FeatureTags = prop.getProperty("FeatureTags");
         LSCImageTagsOutput = prop.getProperty("LSCImageTagsOutput");
-        UniqueTagHierarchy = prop.getProperty("UniqueTagHierarchy");
+        UniqueTagHierarchyOutput = prop.getProperty("UniqueTagHierarchyOutput");
         OutputFolder = prop.getProperty("OutputFolder");
     }
 }

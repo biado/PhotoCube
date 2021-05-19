@@ -604,7 +604,7 @@ export default class ThreeBrowser extends React.Component<{
         console.log("Done computing cells")
 
         //Update filecount:
-        this.props.onFileCountChanged(page!.FileCount);
+        this.props.onFileCountChanged(page!.TotalFileCount);
         // let uniquePhotos: Set<string> = new Set();
         // this.cells.forEach((cell: Cell) => 
         //     cell.CubeObjects.forEach(co => uniquePhotos.add(co.FileURI)));

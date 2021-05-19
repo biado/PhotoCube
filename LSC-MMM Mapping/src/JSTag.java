@@ -7,9 +7,9 @@ import java.util.Objects;
 public class JSTag {
     private String name;
     private Integer id; // -1 if this tag is not used as actual tag for an image. Not int but Integer to force null when writing to json file. (If int it writes 0)
-    private JSTagset[] children;
+    private JSTag[] children;
 
-    public JSTagset(String name, int id, JSTagset[] children) {
+    public JSTag(String name, int id, JSTag[] children) {
         this.name = name; // Gson doesn't seem to use this constructor, so "_" in the name has to be handled in the hierarchy string and image tag.
         this.id = id;
         this.children = children;
@@ -20,10 +20,10 @@ public class JSTag {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof JSTagset)) {
+        if (!(o instanceof JSTag)) {
             return false;
         }
-        JSTagset that = (JSTagset) o;
+        JSTag that = (JSTag) o;
         return Objects.equals(this.id, that.id) && 
                 Objects.equals(this.name, that.name);
         // We only consider name and id for tags to be equal.
@@ -54,7 +54,7 @@ public class JSTag {
      * Returns the children of this tagset
      * @return the children of this tagset
      */
-    public JSTagset[] getChildren() {
+    public JSTag[] getChildren() {
         return this.children;
     }
 

@@ -6,7 +6,7 @@
     CurrentPage:number,
     PageCount:number,
     PageSize:number,
-    FileCount:number,
+    TotalFileCount:number,
     FirstRowOnPage:number,
     LastRowOnPage:number,
 

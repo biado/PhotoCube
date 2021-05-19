@@ -59,13 +59,13 @@ namespace ObjectCubeServer.Controllers
                 //Creating Cells:
                 List<Cell> cells = new List<Cell>();
 
-                Page<PublicCell> result = instantiatePageResult(currentPageNumber, pageSizeNumber);
+                PublicPage<PublicCell> result = instantiatePageResult(currentPageNumber, pageSizeNumber);
                 // If there are no axis or filters, it means it will call for the whole data set.
                 // We don't want to get all 190K cubeObjects in this case, but get only small number (1st page) and return fast.
                 if (!xDefined && !yDefined && !zDefined && !filtersDefined)
                 {
-                    result.FileCount = coContext.CubeObjects.Count();
-                    var totalPages = (double) result.FileCount / pageSizeNumber;
+                    result.TotalFileCount = coContext.CubeObjects.Count();
+                    var totalPages = (double) result.TotalFileCount / pageSizeNumber;
                     result.PageCount = (int) Math.Ceiling(totalPages);
 
                     cells = new List<Cell>()
@@ -228,7 +228,7 @@ namespace ObjectCubeServer.Controllers
             }
         }
 
-        private Page<PublicCell> updateRowCountAndPageCount(Page<PublicCell> result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells, int pageSizeNumber)
+        private PublicPage<PublicCell> updateRowCountAndPageCount(PublicPage<PublicCell> result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells, int pageSizeNumber)
         {
             IEnumerable<CubeObject> xUnion = new List<CubeObject>();
             IEnumerable<CubeObject> yUnion = new List<CubeObject>();
@@ -269,15 +269,15 @@ namespace ObjectCubeServer.Controllers
             if (yUnion.Any()) axisIntersection = axisIntersection.Intersect(yUnion);
             if (zUnion.Any()) axisIntersection = axisIntersection.Intersect(zUnion);
 
-            result.FileCount = axisIntersection.Distinct().Count();
-            var totalpage = (double)result.FileCount / pageSizeNumber;
+            result.TotalFileCount = axisIntersection.Distinct().Count();
+            var totalpage = (double)result.TotalFileCount / pageSizeNumber;
             result.PageCount = (int)Math.Ceiling(totalpage);
             return result;
         }
 
-        private Page<PublicCell> instantiatePageResult(int currentPage, int pageSize)
+        private PublicPage<PublicCell> instantiatePageResult(int currentPage, int pageSize)
         {
-            var result = new Page<PublicCell>();
+            var result = new PublicPage<PublicCell>();
             result.CurrentPage = currentPage;
             result.PageSize = pageSize;
 
@@ -312,7 +312,7 @@ namespace ObjectCubeServer.Controllers
             return currentPageNumber;
         }
 
-        private Page<PublicCell> GetPublicCellsInThisPage(Page<PublicCell> result, List<Cell> cells, int currentPage, int pageSize)
+        private PublicPage<PublicCell> GetPublicCellsInThisPage(PublicPage<PublicCell> result, List<Cell> cells, int currentPage, int pageSize)
         {
             var skip = (currentPage - 1) * pageSize;
             result.Results = cells.Select(c => c.GetPublicCell(skip, pageSize)).ToList();

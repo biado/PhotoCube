@@ -9,8 +9,13 @@ For this version, the keys are:
  - LSCVisualConcept
  - LSCMetadata
  - LSCTopic
- - manualTagSetsVC
  - manualTagSetsMD
- - LSCHierarchiesOutput
+ - JsonHierarchy
+ - LSCFilename
+ - ImageFeatureTop5
+ - FeatureTags
  - LSCImageTagsOutput
+ - UniqueTagHierarchyOutput
  - OutputFolder
+ 
+To parse and build json, we use the gson library. Read more and find link to download here: https://github.com/google/gson

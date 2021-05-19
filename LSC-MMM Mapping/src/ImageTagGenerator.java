@@ -99,7 +99,7 @@ public class ImageTagGenerator {
             StringBuilder sb = getCorrectStringBuilder(filename); // Make sure to put the solution images in the beginning of the output file.
             // File format: "FileName,,TagSet,,Tag,,TagSet,,Tag,,(...)"
             sb.append(filename);
-            sb.append(makeTagsFromVisualConcept(filename)); // semantic tags
+            sb.append(makeTagsFromJSON(filename)); // semantic tags
             if (filename_metadataLine_map.containsKey(filename)) { // metadata tags
                 String metadataLine = filename_metadataLine_map.get(filename);
                 sb.append(makeTagsFromMetadata(metadataLine));
@@ -118,7 +118,7 @@ public class ImageTagGenerator {
         br.close();
     }
 
-    private String makeTagsFromVisualConcept(String imagePath) { // semantic tags
+    private String makeTagsFromJSON(String imagePath) { // semantic tags
         List<String> tagnames = featureFinder.findFeatures(imagePath);
         StringBuilder sb = new StringBuilder();
         // put all tags in a set to remove duplicate
@@ -239,7 +239,7 @@ public class ImageTagGenerator {
             ImageTagGenerator itg = new ImageTagGenerator();
             // itg.writeToImageTagFile();
             String path = Paths.get("2016-09-25/20160925_150243_000.jpg").toString();
-            System.out.println(itg.makeTagsFromVisualConcept(path));
+            System.out.println(itg.makeTagsFromJSON(path));
             
             System.out.println("Done.");
         } catch (IOException e) {
