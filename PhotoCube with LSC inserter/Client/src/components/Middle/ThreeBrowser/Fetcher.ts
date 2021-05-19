@@ -15,9 +15,7 @@ export default class Fetcher{
      * @param yAxis 
      * @param zAxis 
      */
-    static async FetchCellsFromAxis(xAxis: Axis|null, yAxis: Axis|null, zAxis: Axis|null, filters: Filter[], currentPage: number, pageSize: number){
-        if (currentPage < 1) currentPage = 1;
-        if (pageSize > 10 || pageSize < 0) pageSize = 10;
+    static async FetchCellsFromAxis(xAxis: Axis|null, yAxis: Axis|null, zAxis: Axis|null, filters: Filter[]){
         //Fetch and add new cells:
         let xDefined: boolean = xAxis !== null;
         let yDefined: boolean = yAxis !== null;
@@ -28,8 +26,6 @@ export default class Fetcher{
         if(yDefined) { queryString += "&yAxis=" + this.parseAxis(yAxis!)}
         if(zDefined) { queryString += "&zAxis=" + this.parseAxis(zAxis!)}
         if(filters.length > 0){ queryString += "&filters=" + JSON.stringify(filters)}
-        if(currentPage !== null) { queryString += "&currentPage=" + currentPage}
-        if(pageSize !== null) { queryString += "&pageSize=" + pageSize}
         console.log(queryString);
             
         return fetch(queryString)
