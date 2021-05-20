@@ -55,7 +55,10 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     //Page returned:
     return (
         <div className="App grid-container">
-          <LeftDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} />
+          <LeftDock 
+          hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
+          onFiltersChanged={this.onFiltersChanged}
+          activeFilters={this.state.filters}/>
            <div className="middle dock">
             {currentBrowser}
             <BottomDock 

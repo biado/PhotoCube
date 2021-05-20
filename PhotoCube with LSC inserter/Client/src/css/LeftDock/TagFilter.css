@@ -1,0 +1,33 @@
+
+.tag.searcher {
+    width: 50%;
+}
+
+.search.field {
+    padding: 8px 0px 8px 10px;
+    border: 1px solid #ccc;
+    outline: none;
+    border-radius: 2px;
+    font-size: 16px;
+    color: #333;
+    margin-right: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search.results {
+    margin-top: 40px;
+}
+
+.Filter {
+    position: relative;
+}
+  
+.button {
+    padding: 5px 10px 5px 10px;
+    border-radius: 20px;
+    border: none;
+    margin-top: 10px;
+    position: absolute;
+    margin-left: 12%;
+}

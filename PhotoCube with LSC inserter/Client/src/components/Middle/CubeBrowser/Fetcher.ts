@@ -68,6 +68,15 @@ export default class Fetcher{
     }
 
     /**
+     * Fetches Tags that start with user-defined search term.
+     * @param searchterm
+     */
+    static async FetchTagByName(searchterm: string){
+        return await fetch(Fetcher.baseUrl + "/tag/name=" + searchterm)
+            .then(result => {return result.json()});
+    }
+
+    /**
      * Fetches a single Node with nodeId from the server.
      * @param nodeId 
      */
@@ -77,7 +86,7 @@ export default class Fetcher{
     }
 
     /**
-     * Fetches a single Node and it's immediate parent with user-defined 
+     * Fetches Nodes and it's immediate parent that start with the user-defined 
      * search term.
      * @param searchterm
      */
