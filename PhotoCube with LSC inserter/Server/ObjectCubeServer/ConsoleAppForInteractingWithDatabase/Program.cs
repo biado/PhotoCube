@@ -26,7 +26,7 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             Console.WriteLine("Started up!");
 
-            int[] N = new int[] { 50 }; // 191418 = Total number of LSC images, based on VisualConcept file.
+            int[] N = new int[] { 100 }; // 191524 = Total number of LSC images, based on lsc2020.txt file.
 
             string resultPath = sAll.Get("resultPath");
             string experimentResult = "DB Name,Number of Images,Elapsed Time\n";
@@ -42,7 +42,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 stopWatch.Start();
 
                 //Insert data:
-                new DatasetInserter(num);
+                new DatasetInsertSQLGenerator(num);
 
                 // Get the elapsed time as a TimeSpan value.
                 TimeSpan ts = stopWatch.Elapsed;

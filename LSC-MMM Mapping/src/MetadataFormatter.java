@@ -115,7 +115,7 @@ public class MetadataFormatter {
         Map<String, String> columnNameMap = new HashMap<>();
         columnNameMap.put("elevation", "Elevation");
         columnNameMap.put("timezone", "Timezone");
-        columnNameMap.put("semantic_name", "Semantic name");
+        columnNameMap.put("semantic_name", "Location name");
         columnNameMap.put("lon", "Longitude");
         columnNameMap.put("calories", "Calories");
         columnNameMap.put("steps", "Steps");

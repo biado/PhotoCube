@@ -15,6 +15,7 @@ import { BrowsingState } from './BrowsingState';
 import PickedDimension from '../../RightDock/PickedDimension';
 import { Colors } from './Colors';
 import { Filter } from '../../Filter';
+import Page from './Page';
 
 const OrbitControls = require('three-orbitcontrols')
 
@@ -35,7 +36,8 @@ export default class CubeBrowser extends React.Component<{
     state = {
         infoText: "Hover with mouse on a cube to see info",
         showContextMenu: false,
-        showErrorMessage: false
+        showErrorMessage: false,
+        currentPage: 1
     };
 
     render(){
@@ -559,36 +561,44 @@ export default class CubeBrowser extends React.Component<{
 
         //Exclude projected filters in API call
         const filters: Filter[] = this.props.filters.filter(f => 
-            f.Id !== this.xAxis.Id && f.Id !== this.yAxis.Id && f.Id !== this.zAxis.Id
-        )
+            f.Id !== this.xAxis.Id && f.Id !== this.yAxis.Id && f.Id !== this.zAxis.Id);
 
+        let page: Page | null = null;
         let newCells: Cell[] = [];
 
         //Fetch cells based on which axis are defined:
         if(xDefined && yDefined && zDefined){   //X and Y and Z
             //Render all three axis
-            let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, this.zAxis, filters);
+            page = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, this.zAxis, this.props.filters, this.state.currentPage);
+            let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined && yDefined){         //X and Y
-            let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, null, filters);
+            page = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, null, this.props.filters, this.state.currentPage);
+            let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined && zDefined){         //X and Z
-            let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, null, this.zAxis, filters);
+            page = await Fetcher.FetchCellsFromAxis(this.xAxis, null, this.zAxis, this.props.filters, this.state.currentPage);
+            let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(yDefined && zDefined){         //Y and Z
-            let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, this.yAxis, this.zAxis, filters);
+            page = await Fetcher.FetchCellsFromAxis(null, this.yAxis, this.zAxis, this.props.filters, this.state.currentPage);
+            let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined){                     //X
-            let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, null, null, filters);
+            page = await Fetcher.FetchCellsFromAxis(this.xAxis, null, null, this.props.filters, this.state.currentPage);
+            let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(yDefined){                     //Y
-            let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, this.yAxis, null, filters);
+            page = await Fetcher.FetchCellsFromAxis(null, this.yAxis, null, this.props.filters, this.state.currentPage);
+            let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(zDefined){                     //Z
-            let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, null, this.zAxis, filters);
+            page = await Fetcher.FetchCellsFromAxis(null, null, this.zAxis, this.props.filters, this.state.currentPage);
+            let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         } else if(!xDefined && !yDefined && !zDefined){
-            let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, null, null, filters);
+            page = await Fetcher.FetchCellsFromAxis(null, null, null, this.props.filters, this.state.currentPage);
+            let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }
 
@@ -597,10 +607,11 @@ export default class CubeBrowser extends React.Component<{
         console.log("Done computing cells")
 
         //Update filecount:
-        let uniquePhotos: Set<string> = new Set();
-        this.cells.forEach((cell: Cell) => 
-            cell.CubeObjects.forEach(co => uniquePhotos.add(co.FileURI)));
-        this.props.onFileCountChanged(uniquePhotos.size);
+        this.props.onFileCountChanged(page!.TotalFileCount);
+        // let uniquePhotos: Set<string> = new Set();
+        // this.cells.forEach((cell: Cell) => 
+        //     cell.CubeObjects.forEach(co => uniquePhotos.add(co.FileURI)));
+        // this.props.onFileCountChanged(uniquePhotos.size);
     }
 
     /**
