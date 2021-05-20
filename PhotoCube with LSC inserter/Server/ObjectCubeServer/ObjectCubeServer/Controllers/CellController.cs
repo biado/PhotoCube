@@ -17,6 +17,7 @@ namespace ObjectCubeServer.Controllers
     [ApiController]
     public class CellController : ControllerBase
     {
+        public static int pageSize = 10;
         /* EXAMPLES:
          * GET: /api/cell?xAxis={jsonObject}
          * GET: /api/cell?yAxis={jsonObject}
@@ -27,18 +28,24 @@ namespace ObjectCubeServer.Controllers
          * GET: /api/cell?xAxis={jsonObject}&yAxis={jsonObject}&zAxis={jsonObject}
          * 
          * Where an axis showing a Hierarchy could be:
-         *  {"AxisDirection":"X","AxisType":"Hierarchy","TagsetId":0,"HierarchyNodeId":1}
+         *  {"AxisType":"Hierarchy","Id":0} (Id is NodeId)
          * Or an axis showing a Tagset could be: 
-         *  {"AxisDirection":"X","AxisType":"Tagset","TagsetId":1,"HierarchyNodeId":0}
+         *  {"AxisType":"Tagset","Id":1} (Id is TagsetId)
          *  
          * The same way, filters can also be added:
          * Hierarchy filter:
          *     &filters=[{"type":"hierarchy","tagId":0,"nodeId":116}]
          * Tag filter:
          *     &filters=[{"type":"tag","tagId":42,"nodeId":0}]
-         * 
+         *
+         * The call may specify which page of the result it wants.
+         * For example,
+         * GET: /api/cell?xAxis={jsonObject}&currentPage=3
+         * If not specified, the default is currentPage=1.
+         *
+         * A page of result contains maximum { PageSize (currently set to 10) * number of cells } cubeObjects.
         */
-        public IActionResult Get(string xAxis, string yAxis, string zAxis, string filters, string currentPage, string pageSize)
+        public IActionResult Get(string xAxis, string yAxis, string zAxis, string filters, string currentPage)
         {
             using (var coContext = new ObjectContext())
             {
@@ -53,19 +60,18 @@ namespace ObjectCubeServer.Controllers
                 List<ParsedFilter> filtersList =
                     filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
                 int currentPageNumber = parseCurrentPage(currentPage);
-                int pageSizeNumber = parsePageSize(pageSize);
-                var skip = (currentPageNumber - 1) * pageSizeNumber;
+                var skip = (currentPageNumber - 1) * pageSize;
 
                 //Creating Cells:
                 List<Cell> cells = new List<Cell>();
 
-                PublicPage<PublicCell> result = instantiatePageResult(currentPageNumber, pageSizeNumber);
+                PublicPage<PublicCell> result = instantiatePageResult(currentPageNumber);
                 // If there are no axis or filters, it means it will call for the whole data set.
                 // We don't want to get all 190K cubeObjects in this case, but get only small number (1st page) and return fast.
                 if (!xDefined && !yDefined && !zDefined && !filtersDefined)
                 {
                     result.TotalFileCount = coContext.CubeObjects.Count();
-                    var totalPages = (double) result.TotalFileCount / pageSizeNumber;
+                    var totalPages = (double) result.TotalFileCount / pageSize;
                     result.PageCount = (int) Math.Ceiling(totalPages);
 
                     cells = new List<Cell>()
@@ -75,7 +81,7 @@ namespace ObjectCubeServer.Controllers
                             x = 1,
                             y = 1,
                             z = 1,
-                            CubeObjects = coContext.CubeObjects.Skip(skip).Take(pageSizeNumber).ToList()
+                            CubeObjects = coContext.CubeObjects.Skip(skip).Take(pageSize).ToList()
                         }
                     };
                     // Convert cells to publicCells
@@ -122,7 +128,7 @@ namespace ObjectCubeServer.Controllers
                                     x = index1 + 1,
                                     y = index2 + 1,
                                     z = index3 + 1,
-                                    CubeObjects = colist1.Intersect(colist2).Intersect(colist3).Skip(skip).Take(pageSizeNumber).ToList()
+                                    CubeObjects = colist1.Intersect(colist2).Intersect(colist3).Skip(skip).Take(pageSize).ToList()
                                 }))).ToList();
                 }
                 else if (xDefined && yDefined) //XY
@@ -135,7 +141,7 @@ namespace ObjectCubeServer.Controllers
                                     x = index1 + 1,
                                     y = index2 + 1,
                                     z = 0,
-                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSizeNumber).ToList() //Where co is in colist2 as well
+                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSize).ToList() //Where co is in colist2 as well
                                 })).ToList();
                 }
                 else if (xDefined && zDefined) //XZ
@@ -148,7 +154,7 @@ namespace ObjectCubeServer.Controllers
                                     x = index1 + 1,
                                     y = 0,
                                     z = index2 + 1,
-                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSizeNumber).ToList() //Where co is in colist2 as well
+                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSize).ToList() //Where co is in colist2 as well
                                 })).ToList();
                 }
                 else if (yDefined && zDefined) //YZ
@@ -161,7 +167,7 @@ namespace ObjectCubeServer.Controllers
                                     x = 0,
                                     y = index1 + 1,
                                     z = index2 + 1,
-                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSizeNumber).ToList()
+                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSize).ToList()
                                 })).ToList();
                 }
                 else if (xDefined) //X
@@ -173,7 +179,7 @@ namespace ObjectCubeServer.Controllers
                                 x = index1 + 1,
                                 y = 1,
                                 z = 0,
-                                CubeObjects = colist1.Skip(skip).Take(pageSizeNumber).ToList()
+                                CubeObjects = colist1.Skip(skip).Take(pageSize).ToList()
                             }).ToList();
                 }
                 else if (yDefined) //Y
@@ -185,7 +191,7 @@ namespace ObjectCubeServer.Controllers
                                 x = 1,
                                 y = index1 + 1,
                                 z = 0,
-                                CubeObjects = colist1.Skip(skip).Take(pageSizeNumber).ToList()
+                                CubeObjects = colist1.Skip(skip).Take(pageSize).ToList()
                             }).ToList();
                 }
                 else if (zDefined) //Z
@@ -197,7 +203,7 @@ namespace ObjectCubeServer.Controllers
                                 x = 0,
                                 y = 1,
                                 z = index1 + 1,
-                                CubeObjects = colist1.Skip(skip).Take(pageSizeNumber).ToList()
+                                CubeObjects = colist1.Skip(skip).Take(pageSize).ToList()
                             }).ToList();
                 }
                 else if (!xDefined && !yDefined && !zDefined) //If X Y and Z are not defined, show all:
@@ -209,7 +215,7 @@ namespace ObjectCubeServer.Controllers
                             x = 1,
                             y = 1,
                             z = 1,
-                            CubeObjects = filteredCubeObjects.Skip(skip).Take(pageSizeNumber).ToList()
+                            CubeObjects = filteredCubeObjects.Skip(skip).Take(pageSize).ToList()
                         }
                     };
                 }
@@ -217,10 +223,10 @@ namespace ObjectCubeServer.Controllers
                 //If cells have no cubeObjects, remove them:
                 cells.RemoveAll(c => !c.CubeObjects.Any());
 
-                result = updateRowCountAndPageCount(result, filteredCubeObjects, xAxisCubeObjects, yAxisCubeObjects, zAxisCubeObjects, cells, pageSizeNumber);
+                result = updateRowCountAndPageCount(result, filteredCubeObjects, xAxisCubeObjects, yAxisCubeObjects, zAxisCubeObjects, cells);
 
                 // Convert cells to publicCells
-                result = GetPublicCellsInThisPage(result, cells, currentPageNumber, pageSizeNumber);
+                result = GetPublicCellsInThisPage(result, cells, currentPageNumber);
 
                 //Return OK with json result:
                 return Ok(JsonConvert.SerializeObject(result,
@@ -228,7 +234,8 @@ namespace ObjectCubeServer.Controllers
             }
         }
 
-        private PublicPage<PublicCell> updateRowCountAndPageCount(PublicPage<PublicCell> result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells, int pageSizeNumber)
+        #region HelperMethods:
+        private PublicPage<PublicCell> updateRowCountAndPageCount(PublicPage<PublicCell> result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells)
         {
             IEnumerable<CubeObject> xUnion = new List<CubeObject>();
             IEnumerable<CubeObject> yUnion = new List<CubeObject>();
@@ -270,32 +277,18 @@ namespace ObjectCubeServer.Controllers
             if (zUnion.Any()) axisIntersection = axisIntersection.Intersect(zUnion);
 
             result.TotalFileCount = axisIntersection.Distinct().Count();
-            var totalpage = (double)result.TotalFileCount / pageSizeNumber;
+            var totalpage = (double)result.TotalFileCount / pageSize;
             result.PageCount = (int)Math.Ceiling(totalpage);
             return result;
         }
 
-        private PublicPage<PublicCell> instantiatePageResult(int currentPage, int pageSize)
+        private PublicPage<PublicCell> instantiatePageResult(int currentPage)
         {
             var result = new PublicPage<PublicCell>();
             result.CurrentPage = currentPage;
             result.PageSize = pageSize;
 
             return result;
-        }
-
-        private int parsePageSize(string pageSize)
-        {
-            if (Int32.TryParse(pageSize, out int pageSizeNumber)) // parsed successfully
-            {
-                pageSizeNumber = pageSizeNumber > 10 ? 10 : pageSizeNumber;
-            }
-            else
-            {
-                pageSizeNumber = 10;
-            }
-
-            return pageSizeNumber;
         }
 
         private int parseCurrentPage(string currentPage)
@@ -312,7 +305,7 @@ namespace ObjectCubeServer.Controllers
             return currentPageNumber;
         }
 
-        private PublicPage<PublicCell> GetPublicCellsInThisPage(PublicPage<PublicCell> result, List<Cell> cells, int currentPage, int pageSize)
+        private PublicPage<PublicCell> GetPublicCellsInThisPage(PublicPage<PublicCell> result, List<Cell> cells, int currentPage)
         {
             var skip = (currentPage - 1) * pageSize;
             result.Results = cells.Select(c => c.GetPublicCell(skip, pageSize)).ToList();
@@ -320,7 +313,6 @@ namespace ObjectCubeServer.Controllers
             return result;
         }
 
-        #region HelperMethods:
         /// <summary>
         /// Helper method that fetches all CubeObjects
         /// </summary>

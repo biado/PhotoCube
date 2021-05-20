@@ -135,6 +135,7 @@ namespace ConsoleAppForInteractingWithDatabase
             }
         }
 
+        //Not in use for LSC
         private string saveThumbnail(Image<Rgba32> image, string filename)
         {
             string thumbnailURI = Path.Combine(pathToDataset, "Thumbnails", filename);
@@ -142,6 +143,7 @@ namespace ConsoleAppForInteractingWithDatabase
             return thumbnailURI;
         }
 
+        //Not in use for LSC
         private bool resizeOriginalImageToMakeThumbnails(Image<Rgba32> image, int shortSide)
         {
             if (shortSide > 1024)
