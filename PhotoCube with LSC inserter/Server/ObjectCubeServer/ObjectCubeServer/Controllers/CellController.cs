@@ -65,7 +65,7 @@ namespace ObjectCubeServer.Controllers
                 //Creating Cells:
                 List<Cell> cells = new List<Cell>();
 
-                PublicPage<PublicCell> result = instantiatePageResult(currentPageNumber);
+                PublicPage result = instantiatePageResult(currentPageNumber);
                 // If there are no axis or filters, it means it will call for the whole data set.
                 // We don't want to get all 190K cubeObjects in this case, but get only small number (1st page) and return fast.
                 if (!xDefined && !yDefined && !zDefined && !filtersDefined)
@@ -235,7 +235,7 @@ namespace ObjectCubeServer.Controllers
         }
 
         #region HelperMethods:
-        private PublicPage<PublicCell> updateRowCountAndPageCount(PublicPage<PublicCell> result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells)
+        private PublicPage updateRowCountAndPageCount(PublicPage result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells)
         {
             IEnumerable<CubeObject> xUnion = new List<CubeObject>();
             IEnumerable<CubeObject> yUnion = new List<CubeObject>();
@@ -282,9 +282,9 @@ namespace ObjectCubeServer.Controllers
             return result;
         }
 
-        private PublicPage<PublicCell> instantiatePageResult(int currentPage)
+        private PublicPage instantiatePageResult(int currentPage)
         {
-            var result = new PublicPage<PublicCell>();
+            var result = new PublicPage();
             result.CurrentPage = currentPage;
             result.PageSize = pageSize;
 
@@ -305,7 +305,7 @@ namespace ObjectCubeServer.Controllers
             return currentPageNumber;
         }
 
-        private PublicPage<PublicCell> GetPublicCellsInThisPage(PublicPage<PublicCell> result, List<Cell> cells, int currentPage)
+        private PublicPage GetPublicCellsInThisPage(PublicPage result, List<Cell> cells, int currentPage)
         {
             var skip = (currentPage - 1) * pageSize;
             result.Results = cells.Select(c => c.GetPublicCell(skip, pageSize)).ToList();

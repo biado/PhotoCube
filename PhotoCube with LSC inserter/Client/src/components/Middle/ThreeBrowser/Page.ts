@@ -1,8 +1,10 @@
+import ICell from "./Cell";
+
 /**
  * Represent a page of result, returned from api/cell?.. call.
  * Is similar to Page.cs in the server implementation.
  */
- export default interface Page<T>{
+ export default interface Page{
     CurrentPage:number,
     PageCount:number,
     PageSize:number,
@@ -10,6 +12,5 @@
     FirstRowOnPage:number,
     LastRowOnPage:number,
 
-    // List of Type T. Our result is Cell[]
-    Results:T[]
+    Results:ICell[]
 }

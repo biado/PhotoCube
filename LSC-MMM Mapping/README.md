@@ -9,7 +9,6 @@ For this version, the keys are:
  - LSCVisualConcept
  - LSCMetadata
  - LSCTopic
- - manualTagSetsMD
  - JsonHierarchy
  - LSCFilename
  - ImageFeatureTop5

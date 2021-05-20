@@ -561,7 +561,7 @@ export default class ThreeBrowser extends React.Component<{
         let yDefined : boolean = this.yAxis.TitleString != "Y";
         let zDefined : boolean = this.zAxis.TitleString != "Z";
 
-        let page: Page<ICell> | null = null;
+        let page: Page | null = null;
         let newCells: Cell[] = [];
 
         //Fetch cells based on which axis are defined:
