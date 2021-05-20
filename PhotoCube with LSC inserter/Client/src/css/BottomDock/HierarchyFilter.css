@@ -1,0 +1,26 @@
+.hierarchy.explorer {
+  width: 50%;
+}
+
+.search.field {
+  padding: 8px 0px 8px 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  border-radius: 2px;
+  font-size: 16px;
+  color: #333;
+  margin-right: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search.results {
+  margin-top: 40px;
+}
+
+#node-dropdown {
+  margin-top: 10px;
+  width: 90%;
+  outline: none;
+  padding: 5px;
+}

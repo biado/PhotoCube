@@ -1,0 +1,24 @@
+.Container {
+  padding: 5px;
+}
+
+.displayInline {
+  display: inline-block;
+}
+
+.width50 {
+  width: 50%;
+}
+
+.Dimension {
+  margin-bottom: 5px;
+}
+
+.Dimension.Selector {
+  display: flex;
+  flex-direction: row;
+}
+
+.Filter.Selector {
+  border: 1px solid rgb(133, 133, 133);
+}

@@ -1,0 +1,48 @@
+.bottom.dock {
+  background-color: rgb(40, 40, 40);
+}
+
+.bottom.dock.expanded {
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dimensionbrowser.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 6px;
+}
+
+.dock.name {
+  display: flex;
+  flex-direction: row;
+  margin-left: 5px;
+}
+
+.expand {
+  color: rgb(200, 200, 200);
+  height: 18px;
+  width: 18px;
+}
+
+#browser-icon {
+  height: 15px;
+  width: 15px;
+  color: rgb(200, 200, 200);
+  margin-right: 5px;
+  position: relative;
+  top: 5%;
+}
+
+h5 {
+  color: rgb(200, 200, 200);
+  margin: 0;
+  font-weight: normal;
+}

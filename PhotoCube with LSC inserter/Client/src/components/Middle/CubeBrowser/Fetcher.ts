@@ -1,7 +1,7 @@
 import Axis from "./Axis";
 import CubeObject from './CubeObject';
 import Tag from "./Tag";
-import { Filter } from "../../LeftDock/FacetedSearcher";
+import { Filter } from "../../Filter";
 
 /**
  * The static Fetcher class is used to fetch data from the server.
@@ -73,6 +73,34 @@ export default class Fetcher{
      */
     static async FetchNode(nodeId: number){
         return await fetch(Fetcher.baseUrl + "/node/" + nodeId)
+            .then(result => {return result.json()});
+    }
+
+    /**
+     * Fetches a single Node and it's immediate parent with user-defined 
+     * search term.
+     * @param searchterm
+     */
+     static async FetchNodeByName(searchterm: string){
+        return await fetch(Fetcher.baseUrl + "/node/name=" + searchterm)
+            .then(result => {return result.json()});
+    }
+
+    /**
+     * Fetches a node's parentnode.
+     * @param nodeId
+     */
+     static async FetchParentNode(nodeId: number){
+        return await fetch(Fetcher.baseUrl + "/node/" + nodeId + "/parent")
+            .then(result => {return result.json()});
+    }
+
+    /**
+     * Fetches a node's children. 
+     * @param nodeId
+     */
+     static async FetchChildNodes(nodeId: number){
+        return await fetch(Fetcher.baseUrl + "/node/" + nodeId + "/children")
             .then(result => {return result.json()});
     }
 

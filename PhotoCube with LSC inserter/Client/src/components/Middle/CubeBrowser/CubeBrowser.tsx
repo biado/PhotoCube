@@ -1,12 +1,11 @@
 import * as React from 'react';
 import * as THREE from 'three';
 import Position from './Position';
-import '../../../css/ThreeBrowser.css';
+import '../../../css/CubeBrowser.css';
 import helveticaRegular from '../../../fonts/helvetiker_regular.typeface.json';
 import Axis, {AxisTypeEnum, AxisDirection} from './Axis';
 import Cell from './Cell';
 import Fetcher from './Fetcher';
-import Hierarchy from './Hierarchy';
 import Tagset from './Tagset';
 import HierarchyNode from './HierarchyNode';
 import { Raycaster } from 'three';
@@ -15,16 +14,16 @@ import ICell from './Cell';
 import { BrowsingState } from './BrowsingState';
 import PickedDimension from '../../RightDock/PickedDimension';
 import { Colors } from './Colors';
-import { Filter } from '../../LeftDock/FacetedSearcher';
+import { Filter } from '../../Filter';
 import Page from './Page';
 
 const OrbitControls = require('three-orbitcontrols')
 
 /**
- * The ThreeBrowser Component is the browsing component used to browse photos in 3D.
- * The ThreeBrowser uses the three.js library for 3D rendering: https://threejs.org/
+ * The CubeBrowser Component is the browsing component used to browse photos in 3D.
+ * The CubeBrowser uses the three.js library for 3D rendering: https://threejs.org/
  */
-export default class ThreeBrowser extends React.Component<{
+export default class CubeBrowser extends React.Component<{
         //Props contract:
         onFileCountChanged: (fileCount: number) => void,
         previousBrowsingState: BrowsingState|null,
@@ -59,7 +58,7 @@ export default class ThreeBrowser extends React.Component<{
                 </div>
         }
         return(
-            <div className="grid-item" id="ThreeBrowser">
+            <div className="grid-item" id="CubeBrowser">
                 <div style={{ width: '400px', height: '400px' }} ref = {(mount) => { this.mount = mount }}/>
                 <div id="info">{this.state.infoText}</div>
                 {contextMenu}
@@ -390,7 +389,7 @@ export default class ThreeBrowser extends React.Component<{
      * Handler if window size changes. Resizes the canvas.
      */
     private onBrowserResize = () => {
-        let browserElement: HTMLElement = document.getElementById('ThreeBrowser')!;
+        let browserElement: HTMLElement = document.getElementById('CubeBrowser')!;
         let width = browserElement.clientWidth;
         let height = browserElement.clientHeight;
         this.renderer.setSize(width, height);
@@ -485,7 +484,7 @@ export default class ThreeBrowser extends React.Component<{
         
     /**
      * Updates axis labels and then calls compute cells.
-     * Called from outside of ThreeBrowser
+     * Called from outside of CubeBrowser
      * @param dimName "X", "Y" or "Z"
      * @param dimension 
      */
@@ -509,9 +508,8 @@ export default class ThreeBrowser extends React.Component<{
 
         switch(dimension.type){
             case "hierarchy":
-                let hierarchy: Hierarchy = await Fetcher.FetchHierarchy(dimension.id);
-                let rootNode: HierarchyNode = await Fetcher.FetchNode(hierarchy.RootNodeId);
-                axis.TitleString = hierarchy.Name + " (hierarchy)";
+                let rootNode: HierarchyNode = await Fetcher.FetchNode(dimension.id);
+                axis.TitleString = rootNode.Tag.Name + " (hierarchy)";
                 axis.AddHierarchy(rootNode, this.addTextCallback, this.addLineCallback);
                 break;
             case "tagset":
@@ -560,6 +558,10 @@ export default class ThreeBrowser extends React.Component<{
         let xDefined : boolean = this.xAxis.TitleString != "X";
         let yDefined : boolean = this.yAxis.TitleString != "Y";
         let zDefined : boolean = this.zAxis.TitleString != "Z";
+
+        //Exclude projected filters in API call
+        const filters: Filter[] = this.props.filters.filter(f => 
+            f.Id !== this.xAxis.Id && f.Id !== this.yAxis.Id && f.Id !== this.zAxis.Id);
 
         let page: Page | null = null;
         let newCells: Cell[] = [];

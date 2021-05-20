@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import Position from "./Position";
 import HierarchyNode from './HierarchyNode';
 import Tagset from './Tagset';
-import Hierarchy from './Hierarchy';
 import PickedDimension from '../../RightDock/PickedDimension';
 import { Colors } from './Colors';
 

@@ -95,11 +95,6 @@ namespace ObjectCubeServer.Models.DataAccess
                 .WithOne(h => h.Tagset)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //Ids of Tags are generated when added... Needed for some reason...
-            modelBuilder.Entity<Tag>()
-               .Property(t => t.Id)
-               .ValueGeneratedOnAdd();
-
             //Every tag has exactly one tag type
             modelBuilder.Entity<Tag>()
                 .HasOne(t => t.TagType);
@@ -115,6 +110,7 @@ namespace ObjectCubeServer.Models.DataAccess
             modelBuilder.Entity<Node>()
                 .HasOne(n => n.Tag)
                 .WithMany()
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
             //Typed Tags store a replicate of tagsetid
@@ -174,7 +170,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc50api_dimensionfix; User Id = photocube; Password = postgres;");
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lsc100-pagination; User Id = photocube; Password = postgres;");
                     }
                     break;
                 case PlatformID.Win32NT: //Windows

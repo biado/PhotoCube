@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -19,16 +20,14 @@ namespace ObjectCubeServer.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            List<Tagset> allTagsets;
+            List<PublicTagset> allTagsets;
             using (var context = new ObjectContext())
             {
                 allTagsets = context.Tagsets
-                    //.OrderBy(ts => ts.Name)
-                    .Include(ts => ts.Tags)
+                    .Select(t => new PublicTagset(t.Id, t.Name))
                     .ToList();
             }
-            //Sorting tags:
-            //allTagsets.ForEach(ts => ts.Tags.Sort((t1,t2) => t1.Name.CompareTo(t2.Name)));
+
             return Ok(JsonConvert.SerializeObject(allTagsets,
                 new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })); //Ignore self referencing loops
         }

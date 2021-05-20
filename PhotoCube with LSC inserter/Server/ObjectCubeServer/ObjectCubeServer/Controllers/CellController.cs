@@ -340,7 +340,7 @@ namespace ObjectCubeServer.Controllers
         {
             return cubeObjects
                 .Where(co =>
-                    tagFilters.TrueForAll(f => co.ObjectTagRelations.Exists(otr => otr.TagId == f.tagId))) //Must be tagged with each tag
+                    tagFilters.TrueForAll(f => co.ObjectTagRelations.Exists(otr => otr.TagId == f.Id))) //Must be tagged with each tag
                 .ToList();
         }
 
@@ -371,7 +371,7 @@ namespace ObjectCubeServer.Controllers
         private List<Tag> extractTagsFromHierarchyFilter(ParsedFilter pf)
         {
             //Get node and subnodes with tags:
-            Node node = fetchWholeHierarchyFromRootNode(pf.nodeId);
+            Node node = fetchWholeHierarchyFromRootNode(pf.Id);
             //Extract tags:
             List<Tag> tagsInNode = extractTagsFromHieararchy(node);
             return tagsInNode;
