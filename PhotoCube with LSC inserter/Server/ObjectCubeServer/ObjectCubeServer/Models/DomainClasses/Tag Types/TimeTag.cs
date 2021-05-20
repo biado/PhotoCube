@@ -16,7 +16,7 @@ namespace ObjectCubeServer.Models.DomainClasses.TagTypes
         override
         public string GetTagName()
         {
-            return Name.Hours + ":" + Name.Minutes;
+            return Name.ToString(@"hh\:mm");
         }
 
         public int CompareTo(object obj)
