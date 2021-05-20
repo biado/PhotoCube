@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -72,6 +74,35 @@ namespace ObjectCubeServer.Controllers
                 return Ok(JsonConvert.SerializeObject(tagFound));
             }
             else return NotFound();   
+        }
+
+        // GET: api/Tag/name=wood
+        // Note: currently it is only for string tags
+        [HttpGet("name={name}")]
+        public IActionResult GetTagByName(string name)
+        {
+            List<Tag> tagsFound;
+            using (var context = new ObjectContext())
+            {
+                //tagsFound = context.Tags.AsEnumerable()
+                //    .Where(t => t.GetTagName().ToLower().StartsWith(name.ToLower()))
+                //    .ToList();
+                tagsFound = context.Tags
+                    .Where(t => ((AlphanumericalTag)t).Name.ToLower().StartsWith(name.ToLower()))
+                    .ToList();
+            }
+
+            if (tagsFound != null)
+            {
+                var result = new List<PublicTag>();
+                foreach (Tag tag in tagsFound)
+                {
+                    var publicTag = new PublicTag(tag.Id, ((AlphanumericalTag)tag).Name);
+                    result.Add(publicTag);
+                }
+                return Ok(JsonConvert.SerializeObject(result));
+            }
+            return NotFound();
         }
     }
 }
