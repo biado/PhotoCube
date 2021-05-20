@@ -17,6 +17,12 @@ namespace ObjectCubeServer.Models.DomainClasses
         public List<CubeObject> CubeObjects { get; set; }
 
         // To change the domain model cell to public model cell
+        public PublicCell GetPublicCell(int skip, int pageSize)
+        {
+            List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).Skip(skip).Take(pageSize).ToList();
+            return new PublicCell(this.x, this.y, this.z, cubeObjects);
+        }
+
         public PublicCell GetPublicCell()
         {
             List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).ToList();
