@@ -12,7 +12,7 @@ namespace ObjectCubeServer.Models.DomainClasses
         public string name { get; set; }
 
         // Time tag
-        public TimeSpan startTime { get; set; }
-        public TimeSpan endTime { get; set; }
+        public string startTime { get; set; }
+        public string endTime { get; set; }
     }
 }

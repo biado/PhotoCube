@@ -287,30 +287,41 @@ namespace ObjectCubeServer.Controllers
             switch (timeFilter.type)
             {
                 case "time":
+                    TimeSpan start = parseToTimeSpan(timeFilter.startTime);
+                    TimeSpan end = parseToTimeSpan(timeFilter.endTime);
                     using (var context = new ObjectContext())
                         {
                             var Tagset = context.Tagsets
                                 .Include(ts => ts.Tags)
                                 .FirstOrDefault(ts => ts.Name == "Time");
-                            if (timeFilter.startTime <= timeFilter.endTime)
+                            if (start <= end)
                             {
                                 return Tagset.Tags.Where(t =>
-                                    ((TimeTag) t).Name >= timeFilter.startTime &&
-                                    ((TimeTag) t).Name <= timeFilter.endTime).ToList();
+                                    ((TimeTag) t).Name >= start &&
+                                    ((TimeTag) t).Name <= end).ToList();
                             }
                             else
                             {
                                 // Case: Going over midnight. For example, 20:00-02:00
                                 return Tagset.Tags.Where(t =>
-                                    (((TimeTag) t).Name >= timeFilter.startTime &&
+                                    (((TimeTag) t).Name >= start &&
                                      ((TimeTag) t).Name < new TimeSpan(24, 0, 0))
                                     || (((TimeTag) t).Name >= new TimeSpan(0, 0, 0) &&
-                                    ((TimeTag) t).Name <= timeFilter.endTime)).ToList();
+                                    ((TimeTag) t).Name <= end)).ToList();
                             }
                         }
             }
 
             return null;
+        }
+
+        private TimeSpan parseToTimeSpan(string timeString)
+        {
+            string[] hourMinute = timeString.Split(":");
+            int hour = int.Parse(hourMinute[0]);
+            int minute = int.Parse(hourMinute[1]);
+            TimeSpan time = new TimeSpan(hour, minute, 0);
+            return time;
         }
 
         private PublicPage updateRowCountAndPageCount(PublicPage result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells)
