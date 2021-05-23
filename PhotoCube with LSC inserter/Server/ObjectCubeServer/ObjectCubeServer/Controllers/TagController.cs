@@ -104,5 +104,32 @@ namespace ObjectCubeServer.Controllers
             }
             return NotFound();
         }
+
+        // GET: api/Tag/tagsetName=Year
+        [HttpGet("tagsetName={tagsetName}")]
+        public IActionResult GetAllTagsInTagsetByTagsetName(string tagsetName)
+        {
+            List<Tag> tagsFound;
+            using (var context = new ObjectContext())
+            {
+                var Tagset = context.Tagsets
+                    .Include(ts => ts.Tags)
+                    .FirstOrDefault(ts => ts.Name.ToLower() == tagsetName.ToLower());
+                tagsFound = Tagset.Tags;
+
+            }
+
+            if (tagsFound != null)
+            {
+                var result = new List<PublicTag>();
+                foreach (Tag tag in tagsFound)
+                {
+                    var publicTag = new PublicTag(tag.Id, tag.GetTagName());
+                    result.Add(publicTag);
+                }
+                return Ok(JsonConvert.SerializeObject(result));
+            }
+            return NotFound();
+        }
     }
 }
