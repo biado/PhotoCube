@@ -9,7 +9,8 @@ import '../../css/LeftDock/TagFilter.css';
 /**
  * Component for browsing and adding date filters.
  */
- export const TagDropdown = (props: {
+ export const DateTagDropdown = (props: {
+    className: string,
      tagsetName: string, onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
 
     const [options, setDropdownOptions] = useState<Option[]>([]);

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import '../../css/LeftDock/LeftDock.css';
 import { Filter } from '../Filter';
-import { TagDropdown } from './DateFilter';
+import { DateTagDropdown } from './DateFilter';
 import { TagSearcher } from './TagFilter';
 import { TimeForm } from './TimeFilter';
 
@@ -21,11 +21,11 @@ export default class LeftDock extends Component<{
                 <div className="year dropdown">
                 <h4 className="Header">Date filter:</h4>
                 <p>Year:</p>
-                <TagDropdown tagsetName={"Year"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}></TagDropdown>
+                <DateTagDropdown className={visibility} tagsetName={"Year"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}></DateTagDropdown>
                 <p>Month:</p>
-                <TagDropdown tagsetName={"Month (number)"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}></TagDropdown>
+                <DateTagDropdown className={visibility} tagsetName={"Month (number)"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}></DateTagDropdown>
                 <p>Day:</p>
-                <TagDropdown tagsetName={"Day within month"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}></TagDropdown>
+                <DateTagDropdown className={visibility} tagsetName={"Day within month"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}></DateTagDropdown>
                 </div>
                 <div className="time range">
                     <h4 className="Header">Time range filter:</h4>
