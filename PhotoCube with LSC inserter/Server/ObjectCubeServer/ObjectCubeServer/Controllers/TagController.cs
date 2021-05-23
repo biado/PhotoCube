@@ -106,6 +106,7 @@ namespace ObjectCubeServer.Controllers
         }
 
         // GET: api/Tag/tagsetName=Year
+        // Note: This currently only works with numerical tags.
         [HttpGet("tagsetName={tagsetName}")]
         public IActionResult GetAllTagsInTagsetByTagsetName(string tagsetName)
         {
@@ -115,7 +116,7 @@ namespace ObjectCubeServer.Controllers
                 var Tagset = context.Tagsets
                     .Include(ts => ts.Tags)
                     .FirstOrDefault(ts => ts.Name.ToLower() == tagsetName.ToLower());
-                tagsFound = Tagset.Tags;
+                tagsFound = Tagset.Tags.OrderBy(t => ((NumericalTag)t).Name).ToList();
 
             }
 
