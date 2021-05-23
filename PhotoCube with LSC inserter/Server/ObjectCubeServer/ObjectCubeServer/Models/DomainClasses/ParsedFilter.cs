@@ -10,5 +10,9 @@ namespace ObjectCubeServer.Models.DomainClasses
         public string type { get; set; }
         public int Id { get; set; }
         public string name { get; set; }
+
+        // Time tag
+        public TimeSpan startTime { get; set; }
+        public TimeSpan endTime { get; set; }
     }
 }

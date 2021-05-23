@@ -4,5 +4,7 @@
  export interface Filter{
     type: string,
     Id: number, 
-    name: string
+    name: string,
+    startTime: string,
+    endTime: string
 }

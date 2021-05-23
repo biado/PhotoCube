@@ -96,11 +96,23 @@ namespace ObjectCubeServer.Controllers
                 //Filtering:
                 if (filtersDefined && filtersList.Count > 0)
                 {
-                    //Devide filters:
+                    //Divide filters:
+                    List<ParsedFilter> dayOfWeekFilers = filtersList.Where(f => f.type.Equals("day of week")).ToList();
+                    List<ParsedFilter> timeFilters = filtersList.Where(f => f.type.Equals("time")).ToList();
                     List<ParsedFilter> tagFilters = filtersList.Where(f => f.type.Equals("tag")).ToList();
                     List<ParsedFilter> hierarchyFilters = filtersList.Where(f => f.type.Equals("hierarchy")).ToList();
+                    List<ParsedFilter> tagsetFilters = filtersList.Where(f => f.type.Equals("tagset")).ToList();
 
                     //Apply filters:
+                    if (dayOfWeekFilers.Count > 0)
+                    {
+                        filteredCubeObjects =
+                            filterCubeObjectsWithDayOfWeekFilters(filteredCubeObjects, dayOfWeekFilers);
+                    }
+                    if (timeFilters.Count > 0)
+                    {
+                        filteredCubeObjects = filterCubeObjectsWithTimeFilters(filteredCubeObjects, timeFilters);
+                    } 
                     if (tagFilters.Count > 0)
                     {
                         filteredCubeObjects = filterCubeObjectsWithTagFilters(filteredCubeObjects, tagFilters);
@@ -110,6 +122,11 @@ namespace ObjectCubeServer.Controllers
                     {
                         filteredCubeObjects =
                             filterCubeObjectsWithHierarchyFilters(filteredCubeObjects, hierarchyFilters);
+                    }
+
+                    if (tagsetFilters.Count > 0)
+                    {
+                        filteredCubeObjects = filterCubeObjectsWithTagsetFilters(filteredCubeObjects, tagsetFilters);
                     }
                 }
 
@@ -234,7 +251,68 @@ namespace ObjectCubeServer.Controllers
             }
         }
 
+        private IEnumerable<CubeObject> filterCubeObjectsWithDayOfWeekFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> dayOfWeekFilers)
+        { 
+            return cubeObjects
+                .Where(co =>
+                    dayOfWeekFilers.Exists(f => co.ObjectTagRelations.Exists(otr => otr.TagId == f.Id))) //Must be tagged with at least one tag (OR search!)
+                .ToList();
+        }
+
+        private IEnumerable<CubeObject> filterCubeObjectsWithDateFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> dateFilters)
+        {
+            //Getting tags per date filter:
+            List<List<Tag>>
+                tagsPerDateFilter = dateFilters.Select(df => extractTagsFromTimeFilter(df)).ToList(); // Map into list of tags
+
+            return cubeObjects.Where(co => tagsPerDateFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists
+                lstOfTags => co.ObjectTagRelations.Exists((  //For each tag list, there must exist a cube object where:
+                    otr => lstOfTags.Exists(tag => tag.Id == otr.TagId))))).ToList();  //the cube object is tagged with one tag id from the taglist.
+
+        }
         #region HelperMethods:
+        private IEnumerable<CubeObject> filterCubeObjectsWithTimeFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> timeFilters)
+        {
+            //Getting tags per time filter:
+            List<List<Tag>>
+                tagsPerTimeFilter = timeFilters.Select(timef => extractTagsFromTimeFilter(timef)).ToList(); // Map into list of tags
+
+            return cubeObjects.Where(co => tagsPerTimeFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists
+                lstOfTags => co.ObjectTagRelations.Exists((  //For each tag list, there must exist a cube object where:
+                    otr => lstOfTags.Exists(tag => tag.Id == otr.TagId))))).ToList();  //the cube object is tagged with one tag id from the taglist.
+        }
+
+        private List<Tag> extractTagsFromTimeFilter(ParsedFilter timeFilter)
+        {
+            switch (timeFilter.type)
+            {
+                case "time":
+                    using (var context = new ObjectContext())
+                        {
+                            var Tagset = context.Tagsets
+                                .Include(ts => ts.Tags)
+                                .FirstOrDefault(ts => ts.Name == "Time");
+                            if (timeFilter.startTime <= timeFilter.endTime)
+                            {
+                                return Tagset.Tags.Where(t =>
+                                    ((TimeTag) t).Name >= timeFilter.startTime &&
+                                    ((TimeTag) t).Name <= timeFilter.endTime).ToList();
+                            }
+                            else
+                            {
+                                // Case: Going over midnight. For example, 20:00-02:00
+                                return Tagset.Tags.Where(t =>
+                                    (((TimeTag) t).Name >= timeFilter.startTime &&
+                                     ((TimeTag) t).Name < new TimeSpan(24, 0, 0))
+                                    || (((TimeTag) t).Name >= new TimeSpan(0, 0, 0) &&
+                                    ((TimeTag) t).Name <= timeFilter.endTime)).ToList();
+                            }
+                        }
+            }
+
+            return null;
+        }
+
         private PublicPage updateRowCountAndPageCount(PublicPage result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells)
         {
             IEnumerable<CubeObject> xUnion = new List<CubeObject>();
@@ -308,7 +386,7 @@ namespace ObjectCubeServer.Controllers
         private PublicPage GetPublicCellsInThisPage(PublicPage result, List<Cell> cells, int currentPage)
         {
             var skip = (currentPage - 1) * pageSize;
-            result.Results = cells.Select(c => c.GetPublicCell(skip, pageSize)).ToList();
+            result.Results = cells.Select(c => c.GetPublicCell()).ToList();
 
             return result;
         }
@@ -327,6 +405,27 @@ namespace ObjectCubeServer.Controllers
                     .ToList();
             }
             return allCubeObjects;
+        }
+
+
+        private List<CubeObject> filterCubeObjectsWithTagsetFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> tagsetFilters)
+        {
+            //Getting tags per tagset filter:
+            List<List<Tag>>
+                tagsPerTagsetFilter = tagsetFilters.Select(tsf => extractTagsFromTagsetFilter(tsf)).ToList(); // Map into list of tags
+
+            return cubeObjects.Where(co => tagsPerTagsetFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists
+                lstOfTags => co.ObjectTagRelations.Exists((  //For each tag list, there must exist a cube object where:
+                    otr => lstOfTags.Exists(tag => tag.Id == otr.TagId))))).ToList();  //the cube object is tagged with one tag id from the taglist.
+        }
+
+        private List<Tag> extractTagsFromTagsetFilter(ParsedFilter tsf)
+        {
+            using var context = new ObjectContext();
+            var Tagset = context.Tagsets
+                    .Include(ts => ts.Tags)
+                    .FirstOrDefault(ts => ts.Id == tsf.Id);
+            return Tagset.Tags;
         }
 
         /// <summary>

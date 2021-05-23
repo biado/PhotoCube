@@ -18,7 +18,7 @@ const TagFilterAdder = (props: {
     }, [props.selectedTag])
 
     const onButtonClick = () => {
-        const filter: Filter = createFilter(selectedTag!.Name, selectedTag!.Id, "tag");
+        const filter: Filter = createFilter(selectedTag!.Name, selectedTag!.Id, "tag", "", "");
         if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
         }
@@ -64,7 +64,7 @@ export const TagSearcher = (props: {className: string, onFiltersChanged: (filter
     }
 
     return (
-        <div className="TagSercher">
+        <div className="TagSearcher">
             <form method="get">
                 <input className="search field" type="text" placeholder="Search tags" 
                     onChange={e => onInputGiven(e.target.value)}/>
