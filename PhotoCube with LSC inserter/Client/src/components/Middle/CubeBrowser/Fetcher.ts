@@ -77,6 +77,15 @@ export default class Fetcher{
     }
 
     /**
+     * Fetches all Tags that is in a tagset which has the given name..
+     * @param tagsetName
+     */
+         static async FetchTagsByTagsetName(tagsetName: string){
+            return await fetch(Fetcher.baseUrl + "/tag/tagsetName=" + tagsetName)
+                .then(result => {return result.json()});
+        }
+
+    /**
      * Fetches a single Node with nodeId from the server.
      * @param nodeId 
      */

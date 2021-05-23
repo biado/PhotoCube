@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Filter } from "../Filter";
 import { createFilter } from "../Middle/BottomDock/TagsetFilter";
-import '../../css/LeftDock/TimeFilter.css';
+import '../../css/LeftDock/TagFilter.css';
 
 export const TimeForm = (props: {
     className: string,
