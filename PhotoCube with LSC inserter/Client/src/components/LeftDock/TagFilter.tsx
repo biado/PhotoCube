@@ -5,6 +5,9 @@ import Fetcher from "../Middle/CubeBrowser/Fetcher";
 import { Tag } from "./Tag";
 import '../../css/LeftDock/TagFilter.css';
 
+/**
+ * Component for adding a selected Tag as a filter.
+ */
 const TagFilterAdder = (props: {
     selectedTag: Tag,
     activeFilters: Filter[],
@@ -29,6 +32,9 @@ const TagFilterAdder = (props: {
     )
 }
 
+/**
+ * Component for displaying search results.
+ */
 const SearchResults = (props: {
     options: Tag[], onTagOptionSelected: (e: React.ChangeEvent<HTMLSelectElement>) => void}) => {
 
@@ -43,7 +49,12 @@ const SearchResults = (props: {
     )
 }
 
-export const TagSearcher = (props: {className: string, onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
+/**
+ * Component for browsing searching tags and adding tag filters.
+ * Consists of a search field and a search results dropdown component.
+ * A tag is selected from the search results and its name is shown.
+ */
+export const TagSearcher = (props: { onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
     const [input, updateInput] = useState<string>("");
     const [options, updateOptions] = useState<Tag[]>([]);
     const [selectedTag, updateSelection] = useState<Tag|null>(null);

@@ -77,7 +77,8 @@ export default class Fetcher{
     }
 
     /**
-     * Fetches all Tags that is in a tagset which has the given name..
+     * Fetches all Tags that is in a tagset which has the given name.
+     * Currently only works for tags of numerical type.
      * @param tagsetName
      */
          static async FetchTagsByTagsetName(tagsetName: string){

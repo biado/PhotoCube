@@ -58,7 +58,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
           <LeftDock 
           hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
           onFiltersChanged={this.onFiltersChanged}
-          activeFilters={this.state.filters}/>
+          activeFilters={this.state.filters}
+          onFilterUnchecked={this.onFilterUnchecked}/>
            <div className="middle dock">
             {currentBrowser}
             <BottomDock 
@@ -100,6 +101,14 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     let callback = () => { if(this.CubeBrowser.current){ this.CubeBrowser.current.RecomputeCells(); }}
     this.setState({filters : this.state.filters.filter(filter => filter.name !== filterName)}, callback);
   }
+
+  /**
+   * Called if a filter is removed (by unchecking a check box) from the day-of-week tag list in the Left Dock.
+   */
+     onFilterUnchecked = (filterId : number) => {
+      let callback = () => { if(this.CubeBrowser.current){ this.CubeBrowser.current.RecomputeCells(); }}
+      this.setState({filters : this.state.filters.filter(filter => filter.Id !== filterId)}, callback);
+    }
 
   /**
    * Can be called from sub-components props to update a dimension.

@@ -8,9 +8,9 @@ import '../../css/LeftDock/TagFilter.css';
 
 /**
  * Component for browsing and adding date filters.
+ * Currently used for adding tags from Year, Month (number) and Day within month tagsets.
  */
  export const DateTagDropdown = (props: {
-    className: string,
      tagsetName: string, onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
 
     const [options, setDropdownOptions] = useState<Option[]>([]);

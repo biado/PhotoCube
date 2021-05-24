@@ -3,8 +3,12 @@ import { Filter } from "../Filter";
 import { createFilter } from "../Middle/BottomDock/TagsetFilter";
 import '../../css/LeftDock/TagFilter.css';
 
+/**
+ * Component for adding a range query for Time tags.
+ * Both the startTime and endTime must be filled for the 'Add filter' button to actually add the range filter.
+ * To search for a distinct time, give a same value for both startTime and endTime text input field.
+ */
 export const TimeForm = (props: {
-    className: string,
     activeFilters: Filter[],
     onFiltersChanged: (filter: Filter) => void
 }) => {
@@ -14,6 +18,7 @@ export const TimeForm = (props: {
     };
     const [values, setValues] = useState(initialValues);
 
+    // Ref: https://dev.to/deboragaleano/how-to-handle-multiple-inputs-in-react-55el
     const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
         setValues({

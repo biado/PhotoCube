@@ -78,6 +78,11 @@ namespace ObjectCubeServer.Controllers
 
         // GET: api/Tag/name=wood
         // Note: currently it is only for string tags
+        /// <summary>
+        /// Returns single tag (of alphanumerical type) where Tag.name == name.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [HttpGet("name={name}")]
         public IActionResult GetTagByName(string name)
         {
@@ -107,8 +112,13 @@ namespace ObjectCubeServer.Controllers
 
         // GET: api/Tag/tagsetName=Year
         // Note: This currently only works with numerical tags.
+        /// <summary>
+        /// Returns all tags (of numerical type) in a tagset as a list, where Tagset.name == tagsetName.
+        /// </summary>
+        /// <param tagsetName="tagsetName"></param>
+        /// <returns></returns>
         [HttpGet("tagsetName={tagsetName}")]
-        public IActionResult GetAllTagsInTagsetByTagsetName(string tagsetName)
+        public IActionResult GetAllTagsInNumericalTagsetByTagsetName(string tagsetName)
         {
             List<Tag> tagsFound;
             using (var context = new ObjectContext())
