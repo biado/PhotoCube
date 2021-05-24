@@ -85,7 +85,7 @@ export default class DayOfWeekFilter extends React.Component<{
             case "7":
                 return "Sunday";
             default:
-                break;
+                return "";
         }
     }
 

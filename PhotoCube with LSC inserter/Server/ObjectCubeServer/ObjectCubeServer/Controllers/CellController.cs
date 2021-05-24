@@ -100,7 +100,7 @@ namespace ObjectCubeServer.Controllers
                     //Divide filters:
                     List<ParsedFilter> dayOfWeekFilers = filtersList.Where(f => f.type.Equals("day of week")).ToList();
                     List<ParsedFilter> timeFilters = filtersList.Where(f => f.type.Equals("time")).ToList();
-                    List<ParsedFilter> tagFilters = filtersList.Where(f => f.type.Equals("tag")).ToList();
+                    List<ParsedFilter> tagFilters = filtersList.Where(f => f.type.Equals("tag") || f.type.Equals("date")).ToList();
                     List<ParsedFilter> hierarchyFilters = filtersList.Where(f => f.type.Equals("hierarchy")).ToList();
                     List<ParsedFilter> tagsetFilters = filtersList.Where(f => f.type.Equals("tagset")).ToList();
 

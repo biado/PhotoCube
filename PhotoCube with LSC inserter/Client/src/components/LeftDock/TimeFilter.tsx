@@ -11,8 +11,12 @@ import '../../css/LeftDock/TagFilter.css';
 export const TimeForm = (props: {
     activeFilters: Filter[],
     onFiltersChanged: (filter: Filter) => void
+    onTimeFilterReplaced: (oldFilter:Filter, newFilter: Filter) => void,
+    onFilterRemovedByType: (filterType: string) => void
 }) => {
     const initialValues = {
+        previousStartTime: "",
+        previousEndTime: "",
         startTime: "",
         endTime: ""
     };
@@ -27,18 +31,39 @@ export const TimeForm = (props: {
         });
     }
 
-    const onButtonClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const addFilter = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (values.startTime !== "" && values.endTime !== "") {
             const filter: Filter = createFilter(values.startTime + "-" + values.endTime, 0, "time", values.startTime, values.endTime);
             if (!props.activeFilters.some(af => af.startTime === filter.startTime && af.endTime === filter.endTime)) {
                 props.onFiltersChanged(filter);
             }
+            values.previousStartTime = values.startTime;
+            values.previousEndTime = values.endTime;
+        }
+    }
+
+    const replaceFilter = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+            if (values.startTime !== values.previousStartTime || values.endTime !== values.previousEndTime) {
+                const oldFilter: Filter = createFilter(values.previousStartTime + "-" + values.previousEndTime, 0, "time", values.previousStartTime, values.previousEndTime);
+                const newFilter: Filter = createFilter(values.startTime + "-" + values.endTime, 0, "time", values.startTime, values.endTime);
+                if (props.activeFilters.some(af => af.type === "time")) {
+                    props.onTimeFilterReplaced(oldFilter, newFilter);
+                }
+            }
+    }
+
+    const onClear = () => {
+        if (values.startTime !== "" || values.endTime !== "") {
+            setValues(initialValues);
+            props.onFilterRemovedByType("time");
         }
     }
 
     return (
         <div>
+            <button onClick={() => onClear()}>Clear</button>
         <form>
             <p className="Header">Start:</p>
             <input className="start time field" type="text" placeholder="00:00"
@@ -53,7 +78,7 @@ export const TimeForm = (props: {
                     name="endTime">
             </input>
             <div>
-                <button className="add time range filter button" onClick={(e) => onButtonClick(e)}>Add filter</button>
+                <button className="add time range filter button" onClick={(e) => (values.previousStartTime === "" && values.previousEndTime === "") ? addFilter(e) : replaceFilter(e)}>Add filter</button>
             </div>
         </form>
         </div>
