@@ -49,5 +49,35 @@ namespace ObjectCubeServer.Controllers
                 new JsonSerializerSettings(){ReferenceLoopHandling = ReferenceLoopHandling.Ignore})
             );
         }
+
+        // GET: api/tagset/name=Year
+        /// <summary>
+        /// Returns all tags in a tagset as a list, where Tagset.name == tagsetName.
+        /// </summary>
+        /// <param tagsetName="tagsetName"></param>
+        [HttpGet("name={name}")]
+        public IActionResult GetAllTagsByTagsetName(string name)
+        {
+            List<Tag> tagsFound;
+            using (var context = new ObjectContext())
+            {
+                var Tagset = context.Tagsets
+                    .Include(ts => ts.Tags)
+                    .FirstOrDefault(ts => ts.Name.ToLower() == name.ToLower());
+                tagsFound = Tagset.Tags;
+            }
+
+            if (tagsFound != null)
+            {
+                var result = new List<PublicTag>();
+                foreach (Tag tag in tagsFound)
+                {
+                    var publicTag = new PublicTag(tag.Id, tag.GetTagName());
+                    result.Add(publicTag);
+                }
+                return Ok(JsonConvert.SerializeObject(result));
+            }
+            return NotFound();
+        }
     }
 }
