@@ -6,78 +6,6 @@ import { Tag } from './Tag';
 import Dropdown, { Option } from 'react-dropdown';
 import '../../css/LeftDock/TagFilter.css';
 
-// export const DateTagDropdown = (props: {
-//     tagsetName: string, onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[],
-//     onFilterReplaced: (oldFilter:Filter, newFilter: Filter) => void,
-//     onFilterRemovedById : (filterId: number) => void }) => {
-
-//     const [options, setDropdownOptions] = useState<Option[]>([]);
-//     const [previouslySelectedTag, updatePrevious] = useState<Tag | null>(null);
-//     const [selectedTag, updateSelectedTag] = useState<Tag | null>(null);
-//     const [selectedTagName, updateSelectedTagName] = useState<string>("");
-//     const [buttonDisabled, disableButton] = useState<boolean>(true);
-
-
-//     useEffect(() =>  {
-//         FetchTagsByTagsetName(); 
-//     }, []);
-
-//     async function FetchTagsByTagsetName () {
-//         const response = await Fetcher.FetchTagsByTagsetName(props.tagsetName);
-//         const tags = response.map((t: Tag) => {return {Id: t.Id, Name: t.Name }});
-//         setDropdownOptions(tags.map((t: Tag) => {return {value: t.Id.toString(), label: t.Name}}));
-//     }
-
-//     const updateDropdown = (e: React.ChangeEvent<HTMLSelectElement>) => {
-//         updatePrevious(selectedTag);
-//         const filter: Filter = JSON.parse(e.currentTarget.value);
-//         updateSelectedTag({Id: filter.Id, Name: filter.name});
-//         updateSelectedTagName(filter.name);
-//         disableButton(props.activeFilters.some(af => af.Id === filter.Id));
-//     }
-
-//     const addFilter = () => {
-//         if (selectedTag !== null) {
-//             const filter: Filter = createFilter(selectedTag!.Name, selectedTag!.Id, "tag", "", "");
-//             if (!props.activeFilters.some(af => af.Id === filter.Id)) {
-//                 props.onFiltersChanged(filter);
-//                 disableButton(true);
-//             }
-//         }
-//     }
-
-//     const replaceFilter = () => {
-//         updatePrevious(selectedTag);
-//         const oldFilter: Filter = createFilter(previouslySelectedTag!.Name, previouslySelectedTag!.Id, "tag", "", "");
-//         const newFilter: Filter = createFilter(selectedTag!.Name, selectedTag!.Id, "tag", "", "");
-//         if (!props.activeFilters.some(af => af.Id === newFilter.Id)) {
-//             props.onFilterReplaced(oldFilter, newFilter);
-//             disableButton(true);
-//         }
-//     }
-
-//     const onClear = () => {
-//         if (selectedTag !== null) {
-//             props.onFilterRemovedById(selectedTag.Id);
-//             updatePrevious(null);
-//             updateSelectedTag(null);
-//             updateSelectedTagName("");
-//         }
-//     }
-//     return (
-//         <div className="Filter">
-//             <button onClick={() => onClear()}>Clear</button>
-//             <select className="Filter Selector" value={selectedTagName} onChange={(e) => updateDropdown(e)}>
-//                 <option key={0} value={"true"}>{"Select" + props.tagsetName}</option>
-//                 {options.map(af => 
-//                     <option key={af.value} value={JSON.stringify(af)}>{af.label}</option>)}
-//             </select>
-//             <button className="add button" disabled={buttonDisabled} onClick={() => (previouslySelectedTag === null) ? addFilter() : replaceFilter() }>Add filter</button>
-//         </div>
-//     )
-// }
-
-
 /**
  * Component for browsing and adding date filters.
  * Currently used for adding tags from Year, Month (number) and Day within month tagsets.
@@ -85,7 +13,7 @@ import '../../css/LeftDock/TagFilter.css';
  export const DateTagDropdown = (props: {
      tagsetName: string, onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[],
      onFilterReplaced: (oldFilter:Filter, newFilter: Filter) => void,
-     onFilterRemovedById : (filterId: number) => void }) => {
+     onFilterRemoved : (filterId: number) => void }) => {
 
     const [options, setDropdownOptions] = useState<Option[]>([]);
     const [previouslySelectedTag, updatePrevious] = useState<Tag | null>(null);
@@ -98,8 +26,13 @@ import '../../css/LeftDock/TagFilter.css';
 
     async function FetchTagsByTagsetName () {
         const response = await Fetcher.FetchTagsByTagsetName(props.tagsetName);
-        const tags = response.map((t: Tag) => {return {Id: t.Id, Name: t.Name }});
-        setDropdownOptions(tags.map((t: Tag) => {return {value: t.Id.toString(), label: t.Name}}));
+        const tags: Tag[] = response.map((t: Tag) => {return {Id: t.Id, Name: t.Name }});
+        //sort tags
+        tags.sort((a,b) => parseInt(a.Name) - parseInt(b.Name));
+        //format days and months
+        const formattedTags = formatTags(tags);
+        //set dropdown options
+        setDropdownOptions(formattedTags.map((t: Tag) => {return {value: t.Id.toString(), label: t.Name}}));
     }
 
     const addFilter = () => {
@@ -130,7 +63,7 @@ import '../../css/LeftDock/TagFilter.css';
 
     const onClear = () => {
         if (selectedTag !== null) {
-            props.onFilterRemovedById(selectedTag.Id);
+            props.onFilterRemoved(selectedTag.Id);
             updatePrevious(null);
             updateSelection(null);
         }
@@ -144,3 +77,15 @@ import '../../css/LeftDock/TagFilter.css';
         </div>
     )
 }
+
+//utility function 
+export const formatTags = (months: Tag[]) => {
+    return months.map((tag: Tag) => {
+        if (tag.Name.length == 1) {
+            return { Name: "0".concat(tag.Name), Id: tag.Id };
+        } else {
+            return tag;
+        }
+    })
+}
+
