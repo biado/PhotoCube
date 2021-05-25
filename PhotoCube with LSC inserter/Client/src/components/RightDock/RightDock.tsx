@@ -18,7 +18,7 @@ export default class RightDock extends React.Component<{
         onClearAxis:(axisName: string) => void,
         hideControls: boolean,
         activeFilters: Filter[],
-        onFilterRemoved: (filterName: string) => void
+        onFilterRemoved: (filterId: number) => void
     }>{
 
     private fileCount = React.createRef<FileCount>();

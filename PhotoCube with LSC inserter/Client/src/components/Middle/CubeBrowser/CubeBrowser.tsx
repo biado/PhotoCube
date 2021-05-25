@@ -284,7 +284,7 @@ export default class CubeBrowser extends React.Component<{
     /* EVENT HANDLERS: */
     /** Handler for mouse left click. */
     private onMouseClick = (me: MouseEvent) => {
-        if(me.button == 0 || me.button == 1){ //left or middle click
+        if(me.button === 0 || me.button === 1){ //left or middle click
             this.setState({ showContextMenu: false });
         }
     }
@@ -324,30 +324,30 @@ export default class CubeBrowser extends React.Component<{
             let zDefined : boolean = this.zAxis.TitleString !== "Z";
             let infoText : string = "Number of photos: " + intersects[0].object.userData.size;
             if(xDefined){
-                if(intersects[0].object.userData.x != 0 && this.xAxis.AxisType == AxisTypeEnum.Tagset){
+                if(intersects[0].object.userData.x !== 0 && this.xAxis.AxisType === AxisTypeEnum.Tagset){
                     infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].Name)
-                }else if(this.xAxis.AxisType == AxisTypeEnum.Hierarchy){
+                }else if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
                     infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].Tag.Name)
                 }
-                else if(this.xAxis.AxisType == AxisTypeEnum.HierarchyLeaf){
+                else if(this.xAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
                     infoText += ",  X: " + (this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].Tag.Name)
                 }
             }
             if(yDefined){
-                if(intersects[0].object.userData.y != 0 && this.yAxis.AxisType == AxisTypeEnum.Tagset){
+                if(intersects[0].object.userData.y !== 0 && this.yAxis.AxisType === AxisTypeEnum.Tagset){
                     infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].Name);
-                }else if(this.yAxis.AxisType == AxisTypeEnum.Hierarchy){
+                }else if(this.yAxis.AxisType === AxisTypeEnum.Hierarchy){
                     infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].Tag.Name);
-                }else if(this.yAxis.AxisType == AxisTypeEnum.HierarchyLeaf){
+                }else if(this.yAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
                     infoText += ",  Y: " + (this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].Tag.Name)
                 }
             }
             if(zDefined){
-                if(intersects[0].object.userData.z != 0 && this.zAxis.AxisType == AxisTypeEnum.Tagset){
+                if(intersects[0].object.userData.z !== 0 && this.zAxis.AxisType === AxisTypeEnum.Tagset){
                     infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].Name);
-                }else if(this.zAxis.AxisType == AxisTypeEnum.Hierarchy){
+                }else if(this.zAxis.AxisType === AxisTypeEnum.Hierarchy){
                     infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].Tag.Name);
-                }else if(this.zAxis.AxisType == AxisTypeEnum.HierarchyLeaf){
+                }else if(this.zAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
                     infoText += ",  Z: " + (this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].Tag.Name)
                 }
             }
@@ -520,7 +520,7 @@ export default class CubeBrowser extends React.Component<{
             case "hierarchyNode":
                 let rootNode2: HierarchyNode = await Fetcher.FetchNode(dimension.id);
                 axis.TitleString = rootNode2.Tag.Name + " (hierarchy)";
-                if(rootNode2.Children.length == 0){
+                if(rootNode2.Children.length === 0){
                     axis.AddHierarchyLeaf(rootNode2, this.addTextCallback, this.addLineCallback)
                 }
                 else {
@@ -555,9 +555,9 @@ export default class CubeBrowser extends React.Component<{
         this.boxMeshes = [];
 
         //Fetch and add new cells:
-        let xDefined : boolean = this.xAxis.TitleString != "X";
-        let yDefined : boolean = this.yAxis.TitleString != "Y";
-        let zDefined : boolean = this.zAxis.TitleString != "Z";
+        let xDefined : boolean = this.xAxis.TitleString !== "X";
+        let yDefined : boolean = this.yAxis.TitleString !== "Y";
+        let zDefined : boolean = this.zAxis.TitleString !== "Z";
 
         //Exclude projected filters in API call
         const filters: Filter[] = this.props.filters.filter(f => 

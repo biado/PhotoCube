@@ -4,7 +4,7 @@ import { createFilter } from '../Middle/BottomDock/TagsetFilter';
 import Fetcher from '../Middle/CubeBrowser/Fetcher';
 import { Tag } from './Tag';
 import Dropdown, { Option } from 'react-dropdown';
-import '../../css/LeftDock/TagFilter.css';
+import '../../css/LeftDock/DateFilter.css';
 
 /**
  * Component for browsing and adding date filters.
@@ -15,10 +15,10 @@ import '../../css/LeftDock/TagFilter.css';
      onFilterReplaced: (oldFilter:Filter, newFilter: Filter) => void,
      onFilterRemoved : (filterId: number) => void }) => {
 
-    const [options, setDropdownOptions] = useState<Option[]>([]);
-    const [previouslySelectedTag, updatePrevious] = useState<Tag | null>(null);
-    const [selectedTag, updateSelection] = useState<Tag | null>(null);
-    const [buttonDisabled, disableButton] = useState<boolean>(true);
+    const [options, setDropdownOptions] = useState<Tag[]>([]);
+    const [previousFilter, updatePrevious] = useState<Filter | null>(null);
+    const [selectedFilter, updateSelection] = useState<Filter | null>(null);
+    const [displayed, updateDisplay] = useState<string>("");
 
     useEffect(() =>  {
         FetchTagsByTagsetName(); 
@@ -32,48 +32,50 @@ import '../../css/LeftDock/TagFilter.css';
         //format days and months
         const formattedTags = formatTags(tags);
         //set dropdown options
-        setDropdownOptions(formattedTags.map((t: Tag) => {return {value: t.Id.toString(), label: t.Name}}));
+        setDropdownOptions(formattedTags);
     }
 
-    const addFilter = () => {
-        if (selectedTag !== null) {
-            const filter: Filter = createFilter(selectedTag!.Name, selectedTag!.Id, "date", "", "");
-            if (!props.activeFilters.some(af => af.Id === filter.Id)) {
-                props.onFiltersChanged(filter);
-                disableButton(true);
-            }
+    const addFilter = (option: Tag) => {
+        const filter: Filter = createFilter(option.Name, option.Id, "date");
+        if (!props.activeFilters.some(af => af.Id === filter.Id)) {
+            props.onFiltersChanged(filter);
+            updatePrevious(filter);
+            updateSelection(filter);
         }
     }
 
-    const replaceFilter = () => {
-        updatePrevious(selectedTag);
-        const oldFilter: Filter = createFilter(previouslySelectedTag!.Name, previouslySelectedTag!.Id, "date", "", "");
-        const newFilter: Filter = createFilter(selectedTag!.Name, selectedTag!.Id, "date", "", "");
+    const replaceFilter = (option: Tag) => {
+        updatePrevious(selectedFilter);
+        const newFilter: Filter = createFilter(option.Name, option.Id, "date");
         if (!props.activeFilters.some(af => af.Id === newFilter.Id)) {
-            props.onFilterReplaced(oldFilter, newFilter);
-            disableButton(true);
+            props.onFilterReplaced(selectedFilter!, newFilter);
+            updateSelection(newFilter);
         }
     }
 
-    const updateDropdown = (e: Option) => {
-        updatePrevious(selectedTag);
-        updateSelection({Id: parseInt(e.value), Name: e.label!.toString()});
-        disableButton(props.activeFilters.some(af => af.Id === parseInt(e.value)));
+    const updateDropdown = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        updateDisplay(e.currentTarget.value);
+        const selected: Tag = JSON.parse(e.currentTarget.value);
+        previousFilter === null ? addFilter(selected) : replaceFilter(selected);
     }
 
     const onClear = () => {
-        if (selectedTag !== null) {
-            props.onFilterRemoved(selectedTag.Id);
+        if (selectedFilter !== null) {
+            props.onFilterRemoved(selectedFilter.Id);
             updatePrevious(null);
             updateSelection(null);
+            updateDisplay("");
         }
     }
 
     return (
-        <div className="Filter">
+        <div className="date filter">
+            <select className="Date Selector" value={displayed} onChange={(e) => updateDropdown(e)}>
+                <option key={0} value={""}>{"Select "+ props.tagsetName.split(" ")[0]}</option>
+                {options.map(option =>
+                    <option key={option.Id} value={JSON.stringify(option)}>{option.Name}</option>)}
+                </select>
             <button onClick={() => onClear()}>Clear</button>
-            <Dropdown options={options}  placeholder={"Select "+ props.tagsetName} onChange={e => updateDropdown(e)}/>
-            <button className="add button" disabled={buttonDisabled} onClick={() => (previouslySelectedTag === null) ? addFilter() : replaceFilter() }>Add filter</button>
         </div>
     )
 }

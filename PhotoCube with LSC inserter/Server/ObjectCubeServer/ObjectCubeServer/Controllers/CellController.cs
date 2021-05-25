@@ -281,7 +281,7 @@ namespace ObjectCubeServer.Controllers
         {
             //Getting tags per time filter:
             List<List<Tag>>
-                tagsPerTimeFilter = timeFilters.Select(timef => extractTagsFromTimeFilter(timef)).ToList(); // Map into list of tags
+                tagsPerTimeFilter = timeFilters.Select(tf => extractTagsFromTimeFilter(tf)).ToList(); // Map into list of tags
 
             return cubeObjects.Where(co => tagsPerTimeFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists
                 lstOfTags => co.ObjectTagRelations.Exists((  //For each tag list, there must exist a cube object where:
@@ -290,35 +290,31 @@ namespace ObjectCubeServer.Controllers
 
         private List<Tag> extractTagsFromTimeFilter(ParsedFilter timeFilter)
         {
-            switch (timeFilter.type)
-            {
-                case "time":
-                    TimeSpan start = parseToTimeSpan(timeFilter.startTime);
-                    TimeSpan end = parseToTimeSpan(timeFilter.endTime);
-                    using (var context = new ObjectContext())
-                        {
-                            var Tagset = context.Tagsets
-                                .Include(ts => ts.Tags)
-                                .FirstOrDefault(ts => ts.Name == "Time");
-                            if (start <= end)
-                            {
-                                return Tagset.Tags.Where(t =>
-                                    ((TimeTag) t).Name >= start &&
-                                    ((TimeTag) t).Name <= end).ToList();
-                            }
-                            else
-                            {
-                                // Case: Going over midnight. For example, 20:00-02:00
-                                return Tagset.Tags.Where(t =>
-                                    (((TimeTag) t).Name >= start &&
-                                     ((TimeTag) t).Name < new TimeSpan(24, 0, 0))
-                                    || (((TimeTag) t).Name >= new TimeSpan(0, 0, 0) &&
-                                    ((TimeTag) t).Name <= end)).ToList();
-                            }
-                        }
-            }
+            var times = timeFilter.name.Split("-");
+            TimeSpan start = parseToTimeSpan(times[0]);
+            TimeSpan end = parseToTimeSpan(times[1]);
 
-            return null;
+            using (var context = new ObjectContext())
+            {
+                var Tagset = context.Tagsets
+                    .Include(ts => ts.Tags)
+                    .FirstOrDefault(ts => ts.Name == "Time");
+                if (start <= end)
+                {
+                    return Tagset.Tags.Where(t =>
+                        ((TimeTag) t).Name >= start &&
+                        ((TimeTag) t).Name <= end).ToList();
+                }
+                else
+                {
+                // Case: Going over midnight. For example, 20:00-02:00
+                    return Tagset.Tags.Where(t =>
+                        (((TimeTag) t).Name >= start &&
+                        ((TimeTag) t).Name < new TimeSpan(24, 0, 0))
+                        || (((TimeTag) t).Name >= new TimeSpan(0, 0, 0) &&
+                        ((TimeTag) t).Name <= end)).ToList();
+                }
+            }
         }
 
         private TimeSpan parseToTimeSpan(string timeString)

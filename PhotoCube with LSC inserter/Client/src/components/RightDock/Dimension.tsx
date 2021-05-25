@@ -32,7 +32,7 @@ export const FilterDropdown =
     
     return (
         <select className="Filter Selector" value={selected} onChange={(e) => createDimension(e)}>
-            <option key={0} value={"true"}>Select filter</option>
+            <option key={0} value={""}>Select filter</option>
             {options.map(af => (af.type === "tagset" || af.type === "hierarchy") ?
                 <option key={af.Id} value={JSON.stringify(af)}>{af.name}</option> : null)}
         </select>
@@ -62,7 +62,7 @@ class Dimension extends Component<{
                 {this.renderDimensionTypeAndName()}
                 <div className="Dimension Selector">
                     <FilterDropdown 
-                        cleared={this.state.DimensionName == null} 
+                        cleared={this.state.DimensionName === null} 
                         activeFilters={this.props.activeFilters} 
                         onDimensionPicked={this.dimensionPicked}/>
                     <button onClick={() => this.onClearAxis(this.props.xyz)}>

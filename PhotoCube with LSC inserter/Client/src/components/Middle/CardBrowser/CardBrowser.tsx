@@ -102,17 +102,17 @@ export default class CardBrowser extends React.Component<{
      */
     onKeydown(e: KeyboardEvent){
         //console.log(e.key);
-        if(e.key == "ArrowRight"){
+        if(e.key === "ArrowRight"){
             if(this.state.photoIndex < this.props.cubeObjects.length - 1){
                 this.setState({photoIndex: this.state.photoIndex + 1});
                 this.updateTagsInState();
             }
-        }else if(e.key == "ArrowLeft"){
+        }else if(e.key === "ArrowLeft"){
             if(this.state.photoIndex != 0){
                 this.setState({photoIndex: this.state.photoIndex - 1});
                 this.updateTagsInState();
             }
-        }else if(e.key == "Escape"){
+        }else if(e.key === "Escape"){
             this.props.onBrowsingModeChanged(BrowsingModes.Cube);
         }
     }

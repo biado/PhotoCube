@@ -1,4 +1,4 @@
-import React, { Component, SyntheticEvent } from 'react';
+import React from 'react';
 import '../../../css/GridBrowser.css';
 import CubeObject from '../CubeBrowser/CubeObject';
 import { BrowsingModes } from '../../RightDock/BrowsingModeChanger';
@@ -48,7 +48,7 @@ export default class GridBrowser extends React.Component<{
      */
     onKeydown(e: KeyboardEvent){
         //console.log(e.key);
-        if(e.key == "Escape"){
+        if(e.key === "Escape"){
             this.props.onBrowsingModeChanged(BrowsingModes.Cube);
         }
     }

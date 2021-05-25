@@ -17,7 +17,7 @@ export default class DayOfWeekFilter extends React.Component<{
 }>{
     state = {
         daysOfWeek: [],
-        dayNames: ["M", "T", "W", "T", "F", "S", "S"]
+        dayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     }
 
     render() {
@@ -41,6 +41,7 @@ export default class DayOfWeekFilter extends React.Component<{
      */
     private async renderDaysOfWeek() {
         const DOW: Tag[] = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
+        DOW.sort((a,b) => parseInt(a.Name) - parseInt(b.Name));
         this.setState({daysOfWeek: DOW})
     }
 
@@ -55,7 +56,7 @@ export default class DayOfWeekFilter extends React.Component<{
             onChange={e => this.onChange(e)} />;
         let result = <div className="dow checkbox">
                 {inputElement}
-                <p>{this.state.dayNames[parseInt(dowTag.Name)-1]}</p>
+                <p>{this.state.dayNames[parseInt(dowTag.Name)-1].substring(0,1)}</p>
             </div>
         return result;
     }
@@ -67,15 +68,16 @@ export default class DayOfWeekFilter extends React.Component<{
      */
     private onChange(e: React.ChangeEvent<HTMLInputElement>) {
         if (e.target.checked) {
-            let filter: Filter = createFilter(e.target.name, parseInt(e.target.value), "day of week", "", "");
+            const tagName = this.state.dayNames[parseInt(e.target.name)-1];
+            const filter: Filter = createFilter(tagName, parseInt(e.target.value), "day of week");
             //Add filter
-            if (!this.props.activeFilters.some(af => af.Id === filter.Id)) {
+            if (!this.props.activeFilters.some(af => af.name === tagName)) {
                 this.props.onFiltersChanged(filter);
             }
         } else {
-            let filter: Filter = createFilter(e.target.name, parseInt(e.target.value), "day of week", "", "");
-            if (this.props.activeFilters.some(af => af.Id === filter.Id)) {
-                this.props.onFilterRemoved(filter.Id);
+            const filterId = parseInt(e.target.value);
+            if (this.props.activeFilters.some(af => af.Id === filterId)) {
+                this.props.onFilterRemoved(filterId);
             }
         }
     }

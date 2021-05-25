@@ -1,33 +1,22 @@
-
-.tag.searcher {
-    width: 50%;
+.TagSearcher {
+  margin: 3%;
+  position: relative;
 }
 
-.search.field {
-    padding: 8px 0px 8px 10px;
-    border: 1px solid #ccc;
-    outline: none;
-    border-radius: 2px;
-    font-size: 16px;
-    color: #333;
-    margin-right: 5px;
-    width: 100%;
-    box-sizing: border-box;
+.tag.search.field {
+  padding: 5px;
+  font-size: 13.5px;
+  margin-top: 5px;
 }
 
-.search.results {
-    margin-top: 40px;
+.TagSearcher button {
+  margin-top: 8px;
+  position: absolute;
+  right: 0;
 }
 
-.Filter {
-    position: relative;
-}
-  
-.button {
-    padding: 5px 10px 5px 10px;
-    border-radius: 20px;
-    border: none;
-    margin-top: 10px;
-    position: absolute;
-    margin-left: 12%;
+.tag.result.dropdown {
+  padding-left: 2px;
+  margin-top: 5px;
+  width: 100%;
 }

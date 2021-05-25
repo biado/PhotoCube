@@ -26,7 +26,7 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
     }
 
     const addFilter = () => {
-        const filter: Filter = createFilter(selectedTagset!.Name, selectedTagset!.Id, "tagset", "", "");
+        const filter: Filter = createFilter(selectedTagset!.Name, selectedTagset!.Id, "tagset");
         if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
@@ -47,13 +47,11 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
 }
 
 //utility function
-export const createFilter = (tagName: string, id: number, type: string, startTime: string, endTime: string) => {
+export const createFilter = (tagName: string, id: number, type: string) => {
     const filter: Filter = {
         Id: id,
         type: type,
-        name: tagName,
-        startTime: startTime,
-        endTime: endTime
+        name: tagName
     }
     return filter;
 }
