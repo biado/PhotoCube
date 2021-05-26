@@ -140,7 +140,10 @@ public class ImageTagGenerator {
         // First, check if filename is in the solution. if yes -> frontStringBuilder, no -> backStringBuilder.
         // Because we want the solution files in the front of the image-tag file so that it is always included to different databases.
 
-        if (solutionFilenames.contains(filename)) {
+        // filename example: 2016-09-08\20160908_174237_000.jpg
+        // solution filename example: 20160908_174237_000.jpg
+        String fileNameWithoutFolder = filename.substring(11);
+        if (solutionFilenames.contains(fileNameWithoutFolder)) {
             return solutionsInFront;
         } else {
             return othersAtBack;

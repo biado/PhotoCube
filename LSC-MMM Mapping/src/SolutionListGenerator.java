@@ -81,8 +81,8 @@ public class SolutionListGenerator {
         System.out.println("Started finding solution files from Topics file.");
         try {
             SolutionListGenerator slg = new SolutionListGenerator();
-            slg.writeToSolutionListFile();
-            System.out.println("Done.");
+            // slg.writeToSolutionListFile();
+            System.out.println(slg.getSolutionSet().size());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

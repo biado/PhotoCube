@@ -55,7 +55,16 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     //Page returned:
     return (
         <div className="App grid-container">
-          <LeftDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} />
+          <LeftDock 
+          hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
+          onFiltersChanged={this.onFiltersChanged}
+          activeFilters={this.state.filters}
+          onFilterUnchecked={this.onFilterRemovedById}
+          onFilterReplaced={this.onFilterReplaced}
+          onFilterRemovedById={this.onFilterRemovedById}
+          onTimeFilterReplaced={this.onTimeFilterReplaced}
+          onFilterRemovedByType={this.onFilterRemovedByType}
+          />
            <div className="middle dock">
             {currentBrowser}
             <BottomDock 
@@ -96,6 +105,42 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   onFilterRemoved = (filterName : string) => {
     let callback = () => { if(this.CubeBrowser.current){ this.CubeBrowser.current.RecomputeCells(); }}
     this.setState({filters : this.state.filters.filter(filter => filter.name !== filterName)}, callback);
+  }
+
+  /**
+   * Called if a filter is removed with ID information.
+   */
+  onFilterRemovedById = (filterId: number) => {
+    let callback = () => { if (this.CubeBrowser.current) { this.CubeBrowser.current.RecomputeCells(); } }
+    this.setState({ filters: this.state.filters.filter(filter => filter.Id !== filterId) }, callback);
+  }
+
+    /**
+   * Called if a filter is removed with type information.
+   */
+     onFilterRemovedByType = (filterType: string) => {
+      let callback = () => { if (this.CubeBrowser.current) { this.CubeBrowser.current.RecomputeCells(); } }
+      this.setState({ filters: this.state.filters.filter(filter => filter.type !== filterType) }, callback);
+    }
+
+/**
+ * Called if a filter is replaced.
+ */
+  onFilterReplaced = (oldFilter:Filter, newFilter: Filter) => {
+    let callback = () => { if (this.CubeBrowser.current) { this.CubeBrowser.current.RecomputeCells(); } }
+    let newFilters: Filter[] = this.state.filters.filter(filter => filter.Id !== oldFilter.Id);
+    newFilters.unshift(newFilter);
+    this.setState({ filters: newFilters.flat() }, callback);
+  }
+
+/**
+ * Called if a time filter is replaced.
+ */
+   onTimeFilterReplaced = (oldFilter:Filter, newFilter: Filter) => {
+    let callback = () => { if (this.CubeBrowser.current) { this.CubeBrowser.current.RecomputeCells(); } }
+    let newFilters: Filter[] = this.state.filters.filter(filter => filter.type !== oldFilter.type); // type = time
+    newFilters.unshift(newFilter);
+    this.setState({ filters: newFilters.flat() }, callback);
   }
 
   /**

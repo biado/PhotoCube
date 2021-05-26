@@ -112,7 +112,7 @@ export const HierarchyBrowser =
     }
 
     const onButtonClick = () => {
-        const filter: Filter = createFilter(selectedNode!.Name, selectedNode!.Id, "hierarchy");
+        const filter: Filter = createFilter(selectedNode!.Name, selectedNode!.Id, "hierarchy", "", "");
         if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
             disableButton(true);

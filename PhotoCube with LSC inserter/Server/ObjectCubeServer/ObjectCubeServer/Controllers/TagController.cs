@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.TagTypes;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -72,6 +74,73 @@ namespace ObjectCubeServer.Controllers
                 return Ok(JsonConvert.SerializeObject(tagFound));
             }
             else return NotFound();   
+        }
+
+        // GET: api/Tag/name=wood
+        // Note: currently it is only for string tags
+        /// <summary>
+        /// Returns single tag (of alphanumerical type) where Tag.name == name.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet("name={name}")]
+        public IActionResult GetTagByName(string name)
+        {
+            List<Tag> tagsFound;
+            using (var context = new ObjectContext())
+            {
+                //tagsFound = context.Tags.AsEnumerable()
+                //    .Where(t => t.GetTagName().ToLower().StartsWith(name.ToLower()))
+                //    .ToList();
+                tagsFound = context.Tags
+                    .Where(t => ((AlphanumericalTag)t).Name.ToLower().StartsWith(name.ToLower()))
+                    .ToList();
+            }
+
+            if (tagsFound != null)
+            {
+                var result = new List<PublicTag>();
+                foreach (Tag tag in tagsFound)
+                {
+                    var publicTag = new PublicTag(tag.Id, ((AlphanumericalTag)tag).Name);
+                    result.Add(publicTag);
+                }
+                return Ok(JsonConvert.SerializeObject(result));
+            }
+            return NotFound();
+        }
+
+        // GET: api/Tag/tagsetName=Year
+        // Note: This currently only works with numerical tags.
+        /// <summary>
+        /// Returns all tags (of numerical type) in a tagset as a list, where Tagset.name == tagsetName.
+        /// </summary>
+        /// <param tagsetName="tagsetName"></param>
+        /// <returns></returns>
+        [HttpGet("tagsetName={tagsetName}")]
+        public IActionResult GetAllTagsInNumericalTagsetByTagsetName(string tagsetName)
+        {
+            List<Tag> tagsFound;
+            using (var context = new ObjectContext())
+            {
+                var Tagset = context.Tagsets
+                    .Include(ts => ts.Tags)
+                    .FirstOrDefault(ts => ts.Name.ToLower() == tagsetName.ToLower());
+                tagsFound = Tagset.Tags.OrderBy(t => ((NumericalTag)t).Name).ToList();
+
+            }
+
+            if (tagsFound != null)
+            {
+                var result = new List<PublicTag>();
+                foreach (Tag tag in tagsFound)
+                {
+                    var publicTag = new PublicTag(tag.Id, tag.GetTagName());
+                    result.Add(publicTag);
+                }
+                return Ok(JsonConvert.SerializeObject(result));
+            }
+            return NotFound();
         }
     }
 }

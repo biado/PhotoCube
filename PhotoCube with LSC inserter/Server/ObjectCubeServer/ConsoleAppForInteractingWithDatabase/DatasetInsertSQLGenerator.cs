@@ -23,7 +23,6 @@ namespace ConsoleAppForInteractingWithDatabase
         private int numOfImages;
         private string pathToDataset;
         private string pathToTagFile;
-        private string pathToHierarchiesFile;
         private string pathToErrorLogFile;
         private string resultPath;
         private Stopwatch stopwatch;
@@ -57,7 +56,6 @@ namespace ConsoleAppForInteractingWithDatabase
             this.SQLPath = sAll.Get("SQLPath");
 
             this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
-            this.pathToHierarchiesFile = Path.Combine(pathToDataset, @sAll.Get("LscHierarchiesFilePath"));
             this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");

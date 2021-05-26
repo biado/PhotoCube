@@ -33,8 +33,8 @@ export const FilterDropdown =
     return (
         <select className="Filter Selector" value={selected} onChange={(e) => createDimension(e)}>
             <option key={0} value={"true"}>Select filter</option>
-            {options.map(af => 
-                <option key={af.Id} value={JSON.stringify(af)}>{af.name}</option>)}
+            {options.map(af => (af.type === "tagset" || af.type === "hierarchy") ?
+                <option key={af.Id} value={JSON.stringify(af)}>{af.name}</option> : null)}
         </select>
     )
 }
