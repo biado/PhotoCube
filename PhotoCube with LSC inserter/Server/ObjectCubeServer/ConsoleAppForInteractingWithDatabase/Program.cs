@@ -26,7 +26,7 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             Console.WriteLine("Started up!");
 
-            int[] N = new int[] { 500 }; // 191524 = Total number of LSC images, based on lsc2020.txt file.
+            int[] N = new int[] { 10000 }; // 191524 = Total number of LSC images, based on lsc2020.txt file.
 
             string resultPath = sAll.Get("resultPath");
             string experimentResult = "DB Name,Number of Images,Elapsed Time\n";
