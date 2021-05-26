@@ -1,5 +1,5 @@
 ﻿Type,TagName,URL
-cell,all,https://localhost:44317/api/cell
+Cell,all,https://localhost:44317/api/cell
 DOWF,Monday,https://localhost:44317/api/tag
 DOWF,Thursday,
 DOWF,Monday OR Thursday,
@@ -13,11 +13,11 @@ HF,Norway & Weekend,
 TSF,Speed,
 TSF,Steps,
 TSF,Speed & Steps,
-Filters,Coffee maker & 06:00-12:00,
-Filters,Coffee maker & 06:00-12:00 & Monday & Norway,
-F&A,Kitchen appliance(axis) & 06:00-12:00 & Monday & Norway(axis),
 HA,Kitchen appliance,
 HA,Norway,
 HA,Kitchen appliance & Norway,
 TSA,Steps,
 A,Kitchen appliance & Norway & steps (tsa),
+Filters,Coffee maker & 06:00-12:00,
+Filters,Coffee maker & 06:00-12:00 & Monday & Norway,
+F&A,Kitchen appliance(axis) & 06:00-12:00 & Monday & Norway(axis),
