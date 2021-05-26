@@ -42,12 +42,23 @@ const TagFilter = (props: {
  */
 const SearchResults = (props: {
     options: Tag[], onOptionSelected: (e: React.ChangeEvent<HTMLSelectElement>) => void}) => {
+    const [selected, updateSelection] = useState<string>("");
+
+    //reset dropdown when options are updated
+    useEffect(() => {
+        if (selected.length !== 0) { updateSelection(""); }
+    }, [props.options])
+
+    const onOptionSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        props.onOptionSelected(e);
+        updateSelection(e.currentTarget.value);
+    }
 
     return(
         <div className="search results">
             <h5>{props.options.length} occurence(s) found:</h5>
-            <select defaultValue="" onChange={e => props.onOptionSelected(e)} className="tag result dropdown">
-                <option key={0} value="" disabled hidden>Select filter</option>
+            <select value={selected} onChange={e => onOptionSelected(e)} className="tag result dropdown">
+                <option key={0} value="">Select filter</option>
                 {props.options.map(o => <option key={o.Id} value={JSON.stringify(o)}>{o.Name}</option>)}
             </select> 
         </div>
@@ -76,6 +87,7 @@ export const TagSearcher = (props: { onFiltersChanged: (filter: Filter) => void,
         e.preventDefault();
         const response = await Fetcher.FetchTagByName(input);
         updateOptions(response);
+        if (selectedTag !== null) { updateSelection(null); }
     }
 
     return (

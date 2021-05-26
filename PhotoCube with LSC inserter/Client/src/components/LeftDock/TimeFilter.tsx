@@ -22,11 +22,13 @@ export const TimeFilter = (props: {
     };
 
     const [values, setValues] = useState(initialValues);
-    const [buttonsDisabled, disableButtons] = useState(true);
+    const [clearButtonsDisabled, disableClearButton] = useState(true);
+    const [AddButtonsDisabled, disableAddButton] = useState(true);
 
     //Ref: https://dev.to/deboragaleano/how-to-handle-multiple-inputs-in-react-55el
     const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
-        disableButtons(false);
+        disableAddButton(false);
+        disableClearButton(false);
         const { name, value } = e.target;
         setValues({
             ...values,
@@ -37,11 +39,12 @@ export const TimeFilter = (props: {
     const addFilter = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (values.startTime !== "" && values.endTime !== "") {
-            const filter: Filter = createFilter(values.startTime + "-" + values.endTime, 0, "time");
+            const filter: Filter = createFilter(values.startTime + "-" + values.endTime, -1, "time");
             props.onFiltersChanged(filter);
             values.previousStartTime = values.startTime;
             values.previousEndTime = values.endTime;
-            disableButtons(true);
+            disableAddButton(true);
+            disableClearButton(false);
         }
     }
 
@@ -49,10 +52,11 @@ export const TimeFilter = (props: {
         e.preventDefault();
             if (values.startTime !== values.previousStartTime || values.endTime !== values.previousEndTime) {
                 const oldFilter: Filter = createFilter(values.previousStartTime + "-" + values.previousEndTime, 0, "time");
-                const newFilter: Filter = createFilter(values.startTime + "-" + values.endTime, 0, "time");
+                const newFilter: Filter = createFilter(values.startTime + "-" + values.endTime, -1, "time");
                 if (props.activeFilters.some(af => af.type === "time")) {
                     props.onFilterReplacedByType(oldFilter, newFilter);
-                    disableButtons(true);
+                    disableAddButton(true);
+                    disableClearButton(false);
                 }
             }
     }
@@ -61,7 +65,8 @@ export const TimeFilter = (props: {
         if (values.startTime !== "" || values.endTime !== "") {
             setValues(initialValues);
             props.onFilterRemovedByType("time");
-            disableButtons(true);
+            disableAddButton(true);
+            disableClearButton(true);
         }
     }
 
@@ -90,8 +95,8 @@ export const TimeFilter = (props: {
                 </div>
             </form>
             <div id="date-filter-buttons">
-                <button disabled={buttonsDisabled} onClick={() => onClear()}>Clear</button>
-                <button disabled={buttonsDisabled} onClick={(e) => (values.previousStartTime === "" && values.previousEndTime === "") ? addFilter(e) : replaceFilter(e)}>Add filter</button>
+                <button disabled={clearButtonsDisabled} onClick={() => onClear()}>Clear</button>
+                <button disabled={AddButtonsDisabled} onClick={(e) => (values.previousStartTime === "" && values.previousEndTime === "") ? addFilter(e) : replaceFilter(e)}>Add filter</button>
             </div>
         </div>
     )

@@ -569,35 +569,35 @@ export default class CubeBrowser extends React.Component<{
         //Fetch cells based on which axis are defined:
         if(xDefined && yDefined && zDefined){   //X and Y and Z
             //Render all three axis
-            page = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, this.zAxis, this.props.filters, this.state.currentPage);
+            page = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, this.zAxis, filters, this.state.currentPage);
             let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined && yDefined){         //X and Y
-            page = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, null, this.props.filters, this.state.currentPage);
+            page = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, null, filters, this.state.currentPage);
             let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined && zDefined){         //X and Z
-            page = await Fetcher.FetchCellsFromAxis(this.xAxis, null, this.zAxis, this.props.filters, this.state.currentPage);
+            page = await Fetcher.FetchCellsFromAxis(this.xAxis, null, this.zAxis, filters, this.state.currentPage);
             let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(yDefined && zDefined){         //Y and Z
-            page = await Fetcher.FetchCellsFromAxis(null, this.yAxis, this.zAxis, this.props.filters, this.state.currentPage);
+            page = await Fetcher.FetchCellsFromAxis(null, this.yAxis, this.zAxis, filters, this.state.currentPage);
             let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(xDefined){                     //X
-            page = await Fetcher.FetchCellsFromAxis(this.xAxis, null, null, this.props.filters, this.state.currentPage);
+            page = await Fetcher.FetchCellsFromAxis(this.xAxis, null, null, filters, this.state.currentPage);
             let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(yDefined){                     //Y
-            page = await Fetcher.FetchCellsFromAxis(null, this.yAxis, null, this.props.filters, this.state.currentPage);
+            page = await Fetcher.FetchCellsFromAxis(null, this.yAxis, null, filters, this.state.currentPage);
             let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }else if(zDefined){                     //Z
-            page = await Fetcher.FetchCellsFromAxis(null, null, this.zAxis, this.props.filters, this.state.currentPage);
+            page = await Fetcher.FetchCellsFromAxis(null, null, this.zAxis, filters, this.state.currentPage);
             let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         } else if(!xDefined && !yDefined && !zDefined){
-            page = await Fetcher.FetchCellsFromAxis(null, null, null, this.props.filters, this.state.currentPage);
+            page = await Fetcher.FetchCellsFromAxis(null, null, null, filters, this.state.currentPage);
             let ICells : ICell[] = page!.Results;
             ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
         }

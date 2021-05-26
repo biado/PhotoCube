@@ -68,13 +68,13 @@ export default class DayOfWeekFilter extends React.Component<{
      */
     private onChange(e: React.ChangeEvent<HTMLInputElement>) {
         if (e.target.checked) {
-            const tagName = this.state.dayNames[parseInt(e.target.name)-1];
-            const filter: Filter = createFilter(tagName, parseInt(e.target.value), "day of week");
+            const filter: Filter = createFilter(e.target.name, parseInt(e.target.value), "day of week");
             //Add filter
-            if (!this.props.activeFilters.some(af => af.name === tagName)) {
+            if (!this.props.activeFilters.some(af => af.name === e.target.name)) {
                 this.props.onFiltersChanged(filter);
             }
         } else {
+            //Remove filter
             const filterId = parseInt(e.target.value);
             if (this.props.activeFilters.some(af => af.Id === filterId)) {
                 this.props.onFilterRemoved(filterId);

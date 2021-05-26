@@ -3,7 +3,6 @@ import { Filter } from '../Filter';
 import { createFilter } from '../Middle/BottomDock/TagsetFilter';
 import Fetcher from '../Middle/CubeBrowser/Fetcher';
 import { Tag } from './Tag';
-import Dropdown, { Option } from 'react-dropdown';
 import '../../css/LeftDock/DateFilter.css';
 
 /**
