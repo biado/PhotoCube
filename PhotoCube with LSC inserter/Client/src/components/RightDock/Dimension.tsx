@@ -54,6 +54,13 @@ class Dimension extends Component<{
         DimensionId: null,
         DimensionName: null,
     };
+
+    componentDidUpdate() {
+        if (this.state.DimensionName !== null &&
+            !this.props.activeFilters.some(af => af.name === this.state.DimensionName)) {
+            this.onClearAxis(this.props.xyz);
+        }
+    }
     
     render(){
         return(

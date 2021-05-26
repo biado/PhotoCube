@@ -6,8 +6,11 @@ import { AiOutlineCloseCircle } from 'react-icons/ai';
 /**
  * List component used in the right dock to visualise all active filters.
  */
-export const FilterList = 
-    (props: {activeFilters: Filter[], className: string, onFilterRemoved: (filterId: number) => void}) => {
+export const FilterList = (props: {
+    activeFilters: Filter[], 
+    className: string, 
+    onFilterRemoved: (filterId: number) => void }) => {
+        
     return (
         <div className={props.className} id="filterlist-flexbox">
             <h4 className="Header">Active Filters</h4>
