@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import '../../css/LeftDock/LeftDock.css';
+import '../../css/PhotoCubeClient.css';
 import { Filter } from '../Filter';
 import { DateTagDropdown } from './DateFilter';
 import DayOfWeekFilter from './DayOfWeekFilter';
@@ -20,14 +21,14 @@ export default class LeftDock extends Component<{
         onFilterRemovedByType: (filterType: string) => void
     }>{
     render() {
-        let visibility: string = this.props.hideControls ? "hide" : "";
+        let visibility: string = this.props.hideControls ? " hide" : "";
         return (
-            <div id={"LeftDock" + visibility} >
-                <div>
+            <div id={"LeftDock"} >
+                <div className={visibility}>
                     <h4 className="Header">Day of week filter:</h4>
                     <DayOfWeekFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved}></DayOfWeekFilter>
                 </div>
-                <div>
+                <div className={visibility}>
                     <h4 className="Header">Date filter:</h4>
                     <div className="date dropdowns">
                         <DateTagDropdown tagsetName={"Day within month"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
@@ -35,11 +36,11 @@ export default class LeftDock extends Component<{
                         <DateTagDropdown tagsetName={"Year"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
                     </div>
                 </div>
-                <div>
+                <div className={visibility}>
                     <h4 className="Header">Time range filter:</h4>
                     <TimeFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplacedByType={this.props.onFilterReplacedByType} onFilterRemovedByType={this.props.onFilterRemovedByType}/>
                 </div>
-                <div>
+                <div className={visibility}>
                     <h4 className="Header">Tag filter:</h4>
                     <TagSearcher onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}/>
                 </div>

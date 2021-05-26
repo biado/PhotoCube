@@ -39,16 +39,16 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   render() {
     //Conditional rendering:
     let currentBrowser = null;
-    if(this.state.BrowsingMode === BrowsingModes.Cube){
+    if(this.state.BrowsingMode == BrowsingModes.Cube){
       currentBrowser = <CubeBrowser ref={this.CubeBrowser} 
         onFileCountChanged={this.onFileCountChanged} 
         previousBrowsingState={this.CubeBrowserBrowsingState}
         onOpenCubeInCardMode={this.onOpenCubeInCardMode}
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
         filters={this.state.filters}/>
-    }else if(this.state.BrowsingMode === BrowsingModes.Grid){
+    }else if(this.state.BrowsingMode == BrowsingModes.Grid){
       currentBrowser = <GridBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
-    }else if(this.state.BrowsingMode === BrowsingModes.Card){
+    }else if(this.state.BrowsingMode == BrowsingModes.Card){
       currentBrowser = <CardBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }
 
@@ -140,7 +140,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   onDimensionChanged = (dimName: string, dimension:PickedDimension) => {
     console.log("Dimension " + dimName + ", changed to: ");
     console.log(dimension);
-    if(this.state.BrowsingMode === BrowsingModes.Cube){
+    if(this.state.BrowsingMode == BrowsingModes.Cube){
       this.CubeBrowser.current!.UpdateAxis(dimName, dimension);
     }
   }
