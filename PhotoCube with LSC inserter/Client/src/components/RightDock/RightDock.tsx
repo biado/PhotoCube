@@ -24,10 +24,6 @@ export default class RightDock extends React.Component<{
     private fileCount = React.createRef<FileCount>();
     private browsingModeChanger = React.createRef<BrowsingModeChanger>();
 
-    constructor(props: any){
-        super(props);
-    }
-
     render(){
         let visibility: string = this.props.hideControls ? "hide" : "";
         return(

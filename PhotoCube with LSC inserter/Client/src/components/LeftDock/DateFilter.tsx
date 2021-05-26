@@ -82,7 +82,7 @@ import '../../css/LeftDock/DateFilter.css';
 //utility function 
 export const formatTags = (months: Tag[]) => {
     return months.map((tag: Tag) => {
-        if (tag.Name.length == 1) {
+        if (tag.Name.length === 1) {
             return { Name: "0".concat(tag.Name), Id: tag.Id };
         } else {
             return tag;

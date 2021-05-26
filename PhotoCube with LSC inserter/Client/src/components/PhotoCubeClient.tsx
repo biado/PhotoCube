@@ -39,16 +39,16 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   render() {
     //Conditional rendering:
     let currentBrowser = null;
-    if(this.state.BrowsingMode == BrowsingModes.Cube){
+    if(this.state.BrowsingMode === BrowsingModes.Cube){
       currentBrowser = <CubeBrowser ref={this.CubeBrowser} 
         onFileCountChanged={this.onFileCountChanged} 
         previousBrowsingState={this.CubeBrowserBrowsingState}
         onOpenCubeInCardMode={this.onOpenCubeInCardMode}
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
         filters={this.state.filters}/>
-    }else if(this.state.BrowsingMode == BrowsingModes.Grid){
+    }else if(this.state.BrowsingMode === BrowsingModes.Grid){
       currentBrowser = <GridBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
-    }else if(this.state.BrowsingMode == BrowsingModes.Card){
+    }else if(this.state.BrowsingMode === BrowsingModes.Card){
       currentBrowser = <CardBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }
 
@@ -56,7 +56,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     return (
         <div className="App grid-container">
           <LeftDock 
-          hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
+          hideControls={this.state.BrowsingMode !== BrowsingModes.Cube} 
           onFiltersChanged={this.onFiltersChanged}
           activeFilters={this.state.filters}
           onFilterReplaced={this.onFilterReplaced}
@@ -67,11 +67,11 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
            <div className="middle dock">
             {currentBrowser}
             <BottomDock 
-              hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
+              hideControls={this.state.BrowsingMode !== BrowsingModes.Cube} 
               activeFilters={this.state.filters} 
               onFiltersChanged={this.onFiltersChanged}/>
           </div>
-          <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
+          <RightDock hideControls={this.state.BrowsingMode !== BrowsingModes.Cube} 
             ref={this.rightDock}
             onDimensionChanged={this.onDimensionChanged} 
             onBrowsingModeChanged={this.onBrowsingModeChanged}
@@ -140,7 +140,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   onDimensionChanged = (dimName: string, dimension:PickedDimension) => {
     console.log("Dimension " + dimName + ", changed to: ");
     console.log(dimension);
-    if(this.state.BrowsingMode == BrowsingModes.Cube){
+    if(this.state.BrowsingMode === BrowsingModes.Cube){
       this.CubeBrowser.current!.UpdateAxis(dimName, dimension);
     }
   }
@@ -175,7 +175,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
    */
   onBrowsingModeChanged = (browsingMode: BrowsingModes) =>{
     this.rightDock.current!.ChangeBrowsingMode(browsingMode);
-    if(this.state.BrowsingMode == BrowsingModes.Cube){ //Going from cube to other:
+    if(this.state.BrowsingMode === BrowsingModes.Cube){ //Going from cube to other:
       //Saving current browsingstate:
       this.CubeBrowserBrowsingState = this.CubeBrowser.current!.GetCurrentBrowsingState();
       this.cubeObjects = this.CubeBrowser.current!.GetUniqueCubeObjects()
