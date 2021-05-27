@@ -82,7 +82,7 @@ export default class Fetcher{
      * @param tagsetName
      */
          static async FetchTagsByTagsetName(tagsetName: string){
-            return await fetch(Fetcher.baseUrl + "/tag/tagsetName=" + tagsetName)
+            return await fetch(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
                 .then(result => {return result.json()});
         }
 
