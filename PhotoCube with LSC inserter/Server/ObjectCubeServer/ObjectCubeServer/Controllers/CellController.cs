@@ -148,7 +148,7 @@ namespace ObjectCubeServer.Controllers
                                     x = index1 + 1,
                                     y = index2 + 1,
                                     z = index3 + 1,
-                                    CubeObjects = colist1.Intersect(colist2).Intersect(colist3).Skip(skip).Take(pageSize).ToList()
+                                    CubeObjects = colist1.Intersect(colist2).Intersect(colist3).ToList()
                                 }))).ToList();
                 }
                 else if (xDefined && yDefined) //XY
@@ -161,7 +161,7 @@ namespace ObjectCubeServer.Controllers
                                     x = index1 + 1,
                                     y = index2 + 1,
                                     z = 0,
-                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSize).ToList() //Where co is in colist2 as well
+                                    CubeObjects = colist1.Intersect(colist2).ToList() //Where co is in colist2 as well
                                 })).ToList();
                 }
                 else if (xDefined && zDefined) //XZ
@@ -174,7 +174,7 @@ namespace ObjectCubeServer.Controllers
                                     x = index1 + 1,
                                     y = 0,
                                     z = index2 + 1,
-                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSize).ToList() //Where co is in colist2 as well
+                                    CubeObjects = colist1.Intersect(colist2).ToList() //Where co is in colist2 as well
                                 })).ToList();
                 }
                 else if (yDefined && zDefined) //YZ
@@ -187,7 +187,7 @@ namespace ObjectCubeServer.Controllers
                                     x = 0,
                                     y = index1 + 1,
                                     z = index2 + 1,
-                                    CubeObjects = colist1.Intersect(colist2).Skip(skip).Take(pageSize).ToList()
+                                    CubeObjects = colist1.Intersect(colist2).ToList()
                                 })).ToList();
                 }
                 else if (xDefined) //X
@@ -199,7 +199,7 @@ namespace ObjectCubeServer.Controllers
                                 x = index1 + 1,
                                 y = 1,
                                 z = 0,
-                                CubeObjects = colist1.Skip(skip).Take(pageSize).ToList()
+                                CubeObjects = colist1.ToList()
                             }).ToList();
                 }
                 else if (yDefined) //Y
@@ -211,7 +211,7 @@ namespace ObjectCubeServer.Controllers
                                 x = 1,
                                 y = index1 + 1,
                                 z = 0,
-                                CubeObjects = colist1.Skip(skip).Take(pageSize).ToList()
+                                CubeObjects = colist1.ToList()
                             }).ToList();
                 }
                 else if (zDefined) //Z
@@ -223,7 +223,7 @@ namespace ObjectCubeServer.Controllers
                                 x = 0,
                                 y = 1,
                                 z = index1 + 1,
-                                CubeObjects = colist1.Skip(skip).Take(pageSize).ToList()
+                                CubeObjects = colist1.ToList()
                             }).ToList();
                 }
                 else if (!xDefined && !yDefined && !zDefined) //If X Y and Z are not defined, show all:
@@ -235,7 +235,7 @@ namespace ObjectCubeServer.Controllers
                             x = 1,
                             y = 1,
                             z = 1,
-                            CubeObjects = filteredCubeObjects.Skip(skip).Take(pageSize).ToList()
+                            CubeObjects = filteredCubeObjects.ToList()
                         }
                     };
                 }
@@ -244,7 +244,7 @@ namespace ObjectCubeServer.Controllers
                 cells.RemoveAll(c => !c.CubeObjects.Any());
 
                 //Count unique cubeObjects in all the cells and update the information in the Page object
-                result = updateTotalFileCountAndPageCount(result, filteredCubeObjects, xAxisCubeObjects, yAxisCubeObjects, zAxisCubeObjects, cells);
+                result = updateTotalFileCountAndPageCount(result, cells);
 
                 // Convert cells to publicCells
                 result = GetPublicCellsInThisPage(result, cells, currentPageNumber);
@@ -265,23 +265,11 @@ namespace ObjectCubeServer.Controllers
                 .ToList();
         }
 
-        private IEnumerable<CubeObject> filterCubeObjectsWithDateFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> dateFilters)
-        {
-            //Getting tags per date filter:
-            List<List<Tag>>
-                tagsPerDateFilter = dateFilters.Select(df => extractTagsFromTimeFilter(df)).ToList(); // Map into list of tags
-
-            return cubeObjects.Where(co => tagsPerDateFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists
-                lstOfTags => co.ObjectTagRelations.Exists((  //For each tag list, there must exist a cube object where:
-                    otr => lstOfTags.Exists(tag => tag.Id == otr.TagId))))).ToList();  //the cube object is tagged with one tag id from the taglist.
-
-        }
-
         private IEnumerable<CubeObject> filterCubeObjectsWithTimeFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> timeFilters)
         {
             //Getting tags per time filter:
             List<List<Tag>>
-                tagsPerTimeFilter = timeFilters.Select(timef => extractTagsFromTimeFilter(timef)).ToList(); // Map into list of tags
+                tagsPerTimeFilter = timeFilters.Select(tf => extractTagsFromTimeFilter(tf)).ToList(); // Map into list of tags
 
             return cubeObjects.Where(co => tagsPerTimeFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists
                 lstOfTags => co.ObjectTagRelations.Exists((  //For each tag list, there must exist a cube object where:
@@ -290,35 +278,31 @@ namespace ObjectCubeServer.Controllers
 
         private List<Tag> extractTagsFromTimeFilter(ParsedFilter timeFilter)
         {
-            switch (timeFilter.type)
-            {
-                case "time":
-                    TimeSpan start = parseToTimeSpan(timeFilter.startTime);
-                    TimeSpan end = parseToTimeSpan(timeFilter.endTime);
-                    using (var context = new ObjectContext())
-                        {
-                            var Tagset = context.Tagsets
-                                .Include(ts => ts.Tags)
-                                .FirstOrDefault(ts => ts.Name == "Time");
-                            if (start <= end)
-                            {
-                                return Tagset.Tags.Where(t =>
-                                    ((TimeTag) t).Name >= start &&
-                                    ((TimeTag) t).Name <= end).ToList();
-                            }
-                            else
-                            {
-                                // Case: Going over midnight. For example, 20:00-02:00
-                                return Tagset.Tags.Where(t =>
-                                    (((TimeTag) t).Name >= start &&
-                                     ((TimeTag) t).Name < new TimeSpan(24, 0, 0))
-                                    || (((TimeTag) t).Name >= new TimeSpan(0, 0, 0) &&
-                                    ((TimeTag) t).Name <= end)).ToList();
-                            }
-                        }
-            }
+            var times = timeFilter.name.Split("-");
+            TimeSpan start = parseToTimeSpan(times[0]);
+            TimeSpan end = parseToTimeSpan(times[1]);
 
-            return null;
+            using (var context = new ObjectContext())
+            {
+                var Tagset = context.Tagsets
+                    .Include(ts => ts.Tags)
+                    .FirstOrDefault(ts => ts.Name == "Time");
+                if (start <= end)
+                {
+                    return Tagset.Tags.Where(t =>
+                        ((TimeTag) t).Name >= start &&
+                        ((TimeTag) t).Name <= end).ToList();
+                }
+                else
+                {
+                    // Case: Going over midnight. For example, 20:00-02:00
+                    return Tagset.Tags.Where(t =>
+                        (((TimeTag) t).Name >= start &&
+                        ((TimeTag) t).Name < new TimeSpan(24, 0, 0))
+                        || (((TimeTag) t).Name >= new TimeSpan(0, 0, 0) &&
+                        ((TimeTag) t).Name <= end)).ToList();
+                }
+            }
         }
 
         private TimeSpan parseToTimeSpan(string timeString)
@@ -330,48 +314,14 @@ namespace ObjectCubeServer.Controllers
             return time;
         }
 
-        private PublicPage updateTotalFileCountAndPageCount(PublicPage result, IEnumerable<CubeObject> filteredCubeObjects, List<List<CubeObject>> xAxisCubeObjects, List<List<CubeObject>> yAxisCubeObjects, List<List<CubeObject>> zAxisCubeObjects, List<Cell> cells)
+        private PublicPage updateTotalFileCountAndPageCount(PublicPage result, List<Cell> cells)
         {
-            IEnumerable<CubeObject> xUnion = new List<CubeObject>();
-            IEnumerable<CubeObject> yUnion = new List<CubeObject>();
-            IEnumerable<CubeObject> zUnion = new List<CubeObject>();
-
-            if (xAxisCubeObjects != null)
+            IEnumerable<CubeObject> union = new List<CubeObject>();
+            foreach (Cell cell in cells)
             {
-                foreach (List<CubeObject> cubeObjects in xAxisCubeObjects)
-                {
-                    xUnion = xUnion.Union(cubeObjects);
-                }
+                union = union.Union(cell.CubeObjects);
             }
-            if (yAxisCubeObjects != null)
-            {
-                foreach (List<CubeObject> cubeObjects in yAxisCubeObjects)
-                {
-                    yUnion = yUnion.Union(cubeObjects);
-                }
-            }
-
-            if (zAxisCubeObjects != null)
-            {
-                foreach (List<CubeObject> cubeObjects in zAxisCubeObjects)
-                {
-                    zUnion = zUnion.Union(cubeObjects);
-                }
-            }
-
-            // initial assignment
-            IEnumerable<CubeObject> axisIntersection;
-            if (xUnion.Any()) axisIntersection = xUnion;
-            else if (yUnion.Any()) axisIntersection = yUnion;
-            else if (zUnion.Any()) axisIntersection = zUnion;
-            else axisIntersection = filteredCubeObjects;
-
-            // intersect for axis
-            if (xUnion.Any()) axisIntersection = axisIntersection.Intersect(xUnion);
-            if (yUnion.Any()) axisIntersection = axisIntersection.Intersect(yUnion);
-            if (zUnion.Any()) axisIntersection = axisIntersection.Intersect(zUnion);
-
-            result.TotalFileCount = axisIntersection.Distinct().Count();
+            result.TotalFileCount = union.Count();
             var totalpage = (double)result.TotalFileCount / pageSize;
             result.PageCount = (int)Math.Ceiling(totalpage);
             return result;
@@ -403,7 +353,7 @@ namespace ObjectCubeServer.Controllers
         private PublicPage GetPublicCellsInThisPage(PublicPage result, List<Cell> cells, int currentPage)
         {
             var skip = (currentPage - 1) * pageSize;
-            result.Results = cells.Select(c => c.GetPublicCell()).ToList();
+            result.Results = cells.Select(c => c.GetPublicCell(skip, pageSize)).ToList();
 
             return result;
         }

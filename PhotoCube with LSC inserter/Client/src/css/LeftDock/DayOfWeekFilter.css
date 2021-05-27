@@ -1,0 +1,17 @@
+.dow.filter ul {
+  padding-left: 0;
+  margin: 3%;
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+}
+
+.dow.checkbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dow.checkbox p {
+  margin: 0;
+}

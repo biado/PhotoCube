@@ -8,7 +8,7 @@ namespace ObjectCubeServer.Models.DomainClasses
     public class ParsedFilter
     {
         public string type { get; set; }
-            // types:
+            //possible types:
             //"tag" : Tag filter, including year, month, day filters from Client's Left Dock 
             //"tagset" : Tagset filter. Tagged with at least 1 tag in a tagset 
             //"hierarchy" : Hierarchy filter. Tagged with at least 1 tag in a hierarchy
@@ -17,9 +17,5 @@ namespace ObjectCubeServer.Models.DomainClasses
             //"day of week": Tag filter with OR search
         public int Id { get; set; }
         public string name { get; set; }
-
-        // For time tag
-        public string startTime { get; set; }
-        public string endTime { get; set; }
     }
 }

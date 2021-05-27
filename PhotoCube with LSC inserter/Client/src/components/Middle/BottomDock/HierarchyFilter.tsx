@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../../css/BottomDock/HierarchyFilter.css';
 import { Filter } from '../../Filter';
 import Fetcher from '../CubeBrowser/Fetcher';
@@ -13,12 +13,23 @@ import { Option } from './Option';
  */
 const SearchResults = (props: {
     options: Option[], onOptionSelected: (e: React.ChangeEvent<HTMLSelectElement>) => void}) => {
+    const [selected, updateSelection] = useState<string>("");
+
+     //reset dropdown when options are updated
+    useEffect(() => {
+        if (selected.length !== 0) { updateSelection(""); }
+    }, [props.options])
+
+    const onOptionSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        props.onOptionSelected(e);
+        updateSelection(e.currentTarget.value);
+    }
 
     return(
         <div className="search results">
             <h5>{props.options.length} occurence(s) found:</h5>
-            <select defaultValue="" onChange={e => props.onOptionSelected(e)} id="node-dropdown">
-                <option key={0} value="" disabled hidden>Select filter</option>
+            <select value={selected} onChange={e => onOptionSelected(e)} className="result dropdown">
+                <option key={0} value="">Select filter</option>
                 {props.options.map(o => <option key={o.NodeId} value={JSON.stringify(o)}>{o.NodeName}:{o.ParentnodeName}</option>)}
             </select> 
         </div>
@@ -62,7 +73,7 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
     return (
         <div className="Filter">
             <form method="get">
-                <input className="search field" type="text" placeholder="Search hierarchies" 
+                <input className="search field" type="text" placeholder="e.g. woman, coffee" 
                     onChange={e => onInputGiven(e.target.value)}/>
             </form>
             <button disabled={input === ""} className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>

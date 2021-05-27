@@ -1,0 +1,33 @@
+.time.filter {
+  margin: 3%;
+  position: relative;
+}
+
+.time.field {
+  margin-bottom: 5px;
+  display: flex;
+  flex-direction: row;
+}
+
+.time.field p {
+  margin: 0;
+  width: 50px;
+}
+
+.input.container {
+  position: relative;
+  width: 100%;
+}
+
+.input.field {
+  position: absolute;
+  left: 5%;
+  width: 50%;
+}
+
+#date-filter-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: 10px;
+}

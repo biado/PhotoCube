@@ -1,0 +1,13 @@
+.date.filter {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 2px;
+}
+
+.Date.Selector {
+  border: 1px solid rgb(133, 133, 133);
+}
+
+.date.dropdowns {
+  margin: 3%;
+}

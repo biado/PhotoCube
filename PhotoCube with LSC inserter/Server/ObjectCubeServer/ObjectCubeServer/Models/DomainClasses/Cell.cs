@@ -22,5 +22,11 @@ namespace ObjectCubeServer.Models.DomainClasses
             List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).ToList();
             return new PublicCell(this.x, this.y, this.z, cubeObjects);
         }
+
+        public PublicCell GetPublicCell(int skip, int pageSize)
+        {
+            List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).Skip(skip).Take(pageSize).ToList();
+            return new PublicCell(this.x, this.y, this.z, cubeObjects);
+        }
     }
 }

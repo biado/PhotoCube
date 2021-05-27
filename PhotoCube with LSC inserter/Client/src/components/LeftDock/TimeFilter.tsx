@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Filter } from "../Filter";
 import { createFilter } from "../Middle/BottomDock/TagsetFilter";
-import '../../css/LeftDock/TagFilter.css';
+import '../../css/LeftDock/TimeFilter.css';
 
 /**
  * Component for adding a range query for Time tags.
  * Both the startTime and endTime must be filled for the 'Add filter' button to actually add the range filter.
- * To search for a distinct time, give a same value for both startTime and endTime text input field.
+ * To search for a distinct time, the same value for both startTime and endTime must be given.
  */
-export const TimeForm = (props: {
+export const TimeFilter = (props: {
     activeFilters: Filter[],
     onFiltersChanged: (filter: Filter) => void
-    onTimeFilterReplaced: (oldFilter:Filter, newFilter: Filter) => void,
+    onFilterReplacedByType: (oldFilter:Filter, newFilter: Filter) => void,
     onFilterRemovedByType: (filterType: string) => void
 }) => {
     const initialValues = {
@@ -20,10 +20,15 @@ export const TimeForm = (props: {
         startTime: "",
         endTime: ""
     };
-    const [values, setValues] = useState(initialValues);
 
-    // Ref: https://dev.to/deboragaleano/how-to-handle-multiple-inputs-in-react-55el
+    const [values, setValues] = useState(initialValues);
+    const [clearButtonsDisabled, disableClearButton] = useState(true);
+    const [AddButtonsDisabled, disableAddButton] = useState(true);
+
+    //Ref: https://dev.to/deboragaleano/how-to-handle-multiple-inputs-in-react-55el
     const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
+        disableAddButton(false);
+        disableClearButton(false);
         const { name, value } = e.target;
         setValues({
             ...values,
@@ -34,22 +39,24 @@ export const TimeForm = (props: {
     const addFilter = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (values.startTime !== "" && values.endTime !== "") {
-            const filter: Filter = createFilter(values.startTime + "-" + values.endTime, 0, "time", values.startTime, values.endTime);
-            if (!props.activeFilters.some(af => af.startTime === filter.startTime && af.endTime === filter.endTime)) {
-                props.onFiltersChanged(filter);
-            }
+            const filter: Filter = createFilter(values.startTime + "-" + values.endTime, -1, "time");
+            props.onFiltersChanged(filter);
             values.previousStartTime = values.startTime;
             values.previousEndTime = values.endTime;
+            disableAddButton(true);
+            disableClearButton(false);
         }
     }
 
     const replaceFilter = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
             if (values.startTime !== values.previousStartTime || values.endTime !== values.previousEndTime) {
-                const oldFilter: Filter = createFilter(values.previousStartTime + "-" + values.previousEndTime, 0, "time", values.previousStartTime, values.previousEndTime);
-                const newFilter: Filter = createFilter(values.startTime + "-" + values.endTime, 0, "time", values.startTime, values.endTime);
+                const oldFilter: Filter = createFilter(values.previousStartTime + "-" + values.previousEndTime, 0, "time");
+                const newFilter: Filter = createFilter(values.startTime + "-" + values.endTime, -1, "time");
                 if (props.activeFilters.some(af => af.type === "time")) {
-                    props.onTimeFilterReplaced(oldFilter, newFilter);
+                    props.onFilterReplacedByType(oldFilter, newFilter);
+                    disableAddButton(true);
+                    disableClearButton(false);
                 }
             }
     }
@@ -58,29 +65,39 @@ export const TimeForm = (props: {
         if (values.startTime !== "" || values.endTime !== "") {
             setValues(initialValues);
             props.onFilterRemovedByType("time");
+            disableAddButton(true);
+            disableClearButton(true);
         }
     }
 
     return (
-        <div>
-            <button onClick={() => onClear()}>Clear</button>
-        <form>
-            <p className="Header">Start:</p>
-            <input className="start time field" type="text" placeholder="00:00"
-                    value={values.startTime}
-                    onChange={handleInputChange}
-                    name="startTime">
-            </input>
-            <p className="Header">End:</p>
-            <input className="end time field" type="text" placeholder="23:59"
-                    value={values.endTime}
-                    onChange={handleInputChange}
-                    name="endTime">
-            </input>
-            <div>
-                <button className="add time range filter button" onClick={(e) => (values.previousStartTime === "" && values.previousEndTime === "") ? addFilter(e) : replaceFilter(e)}>Add filter</button>
+        <div className="time filter">
+            <form>
+                <div className="start time field">
+                    <p>Start:</p>
+                    <div className="input container">
+                        <input className="input field" type="text" placeholder="00:00"
+                        value={values.startTime}
+                        onChange={(e) => handleInputChange(e)}
+                        name="startTime">
+                        </input>
+                    </div>
+                </div>
+                <div className="end time field">
+                    <p>End:</p>
+                    <div className="input container">
+                        <input className="input field" type="text" placeholder="23:59"
+                        value={values.endTime}
+                        onChange={(e) => handleInputChange(e)}
+                        name="endTime">
+                        </input>
+                    </div>
+                </div>
+            </form>
+            <div id="date-filter-buttons">
+                <button disabled={clearButtonsDisabled} onClick={() => onClear()}>Clear</button>
+                <button disabled={AddButtonsDisabled} onClick={(e) => (values.previousStartTime === "" && values.previousEndTime === "") ? addFilter(e) : replaceFilter(e)}>Add filter</button>
             </div>
-        </form>
         </div>
     )
 }
