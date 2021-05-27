@@ -64,7 +64,7 @@ export default class DayOfWeekFilter extends React.Component<{
     /**
      * If a checkbox is checked or unchecked, this method is called.
      * When checked: Adds a filter corresponding to the tag, and calls this.props.onFiltersChanged.
-     * When unchecked: Removes the filter corresponding to the tag, and calls this.props.onFilterUnchecked.
+     * When unchecked: Removes the filter corresponding to the tag, and calls this.props.onFilterRemoved.
      */
     private onChange(e: React.ChangeEvent<HTMLInputElement>) {
         if (e.target.checked) {
