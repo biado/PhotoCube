@@ -1,12 +1,12 @@
-# ResearchProject
-PhotoCube and Lifelog Data | Research Project | Autumn 2020 | MSc Software Design | IT University of Copenhagen
+# Thesis
+PhotoCube and Lifelog Data | Thesis | Spring 2021 | MSc Software Design | IT University of Copenhagen
 
 Contributors: Jihye Shin (@jish) | Alexandra Waldau (@alew)
 
 This repository contains 3 directories:
 - LSC-MMM Mapping
-- PhotoCube with LSC inserter
-- Plotting
+- PhotoCube
+- Server performance measurement
 
 ## LSC-MMM Mapping
 
@@ -14,16 +14,10 @@ This directory contains Java programs, that transform Lifelog Search Challenge (
 
 The input files are deleted based on the LSC data usage terms.
 
-## PhotoCube with LSC inserter
+## PhotoCube
 
-This version of PhotoCube includes 2 additional files.
-- LSCDataInsertExperimenter.cs
-- LSCDataInsertExperimenterRefactored.cs
+This version of PhotoCube is implemented to better support the participation in the Lifelog Search Challenge (LSC).
 
-The following files are modified:
-- Program.cs
-- ObjectContext.cs
+## Server performance measurement
 
-## Plotting
-
-This directory contains the result of the experiments and the python scripts to generate plots.
+This directory contains a python script to measure the performance of PhotoCube's server.

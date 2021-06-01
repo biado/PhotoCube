@@ -2,7 +2,7 @@
 ## Info:
 This PhotoCube Client and Server implementations are  developed for research purposes by Jihye Shin and Alexandra Waldau as part of their MSc. thesis in Software Design at the IT University of Copenhagen.
 
-This initial PhotoCube implementation was written by Peter Øvergård Clausen, and his repository is [https://github.com/PeterOeClausen/Thesis](https://github.com/PeterOeClausen/Thesis). Future changes to the implementation will happen in the ITU-PITLab/PhotoCube repository.
+This initial PhotoCube implementation was written by Peter Øvergård Clausen, and his repository is [https://github.com/PeterOeClausen/Thesis](https://github.com/PeterOeClausen/Thesis). This document is hugely based on Peter's installation guide. Future changes to the implementation will happen in the ITU-PITLab/PhotoCube repository.
 
 The PhotoCube uses the M^3 data model, initially proposed by Björn Thór Jónsson, combining multidimensional analysis and faceted search to browse large multimedia collections in order to gain useful insight. It is further developed here to meet support participating in the Lifelog Search Challenge (LSC).
 
@@ -100,7 +100,7 @@ Then run the application by pressing the *Play* button in the top of Visual Stud
 
 When the Console Application says "Press any key to shut down." the database is populated. This process usually takes around 30 minutes. Leave it running until it displays the insertion completed message as below.
 
-![InsertionComplete.jpg](https://github.itu.dk/jish/Thesis/blob/master/PhotoCube/userManualImages/InstallationManualImages/InsertionComplete.jpg)
+![InsertionComplete.jpg](https://github.itu.dk/jish/Thesis/blob/master/PhotoCube/userManualImages/InstallationManualImages/InsertComplete.jpg)
 
 #### 2) Run the SQL script
 
