@@ -34,9 +34,11 @@ namespace ObjectCubeServer.Controllers
          *  
          * The same way, filters can also be added:
          * Hierarchy filter:
-         *     &filters=[{"type":"hierarchy","tagId":0,"nodeId":116}]
+         *     &filters=[{"type":"hierarchy","Id":0,"name":"Norway"}] (Id is NodeId)
          * Tag filter:
-         *     &filters=[{"type":"tag","tagId":42,"nodeId":0}]
+         *     &filters=[{"type":"tag","Id":42,"name":"Oslo"}] (Id is TagId)
+         * Possible types are:
+         *      "tag", "tagset", "hierarchy", "date", "time", and "day of week".
          *
          * The call may specify which page of the result it wants.
          * For example,
