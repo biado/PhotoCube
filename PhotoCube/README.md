@@ -2,9 +2,9 @@
 ## Info:
 This PhotoCube Client and Server implementations are  developed for research purposes by Jihye Shin and Alexandra Waldau as part of their MSc. thesis in Software Design at the IT University of Copenhagen.
 
-This initial PhotoCube implementation was written by Peter Øvergård Clausen, and his repository is [https://github.com/PeterOeClausen/Thesis](https://github.com/PeterOeClausen/Thesis). This document is hugely based on Peter's installation guide. Future changes to the implementation will happen in the ITU-PITLab/PhotoCube repository.
+This initial PhotoCube implementation was written by Peter Øvergård Clausen, and his repository is [https://github.com/PeterOeClausen/Thesis](https://github.com/PeterOeClausen/Thesis). This document is based on Peter's installation guide. Future changes to the implementation will happen in the ITU-PITLab/PhotoCube repository.
 
-The PhotoCube uses the M^3 data model, initially proposed by Björn Thór Jónsson, combining multidimensional analysis and faceted search to browse large multimedia collections in order to gain useful insight. It is further developed here to meet support participating in the Lifelog Search Challenge (LSC).
+The PhotoCube uses the M^3 data model, initially proposed by Björn Thór Jónsson. It is further developed here to meet support participating in the Lifelog Search Challenge (LSC).
 
 The PhotoCube Client is developed in React using Typescript. It also uses the ThreeJS library for 3D rendering.
 
@@ -22,11 +22,17 @@ Tip: Hold ctrl when clicking on the links to open them in a new tab:
 
 Please restart your computer after installing the frameworks, before trying out the code.
 
+Note: PhotoCube also runs on MacOS using Postgres. The *DatasetInsertSQLGenerator.cs* in Installation step 2 supports both Mac and Windows.
+
 ## Download the code:
 Either clone this repository or download it as a zip file with the green button on the top-right of this page.
 
 ## Download the dataset:
 Ask Björn Thór Jónsson for the LSC dataset: [bjth@itu.dk](mailto:bjth@itu.dk).
+
+The files needed are:
+  - ImageTags file in csv format, containing file paths of images and the associated tags
+  - Hierarchy file in json format, containing the json tree of tags
 
 ## Installing and running the server:
 ### Step 0: Open the ObjectCubeServer solution file in Visual Studio:
@@ -45,8 +51,8 @@ Note that the connection-string identifies the Server, this is usually "Server =
 
 Also note that the directory *C:\\Databases* needs to exist.
 
-### Step 2: Enter the path to the Laugavegur Dataset on your computer:
-Please create an *App.Config* file under *Server\ObjectCubeServer* and specify the path to the LSC dataset and other required files on your computer. These file paths are needed to run the  The paths needed to run *ConsoleAppForInteractingWithDatabase/DatasetInsertSQLGenerator.cs*. The content of the file is like this, where you replace the `value`s to your own paths. 
+### Step 2: Enter the path to the LSC Dataset on your computer:
+Please create an *App.Config* file under *Server\ObjectCubeServer* and specify the path to the LSC dataset and other required files on your computer. These file paths are needed to run *ConsoleAppForInteractingWithDatabase/DatasetInsertSQLGenerator.cs*. The content of the file is like this, where you replace the `value`s to your own paths. 
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
