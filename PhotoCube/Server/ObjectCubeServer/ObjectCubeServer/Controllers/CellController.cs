@@ -201,7 +201,7 @@ namespace ObjectCubeServer.Controllers
                                 x = index1 + 1,
                                 y = 1,
                                 z = 0,
-                                CubeObjects = colist1.ToList()
+                                CubeObjects = colist1
                             }).ToList();
                 }
                 else if (yDefined) //Y
@@ -213,7 +213,7 @@ namespace ObjectCubeServer.Controllers
                                 x = 1,
                                 y = index1 + 1,
                                 z = 0,
-                                CubeObjects = colist1.ToList()
+                                CubeObjects = colist1
                             }).ToList();
                 }
                 else if (zDefined) //Z
@@ -225,7 +225,7 @@ namespace ObjectCubeServer.Controllers
                                 x = 0,
                                 y = 1,
                                 z = index1 + 1,
-                                CubeObjects = colist1.ToList()
+                                CubeObjects = colist1
                             }).ToList();
                 }
                 else if (!xDefined && !yDefined && !zDefined) //If X Y and Z are not defined, show all:
@@ -547,9 +547,9 @@ namespace ObjectCubeServer.Controllers
                         .ThenInclude(cn => cn.Tag)
                     .FirstOrDefault(n => n.Id == nodeId);
             }
-            currentNode.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+            var sortedChildren = currentNode.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name).ToList();
             List<Node> newChildNodes = new List<Node>();
-            currentNode.Children.ForEach(cn => newChildNodes.Add(fetchWholeHierarchyFromRootNode(cn.Id)));
+            sortedChildren.ForEach(cn => newChildNodes.Add(fetchWholeHierarchyFromRootNode(cn.Id)));
             currentNode.Children = newChildNodes;
             return currentNode;
         }
