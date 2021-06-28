@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -95,8 +96,10 @@ namespace ObjectCubeServer.Controllers
                         new JsonSerializerSettings() {ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
                 }
 
-                IEnumerable<CubeObject> filteredCubeObjects = coContext.CubeObjects.Include(co => co.ObjectTagRelations);
+                string SQLQuery = "select distinct(O.*) from cubeobjects O join (";
+
                 //Filtering:
+                int filtered = 0;
                 if (filtersDefined && filtersList.Count > 0)
                 {
                     //Divide filters:
@@ -105,16 +108,18 @@ namespace ObjectCubeServer.Controllers
                     List<ParsedFilter> tagFilters = filtersList.Where(f => f.type.Equals("tag") || f.type.Equals("date")).ToList();
                     List<ParsedFilter> hierarchyFilters = filtersList.Where(f => f.type.Equals("hierarchy")).ToList();
                     List<ParsedFilter> tagsetFilters = filtersList.Where(f => f.type.Equals("tagset")).ToList();
+                    string SQLSeparator = "";
 
                     //Apply filters:
                     // As default the cubeObject that has all these filters (AND) will remain in the result.
                     // Exception: Day of week filters have OR logic. For example, Monday filter and Sunday filter gives cubeObjects with either one of those.
                     if (dayOfWeekFilers.Count > 0)
                     {
-                        filteredCubeObjects =
-                            filterCubeObjectsWithDayOfWeekFilters(filteredCubeObjects, dayOfWeekFilers); // OR logic, if there are multiple "day of week" filters
+                        SQLQuery += SQLSeparator + filterCubeObjectsWithDayOfWeekFilters(dayOfWeekFilers, filtered); // OR logic, if there are multiple "day of week" filters
+                        filtered++;
+                        SQLSeparator = "natural join \n";
                     }
-                    if (timeFilters.Count > 0)
+                    /*if (timeFilters.Count > 0)
                     {
                         filteredCubeObjects = filterCubeObjectsWithTimeFilters(filteredCubeObjects, timeFilters); // range filter
                     } 
@@ -132,13 +137,21 @@ namespace ObjectCubeServer.Controllers
                     if (tagsetFilters.Count > 0)
                     {
                         filteredCubeObjects = filterCubeObjectsWithTagsetFilters(filteredCubeObjects, tagsetFilters);
-                    }
+                    }*/
                 }
 
+                if (filtered == 1)
+                {
+                    SQLQuery = Regex.Replace(SQLQuery,@"R\d","");
+                }
+                IEnumerable<CubeObject> filteredCubeobjects = coContext.CubeObjects
+                    .FromSqlRaw(SQLQuery + ") X on O.id = X.object_id")
+                    .ToList(); 
+
                 //Extracting cubeObjects:
-                List<List<CubeObject>> xAxisCubeObjects = getAllCubeObjectsFromAxis(xDefined, axisX, filteredCubeObjects);
-                List<List<CubeObject>> yAxisCubeObjects = getAllCubeObjectsFromAxis(yDefined, axisY, filteredCubeObjects);
-                List<List<CubeObject>> zAxisCubeObjects = getAllCubeObjectsFromAxis(zDefined, axisZ, filteredCubeObjects);
+                List<List<CubeObject>> xAxisCubeObjects = getAllCubeObjectsFromAxis(xDefined, axisX, filteredCubeobjects);
+                List<List<CubeObject>> yAxisCubeObjects = getAllCubeObjectsFromAxis(yDefined, axisY, filteredCubeobjects);
+                List<List<CubeObject>> zAxisCubeObjects = getAllCubeObjectsFromAxis(zDefined, axisZ, filteredCubeobjects);
 
                 if (xDefined && yDefined && zDefined) //XYZ
                 {
@@ -237,7 +250,7 @@ namespace ObjectCubeServer.Controllers
                             x = 1,
                             y = 1,
                             z = 1,
-                            CubeObjects = filteredCubeObjects.ToList()
+                            CubeObjects = filteredCubeobjects.ToList()
                         }
                     };
                 }
@@ -259,15 +272,21 @@ namespace ObjectCubeServer.Controllers
 
         #region HelperMethods:
 
-        private IEnumerable<CubeObject> filterCubeObjectsWithDayOfWeekFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> dayOfWeekFilers)
-        { 
-            return cubeObjects
-                .Where(co =>
-                    dayOfWeekFilers.Exists(f => co.ObjectTagRelations.Exists(otr => otr.TagId == f.Id))) //Must be tagged with at least one tag (OR search!)
-                .ToList();
+        private string filterCubeObjectsWithDayOfWeekFilters(List<ParsedFilter> dayOfWeekFilers, int index)
+        {
+            string query = "(select OTR.object_id " +
+                "from objecttagrelations OTR " +
+                "where";
+            string separator = "";
+            foreach(ParsedFilter f in dayOfWeekFilers)
+            {
+                query += separator + " OTR.tag_id = " + f.Id;
+                separator = " or";
+            }
+            return query + ") R" + index + "\n";      
         }
 
-        private IEnumerable<CubeObject> filterCubeObjectsWithTimeFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> timeFilters)
+        private IQueryable<CubeObject> filterCubeObjectsWithTimeFilters(IQueryable<CubeObject> cubeObjects, List<ParsedFilter> timeFilters)
         {
             //Getting tags per time filter:
             List<List<Tag>>
@@ -275,7 +294,7 @@ namespace ObjectCubeServer.Controllers
 
             return cubeObjects.Where(co => tagsPerTimeFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists
                 lstOfTags => co.ObjectTagRelations.Exists((  //For each tag list, there must exist a cube object where:
-                    otr => lstOfTags.Exists(tag => tag.Id == otr.TagId))))).ToList();  //the cube object is tagged with one tag id from the taglist.
+                    otr => lstOfTags.Exists(tag => tag.Id == otr.TagId)))));  //the cube object is tagged with one tag id from the taglist.
         }
 
         private List<Tag> extractTagsFromTimeFilter(ParsedFilter timeFilter)
@@ -377,7 +396,7 @@ namespace ObjectCubeServer.Controllers
         }
 
 
-        private List<CubeObject> filterCubeObjectsWithTagsetFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> tagsetFilters)
+        private IQueryable<CubeObject> filterCubeObjectsWithTagsetFilters(IQueryable<CubeObject> cubeObjects, List<ParsedFilter> tagsetFilters)
         {
             //Getting tags per tagset filter:
             List<List<Tag>>
@@ -385,7 +404,7 @@ namespace ObjectCubeServer.Controllers
 
             return cubeObjects.Where(co => tagsPerTagsetFilter.TrueForAll( //CubeObject must be tagged with tag in each of the tag lists
                 lstOfTags => co.ObjectTagRelations.Exists((  //For each tag list, there must exist a cube object where:
-                    otr => lstOfTags.Exists(tag => tag.Id == otr.TagId))))).ToList();  //the cube object is tagged with one tag id from the taglist.
+                    otr => lstOfTags.Exists(tag => tag.Id == otr.TagId)))));  //the cube object is tagged with one tag id from the taglist.
         }
 
         private List<Tag> extractTagsFromTagsetFilter(ParsedFilter tsf)
@@ -404,12 +423,12 @@ namespace ObjectCubeServer.Controllers
         /// <param name="cubeObjects"></param>
         /// <param name="tagFilters"></param>
         /// <returns></returns>
-        private List<CubeObject> filterCubeObjectsWithTagFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> tagFilters)
+        private IQueryable<CubeObject> filterCubeObjectsWithTagFilters(IQueryable<CubeObject> cubeObjects, List<ParsedFilter> tagFilters)
         {
             return cubeObjects
                 .Where(co =>
-                    tagFilters.TrueForAll(f => co.ObjectTagRelations.Exists(otr => otr.TagId == f.Id))) //Must be tagged with each tag
-                .ToList();
+                    tagFilters.All(f => co.ObjectTagRelations.Exists(otr => otr.TagId == f.Id))); //Must be tagged with each tag
+      
         }
 
         /// <summary>
@@ -419,7 +438,7 @@ namespace ObjectCubeServer.Controllers
         /// <param name="cubeObjects"></param>
         /// <param name="hierarchyFilters"></param>
         /// <returns></returns>
-        private List<CubeObject> filterCubeObjectsWithHierarchyFilters(IEnumerable<CubeObject> cubeObjects, List<ParsedFilter> hierarchyFilters)
+        private IQueryable<CubeObject> filterCubeObjectsWithHierarchyFilters(IQueryable<CubeObject> cubeObjects, List<ParsedFilter> hierarchyFilters)
         {
             //Getting all tags per hierarchy filter:
             List<List<Tag>> tagsPerHierarchyFilter = hierarchyFilters
@@ -433,7 +452,7 @@ namespace ObjectCubeServer.Controllers
                             otr => lstOfTags.Exists(tag => tag.Id == otr.TagId) //the cube object is tagged with one tag id from the taglist.
                         )
                     )
-                ).ToList();
+                );
         }
 
         private List<Tag> extractTagsFromHierarchyFilter(ParsedFilter pf)
