@@ -173,14 +173,14 @@ namespace ObjectCubeServer.Models.DataAccess
                         optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lscAll-rawsql; User Id = photocube; Password = postgres;");
                     }
                     break;
-                case PlatformID.Win32NT: //Windows
+                case PlatformID.Win32NT: //Windows & postgres (Jihye)
                     if (connectionString != null)
                     {
-                        optionsBuilder.UseSqlServer(connectionString);
+                        optionsBuilder.UseNpgsql(connectionString);
                     }
                     else
                     {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSCWholeFinal; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSCWholeFinal.mdf");
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = PC; User Id = photocube; Password = postgres;");
                     }
                     break;
                 default:
