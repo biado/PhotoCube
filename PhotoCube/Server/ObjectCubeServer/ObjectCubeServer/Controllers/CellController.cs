@@ -11,6 +11,7 @@ using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using ObjectCubeServer.Models.PublicClasses;
+using ObjectCubeServer.Services;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -19,6 +20,7 @@ namespace ObjectCubeServer.Controllers
     public class CellController : ControllerBase
     {
         public static int pageSize = 10;
+        public QueryGenerationService queryGenerationService = new QueryGenerationService();
         /* EXAMPLES:
          * GET: /api/cell?xAxis={jsonObject}
          * GET: /api/cell?yAxis={jsonObject}
@@ -96,12 +98,24 @@ namespace ObjectCubeServer.Controllers
                         new JsonSerializerSettings() {ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
                 }
 
+                queryGenerationService.resetNumberOfAdditionalFilters();
+
                 string SQLQuery = "select distinct(O.*) from cubeobjects O join (";
+                string filterQuery = "";
 
                 //Filtering:
                 int filtered = 0;
                 if (filtersDefined && filtersList.Count > 0)
                 {
+                    //Merge day of week filters, and initialize Ids List field in each filter
+                    filtersList = mergeDayOfWeekFilters(filtersList);
+                    findIdsFromDBAndInitializeIds(filtersList);
+
+                    //Generate query string for the filters part
+                    filterQuery += queryGenerationService.generateFilterQuery(filtersList);
+
+                    //For each cells, generateCellDefinitionQuery(xAxis1, yAxis1, zAxis1) and generateQuery(filterQuery, axisQuery)
+
                     //Divide filters:
                     List<ParsedFilter> dayOfWeekFilers = filtersList.Where(f => f.type.Equals("day of week")).ToList();
                     List<ParsedFilter> timeFilters = filtersList.Where(f => f.type.Equals("time")).ToList();
@@ -267,6 +281,38 @@ namespace ObjectCubeServer.Controllers
                 //Return OK with json result:
                 return Ok(JsonConvert.SerializeObject(result,
                     new JsonSerializerSettings() {ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
+            }
+        }
+
+        private void findIdsFromDBAndInitializeIds(List<ParsedFilter> filtersList)
+        {
+            foreach (var filter in filtersList)
+            {
+                filter.initializeIds();
+            }
+        }
+
+        private List<ParsedFilter> mergeDayOfWeekFilters(List<ParsedFilter> filtersList)
+        {
+            List<ParsedFilter> dayOfWeekFilters = filtersList.Where(f => f.type.Equals("day of week")).ToList();
+            if (dayOfWeekFilters.Count < 2)
+            {
+                // No need to merge day of week filters
+                return filtersList;
+            }
+            else
+            {
+                List<int> dayOfWeekIds = new List<int>();
+                foreach (var dayOfWeekFilter in dayOfWeekFilters)
+                {
+                    dayOfWeekIds.Add(dayOfWeekFilter.Id);
+                }
+
+                ParsedFilter firstDowFilter = dayOfWeekFilters[0];
+                firstDowFilter.Ids = dayOfWeekIds;
+                List<ParsedFilter> mergedList = filtersList.Where(f => !f.type.Equals("day of week")).ToList();
+                mergedList.Add(firstDowFilter);
+                return mergedList;
             }
         }
 
