@@ -42,7 +42,7 @@ namespace ObjectCubeServer.Models.DomainClasses
                 case "hierarchy":
                 case "tag":
                 case "date":
-                    IdList.Add(Id); // This ParentNode will later be used to query the nodes_taggings table for each cell.
+                    IdList.Add(Id);
                     Ids = IdList;
                     break;
 

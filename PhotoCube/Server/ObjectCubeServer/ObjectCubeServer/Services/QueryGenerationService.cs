@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ObjectCubeServer.Services
@@ -9,8 +11,52 @@ namespace ObjectCubeServer.Services
     public class QueryGenerationService
     {
         private int numberOfAdditionalFilters;
-        private int numberOfCellDefinitionFilters;
-        internal string generateFilterQuery(List<ParsedFilter> filtersList)
+        private int numberOfFilters; // cell definition filters + additional filters
+        private string filterQuery;
+
+        internal string generateSQLQueryForCell(string xType, int xVertexId, string yType, int yVertexId, string zType,
+            int zVertexId)
+        {
+            numberOfFilters = numberOfAdditionalFilters;
+            string SQLQuery = "select distinct(O.*) from cubeobjects O join (\n";
+            string cellQuery = generateCellQuery(xType, xVertexId, yType, yVertexId, zType, zVertexId);
+            SQLQuery += filterQuery + cellQuery;
+            if (numberOfFilters == 1)
+            {
+                SQLQuery = Regex.Replace(SQLQuery, @"R\d", "");
+            }
+            SQLQuery += "\n) X on O.id = X.object_id limit 6;";
+            return SQLQuery;
+        }
+        private string generateCellQuery(string xType, int xVertexId, string yType, int yVertexId, string zType,
+            int zVertexId)
+        {
+            // If axis == null, parameters will be: type == "", id == -1
+            string cellQuery = "";
+            if (xType != "") cellQuery += generateVertexQuery(xType, xVertexId);
+            if (yType != "") cellQuery += generateVertexQuery(yType, yVertexId);
+            if (zType != "") cellQuery += generateVertexQuery(zType, zVertexId);
+            return cellQuery;
+        }
+
+        private string generateVertexQuery(string type, int vertexId)
+        {
+            string query = (numberOfFilters == 0) ? "" : "\n natural join \n";
+            switch (type)
+            {
+                case "Hierarchy":
+                    query += String.Format("(select R.object_id from nodes_taggings R where R.node_id = {0}) R{1}", vertexId, numberOfFilters);
+                    break;
+                case "Tagset":
+                    query += String.Format(
+                        "(select R.object_id from objecttagrelations R where R.tag_id = {0}) R{1}", vertexId, numberOfFilters);
+                    break;
+            }
+            numberOfFilters++;
+            return query;
+        }
+
+        internal void generateFilterQuery(List<ParsedFilter> filtersList)
         {
             string query = "";
             string separator = "";
@@ -22,7 +68,7 @@ namespace ObjectCubeServer.Services
                 separator = "\n natural join \n";
             }
 
-            return query;
+            filterQuery = query;
         }
 
         private string generateFilterQueryPerType(ParsedFilter filter)
@@ -66,9 +112,11 @@ namespace ObjectCubeServer.Services
             return idList;
         }
 
-        internal void resetNumberOfAdditionalFilters()
+        internal void reset()
         {
             numberOfAdditionalFilters = 0;
+            numberOfFilters = 0;
+            filterQuery = "";
         }
     }
 }
