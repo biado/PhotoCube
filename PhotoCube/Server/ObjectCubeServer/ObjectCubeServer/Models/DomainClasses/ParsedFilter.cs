@@ -47,7 +47,11 @@ namespace ObjectCubeServer.Models.DomainClasses
                     break;
 
                 case "day of week":
-                    // Handled in CellController.
+                    if (Ids == null) // Case: There is only 1 DoW filter in the request. (If more than 1, already merged and created Ids List in CellController.)
+                    {
+                        IdList.Add(Id);
+                        Ids = IdList;
+                    }
                     break;
 
                 case "time":
