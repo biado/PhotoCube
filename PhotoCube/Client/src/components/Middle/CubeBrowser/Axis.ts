@@ -58,7 +58,7 @@ export default class Axis{
         this.Id = tagset.Id;
         //Sort tags alphabethically:
         tagset.Tags!.sort((a:Tag,b:Tag) => a.Name > b.Name ? 1 : a.Name < b.Name ? -1 : 0);
-        this.Tags = tagset.Tags!;
+        this.Tags = tagset.Tags!.filter((a:Tag) => a.Name != 'Root(-1)' && a.Name != tagset.Name);
         let color: Colors = 
             this.AxisDirection === AxisDirection.X ? Colors.Red:
             this.AxisDirection === AxisDirection.Y ? Colors.Green:
