@@ -1,4 +1,5 @@
 # PhotoCube as a Competitor in the Lifelog Search Challenge
+
 ## Info:
 This PhotoCube Client and Server implementations are  developed for research purposes by Jihye Shin and Alexandra Waldau as part of their MSc. thesis in Software Design at the IT University of Copenhagen.
 
@@ -51,13 +52,13 @@ The files needed are:
 	- tuning-post.sql (In case you update the data rows, run this afterwards)
 
 ## 2. Server Installation
+
 ### Step 0: Open the ObjectCubeServer solution file in Visual Studio:
 Open the *ObjectCubeServer.sln* solution file in Visual Studio. This can be found in the *Server/ObjectCubeServer/* directory.
 
 If Visual Studio says that you need to download and install extensions to make it work, please do so.
 
 ### Step 1: Enter a connection-string:
-
 Add a connection-string to your database in the file: *ObjectCubeServer/Models/Contexts/ObjectContext.cs* switch statement around line 163. Eg:
 ```
 case "DESKTOP-123456": // Put your computer name
@@ -77,7 +78,7 @@ Guide on how to find your computer name: https://it.umn.edu/services-technologie
 ### Step 2: Enter the path to the LSC Dataset on your computer:
 **Note: This step is needed only if you are generating SQL script to insert the data to the database (i.e. running Step 5-1). You can skip this part unless you change the data mapping.**
 
-Please create an *App.Config* file under *Server\ObjectCubeServer* and specify the path to the LSC dataset and other required files on your computer. These file paths are needed to run *ConsoleAppForInteractingWithDatabase/DatasetInsertSQLGenerator.cs*. The content of the file is something like below, where you replace the `value`s to your own paths. 
+Please create a file named *App.Config* under *Server\ObjectCubeServer* and specify the path to the LSC dataset and other required files on your computer. These file paths are needed to run *ConsoleAppForInteractingWithDatabase/DatasetInsertSQLGenerator.cs*. The content of the file is something like below, where you replace the `value`s to your own paths. 
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
@@ -124,7 +125,6 @@ When the Console Application says "Press any key to shut down." the database is 
 ![InsertionComplete.jpg](https://github.itu.dk/jish/Thesis/blob/master/PhotoCube/userManualImages/InstallationManualImages/InsertComplete.jpg)
 
 #### 2) Run the SQL script
-
 The generated SQL script needs to be run on a database. On the Command Prompt (within the folder the sql file is located), run the command below. It takes around 30 minutes.
 
 ```
@@ -135,7 +135,6 @@ psql -q -U postgres PC < PSQL1.sql
 ```
 
 ### Step 6: Run the server:
-
 You can now run the server by right-clicking the ObjectServer project, select 'Set as StartUp Project' and then run the application by pressing the play button in the top of Visual Studio.
 
 ## 3. Client Installation
@@ -157,7 +156,15 @@ Tip: You can start the cmd in the current directory if you write "cmd" and press
 
 ![OpenCmdInCurrentPath.png](https://github.itu.dk/jish/Thesis/blob/master/PhotoCube/userManualImages/InstallationManualImages/OpenCmdInCurrentPath.png)
 
-### Step 3: Run the client:
+### Step 3: Create `.env` file with the correct port number:
+Please create a file named *.env* under *PhotoCube\Client* and specify the server address with the correct port number on your computer. The content of the file is as below, where you replace the value for the secone entry, `REACT_APP_BASE_URL`. Put 44317 for Windows OS, and {????} for MacOS.
+
+```
+REACT_APP_IMAGE_SERVER = http://bjth.itu.dk:5002/
+REACT_APP_BASE_URL = https://localhost:44317/api
+```
+
+### Step 4: Run the client:
 Run the client with the command:
 ```
 npm start
