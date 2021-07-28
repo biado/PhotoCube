@@ -10,31 +10,47 @@ The PhotoCube Client is developed in React using Typescript. It also uses the Th
 
 The PhotoCube Server is developed in C# in the .NET CORE framework, using Entity Framework CORE to communicate with an SQL database when running. The initial data insertion is done by running SQL script. It also uses Newtonsoft's Json.NET framework to serialize and parse JSON.
 
-## Prerequisites:
-On a Windows PC:
+This document only covers the case of using Postgres database, as MSSQL did not support some syntax for denormalization steps. However PhotoCube was developed using MSSQL database. Check Peter's repository to see the different version of the installation guide.
 
+This README file covers the overall setup process of PhotoCube:
+1. Downloads
+2. Server Installation
+3. Client Installation
+4. Database Tuning (Denormalization)
+
+## 1. Downloads
+
+### Download the prerequisites:
 Tip: Hold ctrl when clicking on the links to open them in a new tab:
 * Download and install [Visual Studio IDE (Community edition is free)](https://visualstudio.microsoft.com/vs/) (Required for running and developing server).
 * Download and install [Visual Studio Code IDE](https://code.visualstudio.com/) (Recommended for client development).
 * Download and install [Node](https://nodejs.org/en/) (Required for React client).
-* Download and install [SQL Server (Express and Developer editions are free, scroll down a bit)](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (Required for running development server) **REMEMBER TO CHECK LOCALDB DURING INSTALLATION**.
+* Download and install [PostgreSQL](https://www.postgresql.org/download/)
 * Download and install the Google Chrome Browser or Edge to use the client application with. (Mozilla and other browsers are not yet supported).
+
+Additionally for MacOS:
+* Download .NET Core SDK 2.1 for macOS, and place it in the same folder as the existing SDK. Link: https://dotnet.microsoft.com/download/dotnet/2.1
 
 Please restart your computer after installing the frameworks, before trying out the code.
 
-Note: PhotoCube also runs on MacOS using Postgres. The *DatasetInsertSQLGenerator.cs* in Installation step 2 supports both Mac and Windows.
-
-## Download the code:
+### Download the code:
 Either clone this repository or download it as a zip file with the green button on the top-right of this page.
 
-## Download the dataset:
+### Download the dataset:
 Ask Björn Thór Jónsson for the LSC dataset: [bjth@itu.dk](mailto:bjth@itu.dk).
 
 The files needed are:
-  - ImageTags file in csv format, containing file paths of images and the associated tags
-  - Hierarchy file in json format, containing the json tree of tags
+  - To generate data insertion script by yourself (using the server's *ConsoleAppForInteractingWithDatabase* project):
+    - ImageTags file in csv format, containing file paths of images and the associated tags
+    - Hierarchy file in json format, containing the json tree of tags
+    - (Or you can ask for the resulting file (PSQL1.sql))
+  - For loading and tuning database:
+    - lscDDL.sql (Defines the database structure)
+	- PSQL1.sql (Inserts all LSC data to the database)
+	- tuning-pre.sql (Denormalization)
+	- tuning-post.sql (In case you update the data rows, run this afterwards)
 
-## Installing and running the server:
+## 2. Server Installation
 ### Step 0: Open the ObjectCubeServer solution file in Visual Studio:
 Open the *ObjectCubeServer.sln* solution file in Visual Studio. This can be found in the *Server/ObjectCubeServer/* directory.
 
@@ -42,17 +58,26 @@ If Visual Studio says that you need to download and install extensions to make i
 
 ### Step 1: Enter a connection-string:
 
-Add a connection-string to your SQL database in the file: *ObjectCubeServer/Models/Contexts/ObjectContext.cs* around line 183. Eg:
+Add a connection-string to your database in the file: *ObjectCubeServer/Models/Contexts/ObjectContext.cs* switch statement around line 163. Eg:
 ```
-optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = ObjectData; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\ObjectDB.mdf");
+case "DESKTOP-123456": // Put your computer name
+    if (connectionString != null)
+    {
+        optionsBuilder.UseNpgsql(connectionString);
+    }
+    else
+    {
+		optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = PC; User Id = photocube; Password = postgres;"); // put your connection-string
+    }
+    break;
 ```
 
-Note that the connection-string identifies the Server, this is usually "Server = (localdb)\\mssqllocaldb;", the name of the database: "Database = ObjectData;", that it's a trusted connection: "Trusted_Connection = True;" and the path to the database file (.mdf) "AttachDbFileName=C:\\Databases\\ObjectDB.mdf". The ObjectDB.mdf file will be created later with the command "Update-Database".
-
-Also note that the directory *C:\\Databases* needs to exist.
+Guide on how to find your computer name: https://it.umn.edu/services-technologies/how-tos/find-your-computer-name
 
 ### Step 2: Enter the path to the LSC Dataset on your computer:
-Please create an *App.Config* file under *Server\ObjectCubeServer* and specify the path to the LSC dataset and other required files on your computer. These file paths are needed to run *ConsoleAppForInteractingWithDatabase/DatasetInsertSQLGenerator.cs*. The content of the file is like this, where you replace the `value`s to your own paths. 
+**Note: This step is needed only if you are generating SQL script to insert the data to the database (i.e. running Step 5-1). You can skip this part unless you change the data mapping.**
+
+Please create an *App.Config* file under *Server\ObjectCubeServer* and specify the path to the LSC dataset and other required files on your computer. These file paths are needed to run *ConsoleAppForInteractingWithDatabase/DatasetInsertSQLGenerator.cs*. The content of the file is something like below, where you replace the `value`s to your own paths. 
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
@@ -73,32 +98,22 @@ Then we will compile the applications by right-clicking the Solution in the Solu
 
 ![Rebuild%20solution.png](https://github.itu.dk/jish/Thesis/blob/master/PhotoCube/userManualImages/InstallationManualImages/Rebuild%20solution.png)
 
-### Step 4: Create the database schema migrations and run the migrations against the server:
-If the folder *Migrations* exists in the ObjectCubeServer project, please right-click and delete it. We will generate it again next:
+### Step 4: Create the database schema
+First, run PostgresSQL locally and create a new database.
 
-Open the Package Manager Console (tip: You can search for it in the upper right corner):
-
-![PackageManagerConsole.png](https://github.itu.dk/jish/Thesis/blob/master/PhotoCube/userManualImages/InstallationManualImages/PackageManagerConsole.png)
-
-Be sure that Default Project is set to ObjectCubeServer, and that ObjectCubeServer is selected as StartUp Project:
-
-![ObjectCubeServerDefaultProject.png](https://github.itu.dk/jish/Thesis/blob/master/PhotoCube/userManualImages/InstallationManualImages/ObjectCubeServerDefaultProject.png)
-
-Run:
+Then, run below command on the Command Prompt (within the folder the sql file is located), to create the schema on the database.
 ```
-Add-Migration init
-```
-To create the Migrations folder.
+psql -q -U {user name} {database name} < lscDDL.sql
 
-Then run:
+//Example:
+psql -q -U postgres PC < lscDDL.sql
 ```
-Update-Database
-```
-To apply the migration to the database. This will create the database on the server.
+
 
 ### Step 5: Populate the server with data:
 
 #### 1) Generate the SQL script
+**Note: This step is needed only if you are generating SQL script to insert the data to the database. You can skip this part unless you change the data mapping.**
 To populate the database with data, right-click the ConsoleAppForInteractingWithDatabase and select 'Set as StartUp Project'.
 Then run the application by pressing the *Play* button in the top of Visual Studio to start the ConsoleAppForInteractingWithDatabase program:
 
@@ -110,17 +125,20 @@ When the Console Application says "Press any key to shut down." the database is 
 
 #### 2) Run the SQL script
 
-The generated SQL script needs to be run on a database. On the Command Prompt, run the command below. It takes around 30 minutes.
+The generated SQL script needs to be run on a database. On the Command Prompt (within the folder the sql file is located), run the command below. It takes around 30 minutes.
 
 ```
-sqlcmd -S "(localdb)\MSSQLLocalDB" -d {database name} -i {filepath}
+psql -q -U {user name} {database name} < PSQL1.sql
+
+//Example:
+psql -q -U postgres PC < PSQL1.sql
 ```
 
 ### Step 6: Run the server:
 
 You can now run the server by right-clicking the ObjectServer project, select 'Set as StartUp Project' and then run the application by pressing the play button in the top of Visual Studio.
 
-## Installing and running the client:
+## 3. Client Installation
 Note that when running these commands, it may give "WARN" and "notice" messages, however you can ignore these and keep going with the installation.
 
 ### Step 1: Install React:
@@ -146,23 +164,19 @@ npm start
 ```
 A browser tab should open automatically with the client application.
 
-## Other (needed if you are going to make changes to the database or downloaded npm packages on a seperate computer):
-If you need to delete the data in the database, run:
+## 4. Database Tuning (Denormalization)
+Run below command on the Command Prompt (within the folder the sql file is located), to set up denormalization.
 ```
-Drop-Database
-```
-in the package manager console. This will delete the database.
+psql -U {user name} {database name} < tuning-pre.sql
 
-If you have made changes to the DB Schema, I recommend deleting the *Migrations* directory, running 'Drop-Database' followed by
-```
-Add-Migration init
-```
-in the Package Manager Console. This will recreate the Migrations directory and create the Migrations.
-Lastly, update the schema by running 'Update-Database'.
-
-You can apply changes to the database schema with the command:
-```
-Update-Database
+//Example:
+psql -U postgres PC < tuning-pre.sql
 ```
 
-If you have worked on the client application on one computer, and installed packages using npm, install these packages by running 'npm install' before running 'npm start'.
+If you update the data rows, you need to update the denormalized views by running the command below.
+```
+psql -q -U {user name} {database name} < tuning-post.sql
+
+//Example:
+psql -q -U postgres PC < tuning-post.sql
+```
