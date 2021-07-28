@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace ConsoleAppForInteractingWithDatabase

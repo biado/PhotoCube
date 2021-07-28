@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ObjectCubeServer.Models;
-using ObjectCubeServer.Models.DataAccess;
+﻿using ObjectCubeServer.Models;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using SixLabors.ImageSharp;
@@ -10,11 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace ConsoleAppForInteractingWithDatabase
 {
@@ -485,16 +481,9 @@ namespace ConsoleAppForInteractingWithDatabase
             // values
             // (value1, value2, ..);
 
-            OperatingSystem OS = Environment.OSVersion;
-            PlatformID platformId = OS.Platform;
-
             int insertCount = 0;
-            //SQL server specific requirement
-            if (platformId == PlatformID.Win32NT)
-            {
-                File.AppendAllText(SQLPath, "SET QUOTED_IDENTIFIER ON\nGO\nSET ANSI_NULLS ON\nGO\n");
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\nGO\n");
-            }
+
+            File.AppendAllText(SQLPath, "SELECT NOW();\n\\SET AUTOCOMMIT OFF\nCOMMIT;\n");
 
             //Insert all CubeObjects
             foreach (var co in cubeObjects.Values)
@@ -504,16 +493,10 @@ namespace ConsoleAppForInteractingWithDatabase
                                          "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
                 insertCount++;
-                if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                if (insertCount % 100 == 0)
                 {
-                    File.AppendAllText(SQLPath, "GO\n");
+                    File.AppendAllText(SQLPath, "COMMIT;\n");
                 }
-            }
-
-            if (platformId == PlatformID.Win32NT)
-            {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects OFF;\n");
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\nGO\n");
             }
 
             //Insert all Tagsets
@@ -523,24 +506,12 @@ namespace ConsoleAppForInteractingWithDatabase
                 File.AppendAllText(SQLPath, insertStatement);
             }
 
-            if (platformId == PlatformID.Win32NT)
-            {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets OFF;\n");
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tag_types ON;\n");
-            }
-
             //Insert all TagTypes
             foreach (var tt in tagtypes.Values)
             {
                 string insertStatement = "INSERT INTO tag_types(id, description) VALUES(" + tt.Id + ",'" +
                                          tt.Description + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
-            }
-
-            if (platformId == PlatformID.Win32NT)
-            {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tag_types OFF;\n");
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags ON;\n");
             }
 
             //Insert all Tags 
@@ -575,16 +546,11 @@ namespace ConsoleAppForInteractingWithDatabase
 
                     File.AppendAllText(SQLPath, insertStatement);
                     insertCount++;
-                    if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                    if (insertCount % 100 == 0)
                     {
-                        File.AppendAllText(SQLPath, "GO\n");
+                        File.AppendAllText(SQLPath, "COMMIT;\n");
                     }
                 }
-            }
-
-            if (platformId == PlatformID.Win32NT)
-            {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags OFF;\n");
             }
 
             //Insert all ObjectTagRelations (IDENTITY_INSERT should be off)
@@ -597,16 +563,11 @@ namespace ConsoleAppForInteractingWithDatabase
                                              otr.ObjectId + "," + otr.TagId + "); \n";
                     File.AppendAllText(SQLPath, insertStatement);
                     insertCount++;
-                    if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                    if (insertCount % 100 == 0)
                     {
-                        File.AppendAllText(SQLPath, "GO\n");
+                        File.AppendAllText(SQLPath, "COMMIT;\n");
                     }
                 }
-            }
-
-            if (platformId == PlatformID.Win32NT)
-            {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\nGO\n");
             }
 
             //Insert all Hierarchies
@@ -617,12 +578,6 @@ namespace ConsoleAppForInteractingWithDatabase
                 File.AppendAllText(SQLPath, insertStatement);
             }
 
-            if (platformId == PlatformID.Win32NT)
-            {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies OFF;\n");
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\nGO\n");
-            }
-
             //Insert all Nodes first without setting parent node to avoid violating FK constraint
             insertCount = 0;
             foreach (var n in nodes)
@@ -631,13 +586,13 @@ namespace ConsoleAppForInteractingWithDatabase
                                          "," + n.HierarchyId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
                 insertCount++;
-                if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                if (insertCount % 100 == 0)
                 {
-                    File.AppendAllText(SQLPath, "GO\n");
+                    File.AppendAllText(SQLPath, "COMMIT;\n");
                 }
             }
 
-            //Upate all Nodes and set parent node
+            //Update all Nodes and set parent node
             foreach (var n in nodes)
             {
                 //Root nodes should have no parent node
@@ -649,10 +604,8 @@ namespace ConsoleAppForInteractingWithDatabase
                 }
             }
 
-            if (platformId == PlatformID.Win32NT)
-            {
-                File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\nGO");
-            }
+            File.AppendAllText(SQLPath, "COMMIT;\n\\SET AUTOCOMMIT ON\nSELECT NOW();");
+
         }
     }
 }

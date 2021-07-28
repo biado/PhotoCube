@@ -159,21 +159,11 @@ namespace ObjectCubeServer.Models.DataAccess
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //base.OnConfiguring(optionsBuilder);
-            OperatingSystem OS = Environment.OSVersion;
-            PlatformID platformId = OS.Platform;
-            switch (platformId)
+            string computerName = System.Environment.MachineName;
+            switch (computerName)
             {
-                case PlatformID.Unix: //Mac 
-                    if (connectionString != null)
-                    {
-                        optionsBuilder.UseNpgsql(connectionString);
-                    }
-                    else
-                    {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lscAll-rawsql; User Id = photocube; Password = postgres;");
-                    }
-                    break;
-                case PlatformID.Win32NT: //Windows & postgres (Jihye)
+                //Postgres example
+                case "DESKTOP-9RO8H19":
                     if (connectionString != null)
                     {
                         optionsBuilder.UseNpgsql(connectionString);
@@ -183,6 +173,29 @@ namespace ObjectCubeServer.Models.DataAccess
                         optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = PC; User Id = photocube; Password = postgres;");
                     }
                     break;
+                //Postgres example
+                //case "computerName":
+                //    if (connectionString != null)
+                //    {
+                //        optionsBuilder.UseNpgsql(connectionString);
+                //    }
+                //    else
+                //    {
+                //        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lscAll-rawsql; User Id = photocube; Password = postgres;");
+                //    }
+                //    break;
+
+                //MSSQL example (Not used after LSC performance tuning using Raw SQL)
+                //case "computerName":
+                //    if (connectionString != null)
+                //    {
+                //        optionsBuilder.UseSqlServer(connectionString);
+                //    }
+                //    else
+                //    {
+                //        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSC5KSQL; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSC5KSQL.mdf");
+                //    }
+                //    break;
                 default:
                     throw new System.Exception("Please specify the path to the database");
             }
