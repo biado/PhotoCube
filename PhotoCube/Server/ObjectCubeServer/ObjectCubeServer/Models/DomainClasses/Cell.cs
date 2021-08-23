@@ -20,13 +20,13 @@ namespace ObjectCubeServer.Models.DomainClasses
         public PublicCell GetPublicCell()
         {
             List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).ToList();
-            return new PublicCell(this.x, this.y, this.z, cubeObjects);
+            return new PublicCell(this.x, this.y, this.z, cubeObjects.Count(), cubeObjects);
         }
 
         public PublicCell GetPublicCell(int skip, int pageSize)
         {
             List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).Skip(skip).Take(pageSize).ToList();
-            return new PublicCell(this.x, this.y, this.z, cubeObjects);
+            return new PublicCell(this.x, this.y, this.z, cubeObjects.Count(), cubeObjects);
         }
     }
 }

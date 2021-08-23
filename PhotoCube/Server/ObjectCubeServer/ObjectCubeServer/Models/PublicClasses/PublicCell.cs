@@ -12,13 +12,15 @@ namespace ObjectCubeServer.Models.PublicClasses
         public int x { get; set; }
         public int y { get; set; }
         public int z { get; set; }
+        public int count { get; set; }
         public List<PublicCubeObject> CubeObjects { get; set; }
 
-        public PublicCell(int x, int y, int z, List<PublicCubeObject> cubeObjects)
+        public PublicCell(int x, int y, int z, int count, List<PublicCubeObject> cubeObjects)
         {
             this.x = x;
             this.y = y;
             this.z = z;
+            this.count = count;
             this.CubeObjects = cubeObjects;
         }
     }

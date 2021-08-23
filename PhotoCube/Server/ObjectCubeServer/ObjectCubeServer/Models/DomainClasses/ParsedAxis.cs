@@ -39,7 +39,7 @@ namespace ObjectCubeServer.Models.DomainClasses
                     List<Node> childNodes = extractChildNodesFromHierarchyAxis();
                     foreach (var node in childNodes)
                     {
-                        IdList.Add(node.TagId);
+                        IdList.Add(node.Id);
                     }
 
                     Ids = IdList;
@@ -51,7 +51,7 @@ namespace ObjectCubeServer.Models.DomainClasses
         {
             using var context = new ObjectContext();
             var currentNode = context.Nodes.FirstOrDefault(n => n.Id == Id);
-            string query = String.Format("select * from nodes where id in (select id from get_level_from_parent_node({0},{1}))", Id,
+            string query = String.Format("select N.* from (select N.* from nodes N where N.id in (select id from get_level_from_parent_node({0},{1}))) N join alphanumerical_tags A on N.tag_id = A.id order by A.name", Id,
                 currentNode.HierarchyId);
 
             List<Node> childNodes = context.Nodes
@@ -67,7 +67,7 @@ namespace ObjectCubeServer.Models.DomainClasses
                 .Include(ts => ts.Tags)
                 .FirstOrDefault(ts => ts.Id == Id);
             // Exclude 'Root(-1)' and tag that has same name as tagset (temporary fix - ideally need to fix the InsertSQLGenerator)
-            var Tags = Tagset.Tags.Where(t => !(t.GetTagName().Equals("Root(-1)") || t.GetTagName().Equals(Tagset.Name))).ToList();
+            var Tags = Tagset.Tags.Where(t => !(t.GetTagName().Equals("Root(-1)") || t.GetTagName().Equals(Tagset.Name))).OrderBy(t => t.GetTagName()).ToList();
             return Tags;
         }
     }
