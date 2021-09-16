@@ -11,64 +11,101 @@ namespace ObjectCubeServer.Services
     public class QueryGenerationService
     {
         private int numberOfAdditionalFilters;
-        private int numberOfFilters; // cell definition filters + additional filters
-        private string filterQuery;
+        private int totalNumberOfFilters;  // cell definition filters + additional filters
+        private int numberOfFilters;  // internal counter
+        //private string filterQuery;
 
-        internal string generateSQLQueryForCell(string xType, int xVertexId, string yType, int yVertexId, string zType,
-            int zVertexId)
+        internal string generateSQLQueryForCells(string xType, int xVertexId, string yType, int yVertexId, string zType, int zVertexId, List<ParsedFilter> filtersList)
         {
-            numberOfFilters = numberOfAdditionalFilters;
-            string SQLQuery = "select distinct(O.*) from cubeobjects O join (\n";
-            string cellQuery = generateCellQuery(xType, xVertexId, yType, yVertexId, zType, zVertexId);
-            SQLQuery += filterQuery + cellQuery;
-            if (numberOfFilters == 1)
+            numberOfAdditionalFilters = (filtersList == null) ? 0 : filtersList.Count;
+            totalNumberOfFilters = numberOfAdditionalFilters + ((xType != "") ? 1 : 0) + ((yType != "") ? 1 : 0) + ((zType != "") ? 1 : 0);
+            numberOfFilters = 0;
+
+            string queryfront = "select X.idx, X.idy, X.idz, O.file_uri, X.cnt from (select ";
+            string querymiddle = " from (";
+            string queryend = " group by idx, idy, idz";
+            //string queryendsep = "";
+
+            numberOfFilters += (xType == "") ? 0 : 1;
+            queryfront += (xType == "") ? "1 as idx, " : String.Format("R{0}.id as idx, ", numberOfFilters);
+            //queryend += (xType == "") ? "" : " idx";
+            //queryendsep = (xType == "") ? queryendsep : ", ";
+
+            querymiddle += generateVertexQuery(xType, xVertexId);
+            querymiddle += (xType == "")
+                ? ""         // There is no x-value
+                : (numberOfFilters == totalNumberOfFilters)
+                ? ""         // There is an x-value, but nothing more
+                : " join ("; // There is an x-value, and something more
+
+            numberOfFilters += (yType == "") ? 0 : 1;
+            queryfront += (yType == "") ? "1 as idx, " : String.Format("R{0}.id as idy, ", numberOfFilters);
+            //queryend += (yType == "") ? "" : String.Format("{0} idy", queryendsep);
+            //queryendsep = (yType == "") ? queryendsep : ", ";
+
+            querymiddle += generateVertexQuery(yType, yVertexId);
+            querymiddle += (yType == "")
+                ? ""         // There is no y-value
+                : ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
+                ? ""  // This is the first entry, and there is nothing more
+                : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
+                ? " join ("  // This is the first entry, and there is something more
+                : (numberOfFilters == totalNumberOfFilters)
+                ? String.Format(" on R1.object_id = R{0}.object_id ", numberOfFilters)        // Not first, but nothing more
+                : String.Format(" on R1.object_id = R{0}.object_id join (", numberOfFilters); // Not first, and something more
+
+            numberOfFilters += (zType == "") ? 0 : 1;
+            queryfront += (zType == "") ? "1 as idz, " : String.Format("R{0}.id as idz, ", numberOfFilters);
+            //queryend += (zType == "") ? "" : String.Format("{0} idz", queryendsep);
+
+            querymiddle += generateVertexQuery(zType, zVertexId);
+            querymiddle += (zType == "")
+                ? ""         // There is no z-value
+                : ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
+                ? ""  // This is the first entry, and there is nothing more
+                : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
+                ? " join ("  // This is the first entry, and there is something more
+                : (numberOfFilters == totalNumberOfFilters)
+                ? String.Format(" on R1.object_id = R{0}.object_id ", numberOfFilters)        // Not first, but nothing more
+                : String.Format(" on R1.object_id = R{0}.object_id join (", numberOfFilters); // Not first, and something more
+
+            queryfront += "max(R1.object_id) as object_id, count(distinct R1.object_id) as cnt ";
+            queryend += ") X join cubeobjects O on X.object_id = O.id;";
+
+            if (filtersList != null)
             {
-                SQLQuery = Regex.Replace(SQLQuery, @"R\d", "");
+                foreach (var filter in filtersList)
+                {
+                    numberOfFilters++;
+                    querymiddle += generateFilterQueryPerType(filter);
+                    querymiddle += ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
+                        ? ""  // This is the first entry, and there is nothing more
+                        : ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
+                        ? " join ("  // This is the first entry, and there is something more
+                        : (numberOfFilters == totalNumberOfFilters)
+                        ? String.Format(" on R1.object_id = R{0}.object_id ", numberOfFilters)        // Not first, but nothing more
+                        : String.Format(" on R1.object_id = R{0}.object_id join (", numberOfFilters); // Not first, and something more
+                }
             }
-            SQLQuery += "\n) X on O.id = X.object_id limit 6;";
+
+            string SQLQuery = queryfront + querymiddle + queryend;
+            Console.Write(SQLQuery);
             return SQLQuery;
         }
-        private string generateCellQuery(string xType, int xVertexId, string yType, int yVertexId, string zType,
-            int zVertexId)
-        {
-            // If axis == null, parameters will be: type == "", id == -1
-            string cellQuery = "";
-            if (xType != "") cellQuery += generateVertexQuery(xType, xVertexId);
-            if (yType != "") cellQuery += generateVertexQuery(yType, yVertexId);
-            if (zType != "") cellQuery += generateVertexQuery(zType, zVertexId);
-            return cellQuery;
-        }
-
+        
         private string generateVertexQuery(string type, int vertexId)
         {
-            string query = (numberOfFilters == 0) ? "" : "\n natural join \n";
+            string query = "";
             switch (type)
             {
                 case "Hierarchy":
-                    query += String.Format("(select R.object_id from nodes_taggings R where R.node_id = {0}) R{1}", vertexId, numberOfFilters);
+                    query += String.Format(" select N.object_id, N.node_id as id from nodes_taggings N where N.parentnode_id = {0}) R{1} ", vertexId, numberOfFilters);
                     break;
                 case "Tagset":
-                    query += String.Format(
-                        "(select R.object_id from objecttagrelations R where R.tag_id = {0}) R{1}", vertexId, numberOfFilters);
+                    query += String.Format(" select T.object_id, T.tag_id as id from tagsets_taggings T where T.tagset_id = {0}) R{1} ", vertexId, numberOfFilters);
                     break;
             }
-            numberOfFilters++;
             return query;
-        }
-
-        internal void generateFilterQuery(List<ParsedFilter> filtersList)
-        {
-            string query = "";
-            string separator = "";
-            foreach (var filter in filtersList)
-            {
-                query += separator + generateFilterQueryPerType(filter);
-                numberOfAdditionalFilters++;
-
-                separator = "\n natural join \n";
-            }
-
-            filterQuery = query;
         }
 
         private string generateFilterQueryPerType(ParsedFilter filter)
@@ -78,20 +115,20 @@ namespace ObjectCubeServer.Services
             {
                 case "hierarchy":
                     query += String.Format(
-                        "(select R.object_id from nodes_taggings R where R.node_id = {0}) R{1}", filter.Ids[0], numberOfAdditionalFilters);
+                        " select N.object_id from nodes_taggings N where R.parentnode_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
                     break;
 
                 case "tag":
                 case "date":
                     query += String.Format(
-                        "(select R.object_id from objecttagrelations R where R.tag_id = {0}) R{1}", filter.Ids[0], numberOfAdditionalFilters);
+                        " select R.object_id from objecttagrelations R where R.tag_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
                     break;
 
                 case "tagset":
                 case "day of week":
                 case "time":
                     query += String.Format(
-                        "(select R.object_id from objecttagrelations R where R.tag_id in {0}) R{1}", generateIdList(filter), numberOfAdditionalFilters);
+                        " select R.object_id from objecttagrelations R where R.tag_id in {0}) R{1}", generateIdList(filter), numberOfFilters);
                     break;
             }
 
@@ -116,7 +153,7 @@ namespace ObjectCubeServer.Services
         {
             numberOfAdditionalFilters = 0;
             numberOfFilters = 0;
-            filterQuery = "";
+            //filterQuery = "";
         }
     }
 }

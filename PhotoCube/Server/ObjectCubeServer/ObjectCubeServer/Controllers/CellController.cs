@@ -53,9 +53,9 @@ namespace ObjectCubeServer.Controllers
                 bool zDefined = zAxis != null;
                 bool filtersDefined = filters != null;
                 //Parsing:
-                ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : null;
-                ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : null;
-                ParsedAxis axisZ = zDefined ? JsonConvert.DeserializeObject<ParsedAxis>(zAxis) : null;
+                ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : new ParsedAxis { AxisType = "", Id = -1 };
+                ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : new ParsedAxis { AxisType = "", Id = -1 };
+                ParsedAxis axisZ = zDefined ? JsonConvert.DeserializeObject<ParsedAxis>(zAxis) : new ParsedAxis { AxisType = "", Id = -1 };
                 List<ParsedFilter> filtersList =
                     filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
                     //Potential refactor: Parsed filter inheritance & make factory class to parse and instantiate filters without losing information
@@ -96,126 +96,19 @@ namespace ObjectCubeServer.Controllers
                     findIdsFromDBAndInitializeIds(filtersList);
 
                     //Generate query string for the filters part
-                    queryGenerationService.generateFilterQuery(filtersList);
+                    //queryGenerationService.generateFilterQuery(filtersList);
                 }
 
-                //Build cells by generating and executing SQL query for each cell (max 6 images per cell)
-                if (xDefined && yDefined && zDefined) //XYZ
-                {
-                    axisX.initializeIds();
-                    axisY.initializeIds();
-                    axisZ.initializeIds();
-                    cells =
-                        axisX.Ids.SelectMany((v1, index1) =>
-                        axisY.Ids.SelectMany((v2, index2) =>
-                            axisZ.Ids.Select((v3, index3) => new Cell()
-                                {
-                                    x = index1 + 1,
-                                    y = index2 + 1,
-                                    z = index3 + 1,
-                                    CubeObjects = coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell(axisX.AxisType, v1, axisY.AxisType, v2, axisZ.AxisType, v3)).ToList()
-                                }))).ToList();
-                }
-                else if (xDefined && yDefined) //XY
-                {
-                    axisX.initializeIds();
-                    axisY.initializeIds();
-                    cells =
-                        axisX.Ids.SelectMany((v1, index1) =>
-                            axisY.Ids.Select((v2, index2) =>
-                                new Cell()
-                                {
-                                    x = index1 + 1,
-                                    y = index2 + 1,
-                                    z = 0,
-                                    CubeObjects = coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell(axisX.AxisType, v1, axisY.AxisType, v2, "", -1)).ToList() //Where co is in colist2 as well
-                                })).ToList();
-                }
-                else if (xDefined && zDefined) //XZ
-                {
-                    axisX.initializeIds();
-                    axisZ.initializeIds();
-                    cells =
-                        axisX.Ids.SelectMany((v1, index1) =>
-                            axisZ.Ids.Select((v2, index2) =>
-                                new Cell()
-                                {
-                                    x = index1 + 1,
-                                    y = 0,
-                                    z = index2 + 1,
-                                    CubeObjects = coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell(axisX.AxisType, v1, "", -1, axisZ.AxisType, v2)).ToList() //Where co is in colist2 as well
-                                })).ToList();
-                }
-                else if (yDefined && zDefined) //YZ
-                {
-                    axisY.initializeIds();
-                    axisZ.initializeIds();
-                    cells =
-                        axisY.Ids.SelectMany((v1, index1) =>
-                            axisZ.Ids.Select((v2, index2) =>
-                                new Cell()
-                                {
-                                    x = 0,
-                                    y = index1 + 1,
-                                    z = index2 + 1,
-                                    CubeObjects = coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell("", -1, axisY.AxisType, v1, axisZ.AxisType, v2)).ToList()
-                                })).ToList();
-                }
-                else if (xDefined) //X
-                {
-                    axisX.initializeIds();
-                    cells =
-                        axisX.Ids.Select((v1, index1) =>
-                            new Cell()
-                            {
-                                x = index1 + 1,
-                                y = 1,
-                                z = 0,
-                                CubeObjects = coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell(axisX.AxisType, v1, "", -1, "", -1)).ToList()
-                            }).ToList();
-                }
-                else if (yDefined) //Y
-                {
-                    axisY.initializeIds();
-                    cells =
-                        axisY.Ids.Select((v1, index1) =>
-                            new Cell()
-                            {
-                                x = 1,
-                                y = index1 + 1,
-                                z = 0,
-                                CubeObjects = coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell("", -1, axisY.AxisType, v1, "", -1)).ToList()
-                            }).ToList();
-                }
-                else if (zDefined) //Z
-                {
-                    axisZ.initializeIds();
-                    cells =
-                        axisZ.Ids.Select((v1, index1) =>
-                            new Cell()
-                            {
-                                x = 0,
-                                y = 1,
-                                z = index1 + 1,
-                                CubeObjects = coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell("", -1, "", -1, axisZ.AxisType, v1)).ToList()
-                            }).ToList();
-                }
-                else if (!xDefined && !yDefined && !zDefined) //If X Y and Z are not defined, show all:
-                {
-                    cells = new List<Cell>()
-                    {
-                        new Cell()
-                        {
-                            x = 1,
-                            y = 1,
-                            z = 1,
-                            CubeObjects = coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell("", -1, "", -1, "", -1)).ToList()
-                        }
-                    };
-                }
+                axisX.initializeIds();
+                axisY.initializeIds();
+                axisZ.initializeIds();
+
+                // Need to run the query, extract the results, and convert the coordinates
+                //coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id)).ToList();
+                string query = queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id, filtersList);
 
                 //If cells have no cubeObjects, remove them:
-                cells.RemoveAll(c => !c.CubeObjects.Any());
+                //cells.RemoveAll(c => !c.CubeObjects.Any());
 
                 // Convert cells to publicCells
                 result = cells.Select(c => c.GetPublicCell()).ToList();

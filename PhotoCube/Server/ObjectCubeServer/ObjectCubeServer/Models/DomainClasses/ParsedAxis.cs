@@ -16,11 +16,12 @@ namespace ObjectCubeServer.Models.DomainClasses
         public string AxisType { get; set; }
         // Either Tagset or Node id
         public int Id { get; set; }
-        public List<int> Ids { get; set; }
+        public Dictionary<int,int> Ids { get; set; }
 
         internal void initializeIds()
         {
-            List<int> IdList = new List<int>();
+            Dictionary<int,int> IdList = new Dictionary<int,int>();
+            int i = 1;
             switch (AxisType)
             {
                 case "Tagset":
@@ -28,7 +29,7 @@ namespace ObjectCubeServer.Models.DomainClasses
 
                     foreach (var tag in tags)
                     {
-                        IdList.Add(tag.Id);
+                        IdList.Add(tag.Id, i++);
                     }
 
                     Ids = IdList;
@@ -37,11 +38,17 @@ namespace ObjectCubeServer.Models.DomainClasses
                 case "Hierarchy":
                     // Find children nodes that is 1 level below
                     List<Node> childNodes = extractChildNodesFromHierarchyAxis();
+
                     foreach (var node in childNodes)
                     {
-                        IdList.Add(node.Id);
+                        IdList.Add(node.Id, i++);
                     }
 
+                    Ids = IdList;
+                    break;
+
+                default:
+                    IdList.Add(1, 1);
                     Ids = IdList;
                     break;
             }
