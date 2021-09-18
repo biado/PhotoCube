@@ -23,5 +23,15 @@ namespace ObjectCubeServer.Models.PublicClasses
             this.count = count;
             this.CubeObjects = cubeObjects;
         }
+
+        public PublicCell(int x, int y, int z, int count, int id, string fileURI)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.count = count;
+            this.CubeObjects = new List<PublicCubeObject>();
+            this.CubeObjects.Add(new PublicCubeObject(id, fileURI));
+        }
     }
 }

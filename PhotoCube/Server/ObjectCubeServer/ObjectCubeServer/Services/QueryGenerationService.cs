@@ -21,7 +21,7 @@ namespace ObjectCubeServer.Services
             totalNumberOfFilters = numberOfAdditionalFilters + ((xType != "") ? 1 : 0) + ((yType != "") ? 1 : 0) + ((zType != "") ? 1 : 0);
             numberOfFilters = 0;
 
-            string queryfront = "select X.idx, X.idy, X.idz, O.file_uri, X.cnt from (select ";
+            string queryfront = "select X.idx as x, X.idy as y, X.idz as z, X.object_id as id , O.file_uri as fileURI, X.cnt as count from (select ";
             string querymiddle = " from (";
             string queryend = " group by idx, idy, idz";
             //string queryendsep = "";

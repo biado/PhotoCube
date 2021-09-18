@@ -57,7 +57,8 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Hierarchy> Hierarchies { get; set; }
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
-        
+        public DbSet<SingleObjectCell> SingleObjectCells { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

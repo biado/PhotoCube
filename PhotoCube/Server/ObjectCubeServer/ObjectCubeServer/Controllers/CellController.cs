@@ -105,13 +105,17 @@ namespace ObjectCubeServer.Controllers
 
                 // Need to run the query, extract the results, and convert the coordinates
                 //coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id)).ToList();
-                string query = queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id, filtersList);
+                List<SingleObjectCell> singlecells =
+                    coContext.SingleObjectCells.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id, filtersList)).ToList();
+                result = new List<PublicCell>();
+                foreach (var c in singlecells)
+                {
+                    //result.Add(new PublicCell(c.x, c.y, c.z, c.count, c.id, c.fileURI));
+                    result.Add(new PublicCell(axisX.Ids[c.x], axisY.Ids[c.y], axisZ.Ids[c.z], c.count, c.id, c.fileURI));
+                }
 
                 //If cells have no cubeObjects, remove them:
                 //cells.RemoveAll(c => !c.CubeObjects.Any());
-
-                // Convert cells to publicCells
-                result = cells.Select(c => c.GetPublicCell()).ToList();
 
                 //Return OK with json result:
                 return Ok(JsonConvert.SerializeObject(result,
