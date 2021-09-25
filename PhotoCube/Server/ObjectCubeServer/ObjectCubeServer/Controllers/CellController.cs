@@ -61,43 +61,54 @@ namespace ObjectCubeServer.Controllers
                     //Potential refactor: Parsed filter inheritance & make factory class to parse and instantiate filters without losing information
 
                 //Creating Cells:
-                List<Cell> cells = new List<Cell>();
+                //List<Cell> cells = new List<Cell>();
                 List<PublicCell> result;
 
-                // If there are no axis or filters, it means it will call for the whole data set.
-                // We don't want to get all 190K cubeObjects in this case, but get only small number (1st page) and return fast.
-                if (!xDefined && !yDefined && !zDefined && !filtersDefined)
-                {
-                    cells = new List<Cell>()
-                    {
-                        new Cell()
-                        {
-                            x = 1,
-                            y = 1,
-                            z = 1,
-                            CubeObjects = coContext.CubeObjects.Take(6).ToList()
-                        }
-                    };
-                    // Convert cells to publicCells
-                    result = cells.Select(c => c.GetPublicCell()).ToList();
+                //// If there are no axis or filters, it means it will call for the whole data set.
+                //// We don't want to get all 190K cubeObjects in this case, but get only small number (1st page) and return fast.
 
-                    //Return OK with json result:
-                    return Ok(JsonConvert.SerializeObject(result,
-                        new JsonSerializerSettings() {ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
-                }
+                //// BÞJ: We can make a special case query for no axes / filters and get rid of this special case here
+                ////      Currently, the count is missing, and this needs to be added for Aaron
+                ////      The following query will yield the correct results fast, and is nearly the same as the current state query
+                ////select X.idx, X.idy, X.idz,	O.file_uri, X.cnt-- , A1.name, A2.name
+                ////from(
+                ////  select 1 as idx, 1 as idy, 1 as idz, max(R1.id) as object_id, count(distinct R1.id) as cnt
+                ////  from cubeobjects R1
+                ////) X
+                ////join cubeobjects O on X.object_id = O.id;
+                //if (!xDefined && !yDefined && !zDefined && !filtersDefined)
+                //{
+                //    cells = new List<Cell>()
+                //    {
+                //        new Cell()
+                //        {
+                //            x = 1,
+                //            y = 1,
+                //            z = 1,
+                //            CubeObjects = coContext.CubeObjects.Take(6).ToList()
+                //        }
+                //    };
+                //    // Convert cells to publicCells
+                //    result = cells.Select(c => c.GetPublicCell()).ToList();
 
-                queryGenerationService.reset();
+                //    //Return OK with json result:
+                //    return Ok(JsonConvert.SerializeObject(result,
+                //        new JsonSerializerSettings() {ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
+                //}
+
+                // BÞJ: I do not believe this is needed anymore... 
+                //queryGenerationService.reset();
 
                 //Filtering:
-                if (filtersDefined && filtersList.Count > 0)
-                {
-                    //Merge day of week filters, and initialize Ids List field in each filter
-                    filtersList = mergeDayOfWeekFilters(filtersList);
-                    findIdsFromDBAndInitializeIds(filtersList);
+                //if (filtersDefined && filtersList.Count > 0)
+                //{
+                //    //Merge day of week filters, and initialize Ids List field in each filter
+                //    filtersList = mergeDayOfWeekFilters(filtersList);
+                //    findIdsFromDBAndInitializeIds(filtersList);
 
-                    //Generate query string for the filters part
-                    //queryGenerationService.generateFilterQuery(filtersList);
-                }
+                //    //Generate query string for the filters part
+                //    //queryGenerationService.generateFilterQuery(filtersList);
+                //}
 
                 axisX.initializeIds();
                 axisY.initializeIds();
@@ -123,36 +134,36 @@ namespace ObjectCubeServer.Controllers
             }
         }
 
-        private void findIdsFromDBAndInitializeIds(List<ParsedFilter> filtersList)
-        {
-            foreach (var filter in filtersList)
-            {
-                filter.initializeIds();
-            }
-        }
+        //private void findIdsFromDBAndInitializeIds(List<ParsedFilter> filtersList)
+        //{
+        //    foreach (var filter in filtersList)
+        //    {
+        //        filter.initializeIds();
+        //    }
+        //}
 
-        private List<ParsedFilter> mergeDayOfWeekFilters(List<ParsedFilter> filtersList)
-        {
-            List<ParsedFilter> dayOfWeekFilters = filtersList.Where(f => f.type.Equals("day of week")).ToList();
-            if (dayOfWeekFilters.Count < 2)
-            {
-                // No need to merge day of week filters
-                return filtersList;
-            }
-            else
-            {
-                List<int> dayOfWeekIds = new List<int>();
-                foreach (var dayOfWeekFilter in dayOfWeekFilters)
-                {
-                    dayOfWeekIds.Add(dayOfWeekFilter.Id);
-                }
+        //private List<ParsedFilter> mergeDayOfWeekFilters(List<ParsedFilter> filtersList)
+        //{
+        //    List<ParsedFilter> dayOfWeekFilters = filtersList.Where(f => f.type.Equals("day of week")).ToList();
+        //    if (dayOfWeekFilters.Count < 2)
+        //    {
+        //        // No need to merge day of week filters
+        //        return filtersList;
+        //    }
+        //    else
+        //    {
+        //        List<int> dayOfWeekIds = new List<int>();
+        //        foreach (var dayOfWeekFilter in dayOfWeekFilters)
+        //        {
+        //            dayOfWeekIds.Add(dayOfWeekFilter.Id);
+        //        }
 
-                ParsedFilter firstDowFilter = dayOfWeekFilters[0];
-                firstDowFilter.Ids = dayOfWeekIds;
-                List<ParsedFilter> mergedList = filtersList.Where(f => !f.type.Equals("day of week")).ToList();
-                mergedList.Add(firstDowFilter);
-                return mergedList;
-            }
-        }
+        //        ParsedFilter firstDowFilter = dayOfWeekFilters[0];
+        //        firstDowFilter.Ids = dayOfWeekIds;
+        //        List<ParsedFilter> mergedList = filtersList.Where(f => !f.type.Equals("day of week")).ToList();
+        //        mergedList.Add(firstDowFilter);
+        //        return mergedList;
+        //    }
+        //}
     }
 }
