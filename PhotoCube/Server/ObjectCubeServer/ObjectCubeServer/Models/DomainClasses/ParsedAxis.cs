@@ -13,7 +13,7 @@ namespace ObjectCubeServer.Models.DomainClasses
     /// </summary>
     public class ParsedAxis
     {
-        public string AxisType { get; set; }
+        public string Type { get; set; }
         // Either Tagset or Node id
         public int Id { get; set; }
         public Dictionary<int,int> Ids { get; set; }
@@ -22,9 +22,9 @@ namespace ObjectCubeServer.Models.DomainClasses
         {
             Dictionary<int,int> IdList = new Dictionary<int,int>();
             int i = 1;
-            switch (AxisType)
+            switch (Type)
             {
-                case "Tagset":
+                case "tagset":
                     List<Tag> tags = extractTagsFromTagsetAxis(); // Could not query Tags table using raw sql - seems like it doesn't support TPT hierarchies.
 
                     foreach (var tag in tags)
@@ -35,7 +35,7 @@ namespace ObjectCubeServer.Models.DomainClasses
                     Ids = IdList;
                     break;
 
-                case "Hierarchy":
+                case "node":
                     // Find children nodes that is 1 level below
                     List<Node> childNodes = extractChildNodesFromHierarchyAxis();
 

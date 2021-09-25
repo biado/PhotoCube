@@ -53,9 +53,9 @@ namespace ObjectCubeServer.Controllers
                 bool zDefined = zAxis != null;
                 bool filtersDefined = filters != null;
                 //Parsing:
-                ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : new ParsedAxis { AxisType = "", Id = -1 };
-                ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : new ParsedAxis { AxisType = "", Id = -1 };
-                ParsedAxis axisZ = zDefined ? JsonConvert.DeserializeObject<ParsedAxis>(zAxis) : new ParsedAxis { AxisType = "", Id = -1 };
+                ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : new ParsedAxis { Type = "", Id = -1 };
+                ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : new ParsedAxis { Type = "", Id = -1 };
+                ParsedAxis axisZ = zDefined ? JsonConvert.DeserializeObject<ParsedAxis>(zAxis) : new ParsedAxis { Type = "", Id = -1 };
                 List<ParsedFilter> filtersList =
                     filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
                     //Potential refactor: Parsed filter inheritance & make factory class to parse and instantiate filters without losing information
@@ -117,7 +117,7 @@ namespace ObjectCubeServer.Controllers
                 // Need to run the query, extract the results, and convert the coordinates
                 //coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id)).ToList();
                 List<SingleObjectCell> singlecells =
-                    coContext.SingleObjectCells.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id, filtersList)).ToList();
+                    coContext.SingleObjectCells.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.Type, axisX.Id, axisY.Type, axisY.Id, axisZ.Type, axisZ.Id, filtersList)).ToList();
                 result = new List<PublicCell>();
                 foreach (var c in singlecells)
                 {
