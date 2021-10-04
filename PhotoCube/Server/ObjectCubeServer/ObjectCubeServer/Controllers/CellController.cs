@@ -44,7 +44,7 @@ namespace ObjectCubeServer.Controllers
          *
          * Currently, each cell contains maximum { 6 * number of cells } cubeObjects.
         */
-        public IActionResult Get(string xAxis, string yAxis, string zAxis, string filters)
+        public IActionResult Get(string xAxis, string yAxis, string zAxis, string filters, string all)
         {
             using (var coContext = new ObjectContext())
             {
@@ -52,6 +52,8 @@ namespace ObjectCubeServer.Controllers
                 bool yDefined = yAxis != null;
                 bool zDefined = zAxis != null;
                 bool filtersDefined = filters != null;
+                bool allDefined = all != null;
+
                 //Parsing:
                 ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : new ParsedAxis { Type = "", Id = -1 };
                 ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : new ParsedAxis { Type = "", Id = -1 };
@@ -59,6 +61,14 @@ namespace ObjectCubeServer.Controllers
                 List<ParsedFilter> filtersList =
                     filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
                     //Potential refactor: Parsed filter inheritance & make factory class to parse and instantiate filters without losing information
+
+                if (allDefined)
+                {
+                    List<PublicCubeObject> cubeobjects =
+                        coContext.PublicCubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForObjects(filtersList)).ToList();
+                    return Ok(JsonConvert.SerializeObject(cubeobjects,
+                        new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+                }
 
                 //Creating Cells:
                 //List<Cell> cells = new List<Cell>();

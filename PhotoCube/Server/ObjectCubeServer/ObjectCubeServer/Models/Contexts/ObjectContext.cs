@@ -4,6 +4,7 @@ using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using System;
 using System.Configuration;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Models.DataAccess
 {
@@ -58,6 +59,7 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
         public DbSet<SingleObjectCell> SingleObjectCells { get; set; }
+        public DbSet<PublicCubeObject> PublicCubeObjects { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -171,6 +173,7 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
+                        //
                         optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lscAll-rawsql; User Id = photocube; Password = postgres;");
                     }
                     break;

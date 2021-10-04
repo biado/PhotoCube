@@ -99,7 +99,45 @@ namespace ObjectCubeServer.Services
             Console.Write(SQLQuery);
             return SQLQuery;
         }
-        
+
+        internal string generateSQLQueryForObjects(List<ParsedFilter> filtersList)
+        {
+            numberOfAdditionalFilters = (filtersList == null) ? 0 : filtersList.Count;
+            totalNumberOfFilters = numberOfAdditionalFilters;
+            numberOfFilters = 0;
+
+            if (totalNumberOfFilters == 0)
+            {
+                string BaseQuery = "select O.id as Id, O.file_uri as fileURI from cubeobjects O;";
+                Console.Write(BaseQuery);
+                return BaseQuery;
+            }
+
+            string queryfront = "select distinct O.id as Id, O.file_uri as fileURI from (select R1.object_id ";
+            string querymiddle = " from (";
+            string queryend = ") X join cubeobjects O on X.object_id = O.id;";
+
+            if (filtersList != null)
+            {
+                foreach (var filter in filtersList)
+                {
+                    numberOfFilters++;
+                    querymiddle += generateFilterQueryPerTypeObjects(filter);
+                    querymiddle += ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
+                        ? ""  // This is the first entry, and there is nothing more
+                        : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
+                        ? " join ("  // This is the first entry, and there is something more
+                        : (numberOfFilters == totalNumberOfFilters)
+                        ? String.Format(" on R1.object_id = R{0}.object_id ", numberOfFilters)        // Not first, but nothing more
+                        : String.Format(" on R1.object_id = R{0}.object_id join (", numberOfFilters); // Not first, and something more
+                }
+            }
+
+            string SQLQuery = queryfront + querymiddle + queryend;
+            Console.Write(SQLQuery);
+            return SQLQuery;
+        }
+
         private string generateVertexQuery(string type, int vertexId)
         {
             string query = "";
@@ -128,6 +166,64 @@ namespace ObjectCubeServer.Services
                     else
                     {
                         query += String.Format(" select N.object_id from nodes_taggings N where N.parentnode_id in {0}) R{1}", generateIdList(filter), numberOfFilters);
+                    }
+                    break;
+
+                case "tagset":
+                    if (filter.Ids.Count() == 1)
+                    {
+                        query += String.Format(" select T.object_id from tagsets_taggings T where T.tagset_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
+                    }
+                    else
+                    {
+                        query += String.Format(" select T.object_id from tagsets_taggings T where T.tagset_id in {0}) R{1}", generateIdList(filter), numberOfFilters);
+                    }
+                    break;
+
+                case "tag":
+                    if (filter.Ids.Count() == 1)
+                    {
+                        query += String.Format(" select R.object_id from objecttagrelations R where R.tag_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
+                    }
+                    else
+                    {
+                        query += String.Format(" select R.object_id from objecttagrelations R where R.tag_id in {0}) R{1}", generateIdList(filter), numberOfFilters);
+                    }
+                    break;
+
+                case "numrange":
+                    query += String.Format(" select R.object_id from numerical_tags T join objecttagrelations R on T.id = R.tag_id where {0}) R{1}", generateRangeList(filter, ""), numberOfFilters);
+                    break;
+
+                case "alpharange":
+                    query += String.Format(" select R.object_id from alphanumerical_tags T join objecttagrelations R on T.id = R.tag_id where {0}) R{1}", generateRangeList(filter, "'"), numberOfFilters);
+                    break;
+
+                case "daterange":
+                    query += String.Format(" select R.object_id from date_tags T join objecttagrelations R on T.id = R.tag_id where {0}) R{1}", generateRangeList(filter, "'"), numberOfFilters);
+                    break;
+
+                case "timerange":
+                    query += String.Format(" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {0}) R{1}", generateRangeList(filter, "'"), numberOfFilters);
+                    break;
+            }
+
+            return query;
+        }
+
+        private string generateFilterQueryPerTypeObjects(ParsedFilter filter)
+        {
+            string query = "";
+            switch (filter.type)
+            {
+                case "node":
+                    if (filter.Ids.Count() == 1)
+                    {
+                        query += String.Format(" select N.object_id from nodes_taggings N where N.node_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
+                    }
+                    else
+                    {
+                        query += String.Format(" select N.object_id from nodes_taggings N where N.node_id in {0}) R{1}", generateIdList(filter), numberOfFilters);
                     }
                     break;
 
