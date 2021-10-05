@@ -133,7 +133,7 @@ namespace ObjectCubeServer.Services
             }
 
             string SQLQuery = queryfront + querymiddle + queryend;
-            Console.Write(SQLQuery);
+            Console.WriteLine(SQLQuery);
             return SQLQuery;
         }
 
@@ -228,7 +228,7 @@ namespace ObjectCubeServer.Services
             switch (filter.type)
             {
                 case "node":
-                    if (filter.Ids.Count() == 1)
+                    if (filter.Ids.Count == 1)
                     {
                         query += String.Format(" select N.object_id from nodes_taggings N where N.node_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
                     }
@@ -239,41 +239,49 @@ namespace ObjectCubeServer.Services
                     break;
 
                 case "tagset":
-                    if (filter.Ids.Count() == 1)
+                    if (filter.Ids.Count == 1)
                     {
-                        query += String.Format(" select T.object_id from tagsets_taggings T where T.tagset_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
+                        query +=
+                            $" select T.object_id from tagsets_taggings T where T.tagset_id = {filter.Ids[0]}) R{numberOfFilters}";
                     }
                     else
                     {
-                        query += String.Format(" select T.object_id from tagsets_taggings T where T.tagset_id in {0}) R{1}", generateIdList(filter), numberOfFilters);
+                        query +=
+                            $" select T.object_id from tagsets_taggings T where T.tagset_id in {generateIdList(filter)}) R{numberOfFilters}";
                     }
                     break;
 
                 case "tag":
-                    if (filter.Ids.Count() == 1)
+                    if (filter.Ids.Count == 1)
                     {
-                        query += String.Format(" select R.object_id from objecttagrelations R where R.tag_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
+                        query +=
+                            $" select R.object_id from objecttagrelations R where R.tag_id = {filter.Ids[0]}) R{numberOfFilters}";
                     }
                     else
                     {
-                        query += String.Format(" select R.object_id from objecttagrelations R where R.tag_id in {0}) R{1}", generateIdList(filter), numberOfFilters);
+                        query +=
+                            $" select R.object_id from objecttagrelations R where R.tag_id in {generateIdList(filter)}) R{numberOfFilters}";
                     }
                     break;
 
                 case "numrange":
-                    query += String.Format(" select R.object_id from numerical_tags T join objecttagrelations R on T.id = R.tag_id where {0}) R{1}", generateRangeList(filter, ""), numberOfFilters);
+                    query +=
+                        $" select R.object_id from numerical_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "")}) R{numberOfFilters}";
                     break;
 
                 case "alpharange":
-                    query += String.Format(" select R.object_id from alphanumerical_tags T join objecttagrelations R on T.id = R.tag_id where {0}) R{1}", generateRangeList(filter, "'"), numberOfFilters);
+                    query +=
+                        $" select R.object_id from alphanumerical_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
 
                 case "daterange":
-                    query += String.Format(" select R.object_id from date_tags T join objecttagrelations R on T.id = R.tag_id where {0}) R{1}", generateRangeList(filter, "'"), numberOfFilters);
+                    query +=
+                        $" select R.object_id from date_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
 
                 case "timerange":
-                    query += String.Format(" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {0}) R{1}", generateRangeList(filter, "'"), numberOfFilters);
+                    query +=
+                        $" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
             }
 

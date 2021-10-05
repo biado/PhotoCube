@@ -9,5 +9,6 @@ namespace ObjectCubeServer.Models.DomainClasses
         public ParsedAxis? yAxis { get; set; }
         public ParsedAxis? zAxis { get; set; }
         public List<ParsedFilter>? filters { get; }
+        public bool? all { get; }
     }
 }

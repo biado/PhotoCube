@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Models.Contexts
 {
@@ -35,6 +36,7 @@ namespace ObjectCubeServer.Models.Contexts
 
         public ObjectContext(DbContextOptions<ObjectContext> options) : base(options)
         {
+
         }
 
         public ObjectContext(string connectionString)
