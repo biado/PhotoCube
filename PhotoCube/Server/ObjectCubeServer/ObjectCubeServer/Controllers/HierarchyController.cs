@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
@@ -11,6 +10,7 @@ namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class HierarchyController : ControllerBase
     {
         // GET: api/Hierarchy
@@ -31,8 +31,8 @@ namespace ObjectCubeServer.Controllers
                 RecursiveAddChildrenAndTags(h.Nodes.FirstOrDefault(n => n.Id == h.RootNodeId))
             });
 
-            return Ok(JsonConvert.SerializeObject(allHierarchies,
-                new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            return Ok(allHierarchies);
+
         }
 
         // GET: api/Hierarchy/5
@@ -51,8 +51,7 @@ namespace ObjectCubeServer.Controllers
             {
                 return NotFound();
             }
-            return Ok(JsonConvert.SerializeObject(hierarchyFound,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            return Ok(hierarchyFound);
         }
 
         #region HelperMethods:

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
@@ -11,6 +10,7 @@ namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class TagController : ControllerBase
     {
         // GET: api/Tag
@@ -31,7 +31,7 @@ namespace ObjectCubeServer.Controllers
                 {
                     allTags = context.Tags.ToList();
                 }
-                return Ok(JsonConvert.SerializeObject(allTags));
+                return Ok(allTags);
             }
             else
             {
@@ -45,7 +45,7 @@ namespace ObjectCubeServer.Controllers
                 }
                 if (tagsFound != null)
                 {
-                    return Ok(JsonConvert.SerializeObject(tagsFound));
+                    return Ok(tagsFound);
                 }
                 else return NotFound();
             }
@@ -67,7 +67,7 @@ namespace ObjectCubeServer.Controllers
             }
             if (tagFound != null)
             {
-                return Ok(JsonConvert.SerializeObject(tagFound));
+                return Ok(tagFound);
             }
             else return NotFound();   
         }
@@ -92,7 +92,7 @@ namespace ObjectCubeServer.Controllers
             if (tagsFound != null)
             {
                 var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name)).ToList();
-                return Ok(JsonConvert.SerializeObject(result));
+                return Ok(result);
             }
             return NotFound();
         }

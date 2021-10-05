@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 
@@ -12,6 +11,7 @@ namespace ObjectCubeServer.Controllers
     public class ThumbnailController : ControllerBase
     {
         // GET: api/Thumbnail
+        [Produces("application/json")]
         [HttpGet]
         public IActionResult Get()
         {
@@ -23,7 +23,7 @@ namespace ObjectCubeServer.Controllers
             if (allThumbnailURIs != null)
             {
                 var data = new { thumbnailURIs = allThumbnailURIs };
-                return Ok(JsonConvert.SerializeObject(data)); //Does not return file!
+                return Ok(data); //Does not return file!
             }
             else return NotFound();
         }

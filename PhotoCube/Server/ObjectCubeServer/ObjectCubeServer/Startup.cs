@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 namespace ObjectCubeServer
 {
@@ -22,7 +23,8 @@ namespace ObjectCubeServer
             
             // enable json input/output for controllers
             services.AddControllers()
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson(
+                    options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
                 //.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
                 
             services.AddSwaggerGen(c =>

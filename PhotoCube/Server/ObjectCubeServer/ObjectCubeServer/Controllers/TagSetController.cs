@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.PublicClasses;
@@ -25,8 +24,7 @@ namespace ObjectCubeServer.Controllers
                     .ToList();
             }
 
-            return Ok(JsonConvert.SerializeObject(allTagsets,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })); //Ignore self referencing loops
+            return Ok(allTagsets); //Ignore self referencing loops
         }
 
         // GET: api/tagset/5
@@ -42,9 +40,7 @@ namespace ObjectCubeServer.Controllers
                     .Include(ts => ts.Hierarchies)
                     .FirstOrDefault();
             }
-            return Ok(JsonConvert.SerializeObject(tagsetWithId, 
-                new JsonSerializerSettings(){ReferenceLoopHandling = ReferenceLoopHandling.Ignore})
-            );
+            return Ok(tagsetWithId);
         }
 
         // GET: api/tagset/name=Year
@@ -67,7 +63,7 @@ namespace ObjectCubeServer.Controllers
             if (tagsFound != null)
             {
                 var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName())).ToList();
-                return Ok(JsonConvert.SerializeObject(result));
+                return Ok(result);
             }
             return NotFound();
         }
