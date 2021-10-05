@@ -32,13 +32,13 @@ namespace ObjectCubeServer.Controllers
         }
 
         // GET: api/Thumbnail/5
-        [HttpGet("{id}", Name = "GetThumbnail")]
+        [HttpGet("{id:int}", Name = "GetThumbnail")]
         public IActionResult Get(int id)
         {
             string thumbnailURI;
             using (var context = new ObjectContext())
             {
-                CubeObject cubeObject = context.CubeObjects.Where(co => co.Id == id).FirstOrDefault();
+                CubeObject cubeObject = context.CubeObjects.FirstOrDefault(co => co.Id == id);
                 thumbnailURI = cubeObject.ThumbnailURI;
             }
             if (thumbnailURI == null)

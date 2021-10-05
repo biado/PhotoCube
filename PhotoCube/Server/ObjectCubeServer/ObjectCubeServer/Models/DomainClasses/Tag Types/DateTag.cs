@@ -1,8 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
-namespace ObjectCubeServer.Models.DomainClasses.TagTypes
+namespace ObjectCubeServer.Models.DomainClasses.Tag_Types
 {
     [Table("date_tags")]
     public class DateTag : Tag, IComparable

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace ObjectCubeServer.Models.PublicClasses
+﻿namespace ObjectCubeServer.Models.PublicClasses
 {
     /// <summary>
     /// Represents an Object in the M^3 datamodel. (Simplified public model)
@@ -16,8 +11,8 @@ namespace ObjectCubeServer.Models.PublicClasses
 
         public PublicCubeObject(int id, string fileUri)
         {
-            this.Id = id;
-            this.FileURI = fileUri;
+            Id = id;
+            FileURI = fileUri;
         }
     }
 }

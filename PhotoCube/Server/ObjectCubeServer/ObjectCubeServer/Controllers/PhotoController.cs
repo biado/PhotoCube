@@ -22,8 +22,8 @@ namespace ObjectCubeServer.Controllers
             string fileURI;
             using (var context = new ObjectContext())
             {
-                CubeObject cubeObject = context.CubeObjects.Where(co => co.Id == id).FirstOrDefault();
-                fileURI = cubeObject.FileURI;
+                CubeObject cubeObject = context.CubeObjects.FirstOrDefault(co => co.Id == id);
+                fileURI = cubeObject?.FileURI;
                 if(fileURI == null)
                 {
                     return NotFound();

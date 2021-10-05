@@ -16,7 +16,7 @@ namespace ObjectDBTests
             var options = new DbContextOptionsBuilder<ObjectContext>()
                 .UseInMemoryDatabase(databaseName: "TestDb")
                 .Options;
-
+            
             using (var context = new ObjectContext(options))
             {
                 context.CubeObjects.Add(new CubeObject() {
@@ -29,8 +29,8 @@ namespace ObjectDBTests
             using (var context = new ObjectContext(options))
             {
                 var allCubeObjects = context.CubeObjects.ToList();
-                Assert.AreEqual(allCubeObjects.Count, 1);
-                Assert.AreEqual(allCubeObjects.First().Id, 42);
+                Assert.AreEqual(1, allCubeObjects.Count);
+                Assert.AreEqual(42,allCubeObjects.First().Id);
             }
         }
     }

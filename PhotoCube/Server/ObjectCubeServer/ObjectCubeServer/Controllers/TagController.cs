@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using ObjectCubeServer.Models.PublicClasses;
 
@@ -95,12 +96,7 @@ namespace ObjectCubeServer.Controllers
 
             if (tagsFound != null)
             {
-                var result = new List<PublicTag>();
-                foreach (Tag tag in tagsFound)
-                {
-                    var publicTag = new PublicTag(tag.Id, ((AlphanumericalTag)tag).Name);
-                    result.Add(publicTag);
-                }
+                var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name)).ToList();
                 return Ok(JsonConvert.SerializeObject(result));
             }
             return NotFound();

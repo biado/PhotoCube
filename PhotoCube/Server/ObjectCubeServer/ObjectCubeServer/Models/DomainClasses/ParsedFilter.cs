@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using ObjectCubeServer.Models.DataAccess;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
+﻿using System.Collections.Generic;
 
 namespace ObjectCubeServer.Models.DomainClasses
 {

@@ -10,6 +10,7 @@ using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Collections;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
@@ -93,8 +94,7 @@ namespace ObjectCubeServer.Controllers
             using (var context = new ObjectContext())
             {
                 var childNode = context.Nodes
-                    .Where(n => n.Id == nodeId)
-                    .FirstOrDefault();
+                    .FirstOrDefault(n => n.Id == nodeId);
                 parentNode = GetParentNode(childNode);
             }
             return Ok(JsonConvert.SerializeObject(parentNode));

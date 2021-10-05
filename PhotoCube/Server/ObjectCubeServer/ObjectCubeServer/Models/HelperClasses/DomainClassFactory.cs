@@ -1,11 +1,9 @@
-﻿using ObjectCubeServer.Models.DomainClasses;
+﻿using System;
+using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace ObjectCubeServer.Models
+namespace ObjectCubeServer.Models.HelperClasses
 {
     /// <summary>
     /// Simplifies the creation of DomainClasses.
@@ -53,7 +51,7 @@ namespace ObjectCubeServer.Models
             if (description == null) { throw new Exception("Given name was null."); }
 
             tagtypeId++;
-            return new TagType()
+            return new TagType
             {
                 Id = tagtypeId,
                 Description = description
@@ -67,7 +65,7 @@ namespace ObjectCubeServer.Models
             if (tagtype == null) { throw new Exception("Given tagtype was null."); }
 
             tagId++;
-            return new AlphanumericalTag()
+            return new AlphanumericalTag
             {
                 Id = tagId,
                 TagTypeId = tagtype.Id,

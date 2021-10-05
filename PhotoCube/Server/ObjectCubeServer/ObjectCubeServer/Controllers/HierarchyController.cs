@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.DomainClasses.TagTypes;
 
 namespace ObjectCubeServer.Controllers
@@ -35,7 +36,7 @@ namespace ObjectCubeServer.Controllers
             });
 
             return Ok(JsonConvert.SerializeObject(allHierarchies,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+                new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
         }
 
         // GET: api/Hierarchy/5
@@ -47,9 +48,8 @@ namespace ObjectCubeServer.Controllers
             {
                 hierarchyFound = context.Hierarchies
                     .Include(h => h.Nodes)
-                        .ThenInclude(node => node.Tag)
-                    .Where(h => h.Id == id)
-                    .FirstOrDefault();
+                    .ThenInclude(node => node.Tag)
+                    .FirstOrDefault(h => h.Id == id);
             }
             if(hierarchyFound == null)
             {
@@ -77,7 +77,7 @@ namespace ObjectCubeServer.Controllers
                             .ThenInclude(cn => cn.Tag)
                         .FirstOrDefault();
                 }
-                childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+                childNodeWithTagAndChildren?.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }
