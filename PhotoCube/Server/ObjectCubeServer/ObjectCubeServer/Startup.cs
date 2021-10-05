@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Cors;
+using Microsoft.OpenApi.Models;
 
 namespace ObjectCubeServer
 {
@@ -26,8 +18,17 @@ namespace ObjectCubeServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(option => option.EnableEndpointRouting = false);
+            services.AddMvc(option => option.EnableEndpointRouting = false );
+            
+            // enable json input/output for controllers
+            services.AddControllers()
+                .AddNewtonsoftJson();
                 //.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+                
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PhotoCube API", Version = "v1" });
+            });
 
             /* CORS: To enable calls from other origins:
              * https://docs.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-2.2 */
@@ -45,6 +46,14 @@ namespace ObjectCubeServer
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                // Enable middleware to serve generated Swagger as a JSON endpoint.
+                app.UseSwagger();
+                // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+                // specifying the Swagger JSON endpoint.
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("v1/swagger.json", "PhotoCube API V1");
+                });
             }
             else
             {
