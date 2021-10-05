@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.Contexts;
 
 namespace ObjectCubeServer.Models.DomainClasses
 {
@@ -16,16 +15,16 @@ namespace ObjectCubeServer.Models.DomainClasses
         public string Type { get; set; }
         // Either Tagset or Node id
         public int Id { get; set; }
-        public Dictionary<int,int> Ids { get; set; }
+        internal Dictionary<int,int> Ids { get;  set; }
 
         internal void initializeIds()
         {
-            Dictionary<int,int> IdList = new Dictionary<int,int>();
+            var IdList = new Dictionary<int,int>();
             int i = 1;
             switch (Type)
             {
                 case "tagset":
-                    List<Tag> tags = extractTagsFromTagsetAxis(); // Could not query Tags table using raw sql - seems like it doesn't support TPT hierarchies.
+                    List<Tag> tags = ExtractTagsFromTagsetAxis(); // Could not query Tags table using raw sql - seems like it doesn't support TPT hierarchies.
 
                     foreach (var tag in tags)
                     {
@@ -37,7 +36,7 @@ namespace ObjectCubeServer.Models.DomainClasses
 
                 case "node":
                     // Find children nodes that is 1 level below
-                    List<Node> childNodes = extractChildNodesFromHierarchyAxis();
+                    List<Node> childNodes = ExtractChildNodesFromHierarchyAxis();
 
                     foreach (var node in childNodes)
                     {
@@ -54,28 +53,38 @@ namespace ObjectCubeServer.Models.DomainClasses
             }
         }
 
-        private List<Node> extractChildNodesFromHierarchyAxis()
+        private List<Node> ExtractChildNodesFromHierarchyAxis()
         {
             using var context = new ObjectContext();
             var currentNode = context.Nodes.FirstOrDefault(n => n.Id == Id);
-            string query = String.Format("select N.* from (select N.* from nodes N where N.id in (select id from get_level_from_parent_node({0},{1}))) N join alphanumerical_tags A on N.tag_id = A.id order by A.name", Id,
-                currentNode.HierarchyId);
+            if (currentNode != null)
+            {
+                string query =
+                    $"select N.* from (select N.* from nodes N where N.id in (select id from get_level_from_parent_node({Id},{currentNode.HierarchyId}))) N join alphanumerical_tags A on N.tag_id = A.id order by A.name";
 
-            List<Node> childNodes = context.Nodes
-                .FromSqlRaw(query)
-                .ToList();
+                List<Node> childNodes = context.Nodes
+                    .FromSqlRaw(query)
+                    .ToList();
 
-            return childNodes;
+                return childNodes;
+            }
+
+            throw new NullReferenceException("currentNode");
         }
-        private List<Tag> extractTagsFromTagsetAxis()
+        private List<Tag> ExtractTagsFromTagsetAxis()
         {
             using var context = new ObjectContext();
-            var Tagset = context.Tagsets
+            var tagset = context.Tagsets
                 .Include(ts => ts.Tags)
                 .FirstOrDefault(ts => ts.Id == Id);
             // Exclude 'Root(-1)' and tag that has same name as tagset (temporary fix - ideally need to fix the InsertSQLGenerator)
-            var Tags = Tagset.Tags.Where(t => !(t.GetTagName().Equals("Root(-1)") || t.GetTagName().Equals(Tagset.Name))).OrderBy(t => t.GetTagName()).ToList();
-            return Tags;
+            var tags = tagset?.Tags.Where(t => !(t.GetTagName().Equals("Root(-1)") || t.GetTagName().Equals(tagset.Name))).OrderBy(t => t.GetTagName()).ToList();
+            return tags;
+        }
+
+        public override string ToString()
+        {
+            return $"Type = {Type}\n Id{Id.ToString()}\n Ids{Ids}";
         }
     }
 }
