@@ -2,9 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
 
-namespace ObjectCubeServer.Models.DataAccess
+namespace ObjectCubeServer.Models.Contexts
 {
     /// <summary>
     /// The ObjectContext is the entrypoint to the database.

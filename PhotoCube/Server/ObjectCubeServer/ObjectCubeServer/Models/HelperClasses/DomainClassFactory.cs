@@ -1,7 +1,6 @@
 ﻿using System;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
 
 namespace ObjectCubeServer.Models.HelperClasses
 {
