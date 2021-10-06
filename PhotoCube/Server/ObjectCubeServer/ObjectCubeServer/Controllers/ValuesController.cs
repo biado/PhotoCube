@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ObjectCubeServer.Controllers
@@ -22,7 +19,7 @@ namespace ObjectCubeServer.Controllers
         }
 
         // GET api/values/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public ActionResult<string> Get(int id)
         {
             return "value";
@@ -35,13 +32,13 @@ namespace ObjectCubeServer.Controllers
         }
 
         // PUT api/values/5
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
         // DELETE api/values/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public void Delete(int id)
         {
         }

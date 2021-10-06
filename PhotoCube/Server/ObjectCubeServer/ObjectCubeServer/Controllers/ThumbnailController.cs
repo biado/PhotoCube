@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 
 namespace ObjectCubeServer.Controllers
@@ -15,6 +11,7 @@ namespace ObjectCubeServer.Controllers
     public class ThumbnailController : ControllerBase
     {
         // GET: api/Thumbnail
+        [Produces("application/json")]
         [HttpGet]
         public IActionResult Get()
         {
@@ -26,19 +23,19 @@ namespace ObjectCubeServer.Controllers
             if (allThumbnailURIs != null)
             {
                 var data = new { thumbnailURIs = allThumbnailURIs };
-                return Ok(JsonConvert.SerializeObject(data)); //Does not return file!
+                return Ok(data); //Does not return file!
             }
             else return NotFound();
         }
 
         // GET: api/Thumbnail/5
-        [HttpGet("{id}", Name = "GetThumbnail")]
+        [HttpGet("{id:int}", Name = "GetThumbnail")]
         public IActionResult Get(int id)
         {
             string thumbnailURI;
             using (var context = new ObjectContext())
             {
-                CubeObject cubeObject = context.CubeObjects.Where(co => co.Id == id).FirstOrDefault();
+                CubeObject cubeObject = context.CubeObjects.FirstOrDefault(co => co.Id == id);
                 thumbnailURI = cubeObject.ThumbnailURI;
             }
             if (thumbnailURI == null)

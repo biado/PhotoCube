@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace ObjectCubeServer.Models.PublicClasses
 {
@@ -19,8 +14,8 @@ namespace ObjectCubeServer.Models.PublicClasses
 
         public PublicCubeObject(int id, string fileURI)
         {
-            this.Id = id;
-            this.FileURI = fileURI;
+            Id = id;
+            FileURI = fileURI;
         }
     }
 }

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.PublicClasses;
 
@@ -28,8 +24,7 @@ namespace ObjectCubeServer.Controllers
                     .ToList();
             }
 
-            return Ok(JsonConvert.SerializeObject(allTagsets,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })); //Ignore self referencing loops
+            return Ok(allTagsets); //Ignore self referencing loops
         }
 
         // GET: api/tagset/5
@@ -45,9 +40,7 @@ namespace ObjectCubeServer.Controllers
                     .Include(ts => ts.Hierarchies)
                     .FirstOrDefault();
             }
-            return Ok(JsonConvert.SerializeObject(tagsetWithId, 
-                new JsonSerializerSettings(){ReferenceLoopHandling = ReferenceLoopHandling.Ignore})
-            );
+            return Ok(tagsetWithId);
         }
 
         // GET: api/tagset/name=Year
@@ -64,18 +57,13 @@ namespace ObjectCubeServer.Controllers
                 var Tagset = context.Tagsets
                     .Include(ts => ts.Tags)
                     .FirstOrDefault(ts => ts.Name.ToLower() == name.ToLower());
-                tagsFound = Tagset.Tags;
+                tagsFound = Tagset?.Tags;
             }
 
             if (tagsFound != null)
             {
-                var result = new List<PublicTag>();
-                foreach (Tag tag in tagsFound)
-                {
-                    var publicTag = new PublicTag(tag.Id, tag.GetTagName());
-                    result.Add(publicTag);
-                }
-                return Ok(JsonConvert.SerializeObject(result));
+                var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName())).ToList();
+                return Ok(result);
             }
             return NotFound();
         }

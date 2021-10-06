@@ -1,5 +1,4 @@
-﻿using System;
-namespace ObjectCubeServer.Models.PublicClasses
+﻿namespace ObjectCubeServer.Models.PublicClasses
 {
     public class PublicTagset
     {

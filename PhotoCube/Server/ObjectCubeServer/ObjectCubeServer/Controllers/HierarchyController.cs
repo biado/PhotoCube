@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 
 namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class HierarchyController : ControllerBase
     {
         // GET: api/Hierarchy
@@ -34,8 +31,8 @@ namespace ObjectCubeServer.Controllers
                 RecursiveAddChildrenAndTags(h.Nodes.FirstOrDefault(n => n.Id == h.RootNodeId))
             });
 
-            return Ok(JsonConvert.SerializeObject(allHierarchies,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            return Ok(allHierarchies);
+
         }
 
         // GET: api/Hierarchy/5
@@ -47,16 +44,14 @@ namespace ObjectCubeServer.Controllers
             {
                 hierarchyFound = context.Hierarchies
                     .Include(h => h.Nodes)
-                        .ThenInclude(node => node.Tag)
-                    .Where(h => h.Id == id)
-                    .FirstOrDefault();
+                    .ThenInclude(node => node.Tag)
+                    .FirstOrDefault(h => h.Id == id);
             }
             if(hierarchyFound == null)
             {
                 return NotFound();
             }
-            return Ok(JsonConvert.SerializeObject(hierarchyFound,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            return Ok(hierarchyFound);
         }
 
         #region HelperMethods:
@@ -77,7 +72,7 @@ namespace ObjectCubeServer.Controllers
                             .ThenInclude(cn => cn.Tag)
                         .FirstOrDefault();
                 }
-                childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+                childNodeWithTagAndChildren?.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }

@@ -1,12 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
-using System;
-using System.Configuration;
-using ObjectCubeServer.Models.PublicClasses;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 
-namespace ObjectCubeServer.Models.DataAccess
+namespace ObjectCubeServer.Models.Contexts
 {
     /// <summary>
     /// The ObjectContext is the entrypoint to the database.
@@ -33,12 +30,11 @@ namespace ObjectCubeServer.Models.DataAccess
     {
         public ObjectContext()
         {
-
+            
         }
 
         public ObjectContext(DbContextOptions<ObjectContext> options) : base(options)
         {
-
         }
 
         public ObjectContext(string connectionString)
@@ -46,7 +42,7 @@ namespace ObjectCubeServer.Models.DataAccess
             this.connectionString = connectionString;
         }
 
-        private string connectionString;
+        private readonly string connectionString;
 
         /*
          * Exposing which DBSets are available to get, add, update and delete from:
@@ -173,7 +169,6 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        //
                         optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lscAll-rawsql; User Id = photocube; Password = postgres;");
                     }
                     break;
@@ -184,11 +179,11 @@ namespace ObjectCubeServer.Models.DataAccess
                     }
                     else
                     {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = PC; User Id = photocube; Password = postgres;");
+                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = photocube; User Id = photocube; Password = postgres;");
                     }
                     break;
                 default:
-                    throw new System.Exception("Please specify the path to the database");
+                    throw new PlatformNotSupportedException("Platform not supported");
             }
         }
     }

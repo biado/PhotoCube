@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System.Collections;
+using ObjectCubeServer.Models.Contexts;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class NodeController : ControllerBase
     {
         // GET: api/Node
@@ -29,11 +26,11 @@ namespace ObjectCubeServer.Controllers
                     .Include(n => n.Children)
                     .ToList();
             }
-            return Ok(JsonConvert.SerializeObject(allNodes));
+            return Ok(allNodes);
         }
 
         // GET: api/Node/5
-        [HttpGet("{id}", Name = "GetNodes")]
+        [HttpGet("{id:int}", Name = "GetNodes")]
         public IActionResult Get(int id)
         {
             Node nodeFound;
@@ -51,8 +48,7 @@ namespace ObjectCubeServer.Controllers
             {
                 nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 nodeFound = RecursiveAddChildrenAndTags(nodeFound);
-                return Ok(JsonConvert.SerializeObject(nodeFound,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+                return Ok(nodeFound);
             }
         }
 
@@ -80,24 +76,23 @@ namespace ObjectCubeServer.Controllers
                     };
                     result.Add(publicNode);
                 }
-                return Ok(JsonConvert.SerializeObject(result));
+                return Ok(result);
             }
             return NotFound();
         }
 
         // GET: api/Node/123/Parent
-        [HttpGet("{nodeId}/parent")]
+        [HttpGet("{nodeId:int}/parent")]
         public IActionResult GetParentNode(int nodeId)
         {
             PublicNode parentNode;
             using (var context = new ObjectContext())
             {
                 var childNode = context.Nodes
-                    .Where(n => n.Id == nodeId)
-                    .FirstOrDefault();
+                    .FirstOrDefault(n => n.Id == nodeId);
                 parentNode = GetParentNode(childNode);
             }
-            return Ok(JsonConvert.SerializeObject(parentNode));
+            return Ok(parentNode);
         }
 
         // GET: api/Node/123/Children
@@ -113,7 +108,7 @@ namespace ObjectCubeServer.Controllers
                     .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag)cn.Tag).Name)))
                     .FirstOrDefault();
             }
-            return Ok(JsonConvert.SerializeObject(childNodes));
+            return Ok(childNodes);
         }
 
         #region HelperMethods:

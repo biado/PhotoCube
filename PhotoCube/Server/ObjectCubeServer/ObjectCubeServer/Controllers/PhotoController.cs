@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 
 namespace ObjectCubeServer.Controllers
@@ -22,8 +16,8 @@ namespace ObjectCubeServer.Controllers
             string fileURI;
             using (var context = new ObjectContext())
             {
-                CubeObject cubeObject = context.CubeObjects.Where(co => co.Id == id).FirstOrDefault();
-                fileURI = cubeObject.FileURI;
+                CubeObject cubeObject = context.CubeObjects.FirstOrDefault(co => co.Id == id);
+                fileURI = cubeObject?.FileURI;
                 if(fileURI == null)
                 {
                     return NotFound();
