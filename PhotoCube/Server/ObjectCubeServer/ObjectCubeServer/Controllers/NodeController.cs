@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ObjectCubeServer.Models.DomainClasses;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using System.Threading.Tasks;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.PublicClasses;
@@ -31,10 +32,10 @@ namespace ObjectCubeServer.Controllers
 
         // GET: api/Node/5
         [HttpGet("{id:int}", Name = "GetNodes")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             Node nodeFound;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 nodeFound = context.Nodes
                     .Where(n => n.Id == id)
