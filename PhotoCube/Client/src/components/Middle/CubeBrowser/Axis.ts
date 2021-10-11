@@ -7,9 +7,9 @@ import PickedDimension from '../../RightDock/PickedDimension';
 import { Colors } from './Colors';
 
 export enum AxisTypeEnum {
-    Tagset = "Tagset",
-    Hierarchy = "Hierarchy",
-    HierarchyLeaf = "HierarchyLeaf" //A HierarchyLeaf is a HierarchyNode that has no children.
+    Tagset = "tagset",
+    Hierarchy = "node",
+    HierarchyLeaf = "leaf" //A HierarchyLeaf is a HierarchyNode that has no children.
 };
 
 export enum AxisDirection{
@@ -210,3 +210,4 @@ export default class Axis{
         this.IsReady = true;
     }
 }
+
