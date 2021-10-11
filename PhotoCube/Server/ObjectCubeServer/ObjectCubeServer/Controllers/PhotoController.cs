@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 
@@ -11,12 +13,12 @@ namespace ObjectCubeServer.Controllers
     {
         // GET: api/Photo/5
         [HttpGet("{id}", Name = "GetPhoto")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             string fileURI;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
-                CubeObject cubeObject = context.CubeObjects.FirstOrDefault(co => co.Id == id);
+                CubeObject cubeObject = await context.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
                 fileURI = cubeObject?.FileURI;
                 if(fileURI == null)
                 {

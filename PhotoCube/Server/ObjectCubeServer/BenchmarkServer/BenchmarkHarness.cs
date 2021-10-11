@@ -6,7 +6,7 @@ namespace BenchmarkServer
     [HtmlExporter]
     public class BenchmarkHarness
     {
-        [Params(1)] 
+        [Params(10)] 
         public int iterationCount;
 
         private readonly RestClient restClient = new RestClient();

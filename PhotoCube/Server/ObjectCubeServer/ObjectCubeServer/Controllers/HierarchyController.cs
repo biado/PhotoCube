@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
@@ -15,20 +16,20 @@ namespace ObjectCubeServer.Controllers
     {
         // GET: api/Hierarchy
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             List<Hierarchy> allHierarchies;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
-                allHierarchies = context.Hierarchies
+                allHierarchies = await context.Hierarchies
                     .Include(h => h.Nodes)
                         .ThenInclude(n => n.Tag)
-                    .ToList();
+                    .ToListAsync();
             }
             //Add rootnode and recursively add subnodes and their tags:
-            allHierarchies.ForEach(h => h.Nodes = new List<Node>()
+            allHierarchies.ForEach(async h => h.Nodes =  new List<Node>
             {
-                RecursiveAddChildrenAndTags(h.Nodes.FirstOrDefault(n => n.Id == h.RootNodeId))
+                await RecursiveAddChildrenAndTags(h.Nodes.FirstOrDefault(n => n.Id == h.RootNodeId))
             });
 
             return Ok(allHierarchies);
@@ -37,10 +38,10 @@ namespace ObjectCubeServer.Controllers
 
         // GET: api/Hierarchy/5
         [HttpGet("{id}", Name = "GetHirarchy")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             Hierarchy hierarchyFound;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 hierarchyFound = context.Hierarchies
                     .Include(h => h.Nodes)
@@ -55,7 +56,7 @@ namespace ObjectCubeServer.Controllers
         }
 
         #region HelperMethods:
-        private Node RecursiveAddChildrenAndTags(Node parentNode)
+        private async Task<Node> RecursiveAddChildrenAndTags(Node parentNode)
         {
             //we need to find the type of the tag which is at the root of the hierarchy
 
@@ -63,7 +64,7 @@ namespace ObjectCubeServer.Controllers
             foreach (Node childNode in parentNode.Children)
             {
                 Node childNodeWithTagAndChildren;
-                using (var context = new ObjectContext())
+                await using (var context = new ObjectContext())
                 {
                     childNodeWithTagAndChildren = context.Nodes
                         .Where(n => n.Id == childNode.Id)
@@ -73,7 +74,7 @@ namespace ObjectCubeServer.Controllers
                         .FirstOrDefault();
                 }
                 childNodeWithTagAndChildren?.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
-                childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
+                childNodeWithTagAndChildren = await RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }
             parentNode.Children = newChildNodes;

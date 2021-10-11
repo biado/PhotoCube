@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 
@@ -13,12 +15,12 @@ namespace ObjectCubeServer.Controllers
         // GET: api/Thumbnail
         [Produces("application/json")]
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             List<string> allThumbnailURIs;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
-                allThumbnailURIs = context.CubeObjects.Select(co => co.ThumbnailURI).ToList();
+                allThumbnailURIs = await context.CubeObjects.Select(co => co.ThumbnailURI).ToListAsync();
             }
             if (allThumbnailURIs != null)
             {
@@ -30,10 +32,10 @@ namespace ObjectCubeServer.Controllers
 
         // GET: api/Thumbnail/5
         [HttpGet("{id:int}", Name = "GetThumbnail")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             string thumbnailURI;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 CubeObject cubeObject = context.CubeObjects.FirstOrDefault(co => co.Id == id);
                 thumbnailURI = cubeObject.ThumbnailURI;

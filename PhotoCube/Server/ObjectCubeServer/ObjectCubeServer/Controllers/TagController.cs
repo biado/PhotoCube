@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
@@ -22,12 +23,12 @@ namespace ObjectCubeServer.Controllers
         /// <param name="cubeObjectId"></param>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult Get(int? cubeObjectId)
+        public async Task<IActionResult> Get(int? cubeObjectId)
         {
             if (cubeObjectId == null)
             {
                 List<Tag> allTags;
-                using (var context = new ObjectContext())
+                await using (var context = new ObjectContext())
                 {
                     allTags = context.Tags.ToList();
                 }
@@ -36,7 +37,7 @@ namespace ObjectCubeServer.Controllers
             else
             {
                 List<string> tagsFound;
-                using (var context = new ObjectContext())
+                await using (var context = new ObjectContext())
                 {
                     tagsFound = context.ObjectTagRelations
                         .Where(otr => otr.ObjectId == cubeObjectId)
@@ -58,12 +59,12 @@ namespace ObjectCubeServer.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetTag")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             Tag tagFound;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
-                tagFound = context.Tags.Where(t => t.Id == id).FirstOrDefault();
+                tagFound = context.Tags.FirstOrDefault(t => t.Id == id);
             }
             if (tagFound != null)
             {
@@ -79,10 +80,10 @@ namespace ObjectCubeServer.Controllers
         /// <param name="name"></param>
         /// <returns></returns>
         [HttpGet("name={name}")]
-        public IActionResult GetTagByName(string name)
+        public async Task<IActionResult> GetTagByName(string name)
         {
             List<Tag> tagsFound;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 tagsFound = context.Tags
                     .Where(t => ((AlphanumericalTag)t).Name.ToLower().StartsWith(name.ToLower()))

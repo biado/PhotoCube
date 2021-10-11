@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
@@ -14,14 +15,14 @@ namespace ObjectCubeServer.Controllers
     {
         // GET: api/tagset
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             List<PublicTagset> allTagsets;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
-                allTagsets = context.Tagsets
+                allTagsets = await context.Tagsets
                     .Select(t => new PublicTagset(t.Id, t.Name))
-                    .ToList();
+                    .ToListAsync();
             }
 
             return Ok(allTagsets); //Ignore self referencing loops
@@ -29,10 +30,10 @@ namespace ObjectCubeServer.Controllers
 
         // GET: api/tagset/5
         [HttpGet("{id}", Name = "GetTagset")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             Tagset tagsetWithId;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 tagsetWithId = context.Tagsets
                     .Where(ts => ts.Id == id)
@@ -49,10 +50,10 @@ namespace ObjectCubeServer.Controllers
         /// </summary>
         /// <param tagsetName="tagsetName"></param>
         [HttpGet("name={name}")]
-        public IActionResult GetAllTagsByTagsetName(string name)
+        public async Task<IActionResult> GetAllTagsByTagsetName(string name)
         {
             List<Tag> tagsFound;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 var Tagset = context.Tagsets
                     .Include(ts => ts.Tags)

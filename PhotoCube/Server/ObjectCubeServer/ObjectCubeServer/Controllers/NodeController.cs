@@ -18,10 +18,10 @@ namespace ObjectCubeServer.Controllers
     {
         // GET: api/Node
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             List<Node> allNodes;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 allNodes = context.Nodes
                     .Include(n => n.Children)
@@ -48,17 +48,17 @@ namespace ObjectCubeServer.Controllers
             else
             {
                 nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
-                nodeFound = RecursiveAddChildrenAndTags(nodeFound);
+                nodeFound = await RecursiveAddChildrenAndTags(nodeFound);
                 return Ok(nodeFound);
             }
         }
 
         // GET: api/Node/name=wood
         [HttpGet("name={tag}")]
-        public IActionResult GetNodeByName(string tag)
+        public async Task<IActionResult> GetNodeByName(string tag)
         {
             List<Node> nodesFound;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 nodesFound = context.Nodes
                     .Include(n => n.Tag)
@@ -73,7 +73,7 @@ namespace ObjectCubeServer.Controllers
                 {
                     var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
                     {
-                        ParentNode = GetParentNode(node)
+                        ParentNode = await GetParentNode(node)
                     };
                     result.Add(publicNode);
                 }
@@ -84,24 +84,24 @@ namespace ObjectCubeServer.Controllers
 
         // GET: api/Node/123/Parent
         [HttpGet("{nodeId:int}/parent")]
-        public IActionResult GetParentNode(int nodeId)
+        public async Task<IActionResult> GetParentNode(int nodeId)
         {
             PublicNode parentNode;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 var childNode = context.Nodes
                     .FirstOrDefault(n => n.Id == nodeId);
-                parentNode = GetParentNode(childNode);
+                parentNode = await GetParentNode(childNode);
             }
             return Ok(parentNode);
         }
 
         // GET: api/Node/123/Children
         [HttpGet("{nodeId}/children")]
-        public IActionResult GetChildNodes(int nodeId)
+        public async Task<IActionResult> GetChildNodes(int nodeId)
         {
             IEnumerable childNodes;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 childNodes = context.Nodes
                     .Include(n => n.Children)
@@ -113,10 +113,10 @@ namespace ObjectCubeServer.Controllers
         }
 
         #region HelperMethods:
-        private PublicNode GetParentNode(Node child)
+        private async Task<PublicNode> GetParentNode(Node child)
         {
             PublicNode parentNode;
-            using (var context = new ObjectContext())
+            await using (var context = new ObjectContext())
             {
                 parentNode = context.Nodes
                     .Where(n => n.Children.Contains(child))
@@ -128,13 +128,13 @@ namespace ObjectCubeServer.Controllers
             return parentNode;
         }
 
-        private Node RecursiveAddChildrenAndTags(Node parentNode)
+        private async Task<Node> RecursiveAddChildrenAndTags(Node parentNode)
         {
             List<Node> newChildNodes = new List<Node>();
             foreach(Node childNode in parentNode.Children)
             {
                 Node childNodeWithTagAndChildren;
-                using (var context = new ObjectContext())
+                await using (var context = new ObjectContext())
                 {
                     childNodeWithTagAndChildren = context.Nodes
                         .Where(n => n.Id == childNode.Id)
@@ -144,7 +144,7 @@ namespace ObjectCubeServer.Controllers
                         .FirstOrDefault();
                 }
                 childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
-                childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
+                childNodeWithTagAndChildren = await RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }
             parentNode.Children = newChildNodes;
