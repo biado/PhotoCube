@@ -6,7 +6,7 @@ namespace BenchmarkServer
     [HtmlExporter]
     public class BenchmarkHarness
     {
-        [Params(10)] 
+        [Params(100)] 
         public int iterationCount;
 
         private readonly RestClient restClient = new RestClient();
@@ -74,7 +74,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetHierarchyPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)

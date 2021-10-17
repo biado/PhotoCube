@@ -8,14 +8,9 @@ namespace ObjectCubeServerTests.ControllerTests
     {
 
         [Fact]
-        public async Task Get_returns()
+        public Task Get_returns()
         {
-            var controller = new CellController();
-            //var res = controller.Get("", JsonConvert.SerializeObject(yAx), "", "");
-            
-            
-            
-
+            return null;
         }
         
         

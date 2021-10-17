@@ -13,34 +13,34 @@ namespace ObjectCubeServer.Controllers
     [ApiController]
     public class TagsetController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public TagsetController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/tagset
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<PublicTagset>>> Get()
         {
-            List<PublicTagset> allTagsets;
-            await using (var context = new ObjectContext())
-            {
-                allTagsets = await context.Tagsets
-                    .Select(t => new PublicTagset(t.Id, t.Name))
-                    .ToListAsync();
-            }
+            List<PublicTagset> allTagsets = await coContext.Tagsets
+                .Select(t => new PublicTagset(t.Id, t.Name))
+                .ToListAsync();
 
-            return Ok(allTagsets); //Ignore self referencing loops
+            return Ok(allTagsets); //implicit Ignore self referencing loops
         }
 
         // GET: api/tagset/5
         [HttpGet("{id}", Name = "GetTagset")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<ActionResult<Tagset>> Get(int id)
         {
-            Tagset tagsetWithId;
-            await using (var context = new ObjectContext())
-            {
-                tagsetWithId = context.Tagsets
-                    .Where(ts => ts.Id == id)
-                    .Include(ts => ts.Tags)
-                    .Include(ts => ts.Hierarchies)
-                    .FirstOrDefault();
-            }
+            Tagset tagsetWithId = await coContext.Tagsets
+                .Where(ts => ts.Id == id)
+                .Include(ts => ts.Tags)
+                .Include(ts => ts.Hierarchies)
+                .FirstOrDefaultAsync();
+            
             return Ok(tagsetWithId);
         }
 
@@ -50,23 +50,18 @@ namespace ObjectCubeServer.Controllers
         /// </summary>
         /// <param tagsetName="tagsetName"></param>
         [HttpGet("name={name}")]
-        public async Task<IActionResult> GetAllTagsByTagsetName(string name)
+        public async Task<ActionResult<IEnumerable<PublicTag>>> GetAllTagsByTagsetName(string name)
         {
-            List<Tag> tagsFound;
-            await using (var context = new ObjectContext())
-            {
-                var Tagset = context.Tagsets
-                    .Include(ts => ts.Tags)
-                    .FirstOrDefault(ts => ts.Name.ToLower() == name.ToLower());
-                tagsFound = Tagset?.Tags;
-            }
+            var tagset = await coContext.Tagsets
+                .Include(ts => ts.Tags)
+                .FirstOrDefaultAsync(ts => ts.Name.ToLower() == name.ToLower());
+            List<Tag>  tagsFound = tagset?.Tags;
 
-            if (tagsFound != null)
-            {
-                var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName())).ToList();
-                return Ok(result);
-            }
-            return NotFound();
+            if (tagsFound == null) return NotFound();
+            
+            var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName())).ToList();
+            
+            return Ok(result);
         }
     }
 }

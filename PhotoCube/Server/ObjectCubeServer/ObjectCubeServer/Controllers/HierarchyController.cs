@@ -14,40 +14,41 @@ namespace ObjectCubeServer.Controllers
     [Produces("application/json")]
     public class HierarchyController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public HierarchyController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/Hierarchy
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<Hierarchy>>> Get()
         {
-            List<Hierarchy> allHierarchies;
-            await using (var context = new ObjectContext())
-            {
-                allHierarchies = await context.Hierarchies
-                    .Include(h => h.Nodes)
-                        .ThenInclude(n => n.Tag)
-                    .ToListAsync();
-            }
+            List<Hierarchy> allHierarchies = await coContext.Hierarchies
+                .Include(h => h.Nodes)
+                    .ThenInclude(n => n.Tag)
+                .ToListAsync();
+            
+            //TODO see if this can be made partly parallel
             //Add rootnode and recursively add subnodes and their tags:
             allHierarchies.ForEach(async h => h.Nodes =  new List<Node>
             {
-                await RecursiveAddChildrenAndTags(h.Nodes.FirstOrDefault(n => n.Id == h.RootNodeId))
+                 await RecursiveAddChildrenAndTags(h.Nodes.FirstOrDefault(n => n.Id == h.RootNodeId))
             });
 
             return Ok(allHierarchies);
-
         }
 
         // GET: api/Hierarchy/5
         [HttpGet("{id}", Name = "GetHirarchy")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<ActionResult<Hierarchy>> Get(int id)
         {
-            Hierarchy hierarchyFound;
-            await using (var context = new ObjectContext())
-            {
-                hierarchyFound = context.Hierarchies
-                    .Include(h => h.Nodes)
-                    .ThenInclude(node => node.Tag)
-                    .FirstOrDefault(h => h.Id == id);
-            }
+            Hierarchy hierarchyFound = await coContext.Hierarchies
+                .Include(h => h.Nodes)
+                .ThenInclude(node => node.Tag)
+                .FirstOrDefaultAsync(h => h.Id == id);
+            
             if(hierarchyFound == null)
             {
                 return NotFound();
@@ -59,19 +60,18 @@ namespace ObjectCubeServer.Controllers
         private async Task<Node> RecursiveAddChildrenAndTags(Node parentNode)
         {
             //we need to find the type of the tag which is at the root of the hierarchy
-
             List<Node> newChildNodes = new List<Node>();
             foreach (Node childNode in parentNode.Children)
             {
                 Node childNodeWithTagAndChildren;
-                await using (var context = new ObjectContext())
+                await using (var context = new ObjectContext())//use new context, since recursion can't be used with same context
                 {
-                    childNodeWithTagAndChildren = context.Nodes
+                    childNodeWithTagAndChildren = await context.Nodes
                         .Where(n => n.Id == childNode.Id)
                         .Include(n => n.Tag)
                         .Include(n => n.Children)
                             .ThenInclude(cn => cn.Tag)
-                        .FirstOrDefault();
+                        .FirstOrDefaultAsync();
                 }
                 childNodeWithTagAndChildren?.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = await RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);

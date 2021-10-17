@@ -12,34 +12,37 @@ namespace ObjectCubeServer.Controllers
     [ApiController]
     public class ThumbnailController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public ThumbnailController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/Thumbnail
         [Produces("application/json")]
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<string>>> Get()
         {
             List<string> allThumbnailURIs;
-            await using (var context = new ObjectContext())
-            {
-                allThumbnailURIs = await context.CubeObjects.Select(co => co.ThumbnailURI).ToListAsync();
-            }
-            if (allThumbnailURIs != null)
-            {
-                var data = new { thumbnailURIs = allThumbnailURIs };
-                return Ok(data); //Does not return file!
-            }
-            else return NotFound();
+
+            allThumbnailURIs = await coContext.CubeObjects.Select(co => co.ThumbnailURI).ToListAsync();
+
+            if (allThumbnailURIs == null)
+                return NotFound();
+            var data = new {thumbnailURIs = allThumbnailURIs};
+            
+            return Ok(data); //Does not return file!
         }
 
         // GET: api/Thumbnail/5
         [HttpGet("{id:int}", Name = "GetThumbnail")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<ActionResult<string>> Get(int id)
         {
             string thumbnailURI;
-            await using (var context = new ObjectContext())
-            {
-                CubeObject cubeObject = context.CubeObjects.FirstOrDefault(co => co.Id == id);
-                thumbnailURI = cubeObject.ThumbnailURI;
-            }
+            CubeObject cubeObject = await coContext.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
+            thumbnailURI = cubeObject.ThumbnailURI;
+            
             if (thumbnailURI == null)
             {
                 return NotFound();

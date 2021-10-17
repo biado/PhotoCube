@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using ObjectCubeServer.Models.Contexts;
 
 namespace ObjectCubeServer
 {
@@ -25,8 +27,10 @@ namespace ObjectCubeServer
             services.AddControllers()
                 .AddNewtonsoftJson(
                     options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
-                //.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-                
+            
+            //DI of DbContext
+            services.AddDbContext<ObjectContext>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PhotoCube API", Version = "v1" });
@@ -43,7 +47,7 @@ namespace ObjectCubeServer
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment  env)
         {
             if (env.IsDevelopment())
             {
@@ -63,9 +67,10 @@ namespace ObjectCubeServer
             }
 
             // Shows UseCors with named policy.
-            app.UseCors(builder => builder.WithOrigins(@"http://localhost:3000", @"https://localhost:3000").AllowAnyHeader());
+            //app.UseCors(builder => builder.WithOrigins(@"http://localhost:3000", @"https://localhost:3000").AllowAnyHeader());
 
             app.UseHttpsRedirection();
+            app.UseRouting();
             app.UseMvc();
         }
     }

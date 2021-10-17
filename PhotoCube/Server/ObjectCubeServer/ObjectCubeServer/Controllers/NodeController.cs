@@ -3,7 +3,6 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using ObjectCubeServer.Models.DomainClasses;
 using Microsoft.EntityFrameworkCore;
-using System.Collections;
 using System.Threading.Tasks;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
@@ -16,115 +15,97 @@ namespace ObjectCubeServer.Controllers
     [Produces("application/json")]
     public class NodeController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public NodeController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/Node
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<Node>>> Get()
         {
-            List<Node> allNodes;
-            await using (var context = new ObjectContext())
-            {
-                allNodes = context.Nodes
-                    .Include(n => n.Children)
-                    .ToList();
-            }
+            List<Node> allNodes = await coContext.Nodes
+                .Include(n => n.Children)
+                .ToListAsync();
+            
             return Ok(allNodes);
         }
 
         // GET: api/Node/5
         [HttpGet("{id:int}", Name = "GetNodes")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<ActionResult<Node>> Get(int id)
         {
-            Node nodeFound;
-            await using (var context = new ObjectContext())
-            {
-                nodeFound = context.Nodes
-                    .Where(n => n.Id == id)
-                    .Include(n => n.Tag)
-                    .Include(n => n.Children)
-                        .ThenInclude(cn => cn.Tag)
-                    .FirstOrDefault();
-            }
+            Node nodeFound = await coContext.Nodes
+                .Where(n => n.Id == id)
+                .Include(n => n.Tag)
+                .Include(n => n.Children)
+                    .ThenInclude(cn => cn.Tag)
+                .FirstOrDefaultAsync();
+            
             if (nodeFound == null) { return NotFound(); }
-            else
-            {
-                nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
-                nodeFound = await RecursiveAddChildrenAndTags(nodeFound);
-                return Ok(nodeFound);
-            }
+
+            nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+            nodeFound = await RecursiveAddChildrenAndTags(nodeFound);
+            return Ok(nodeFound);
         }
 
         // GET: api/Node/name=wood
         [HttpGet("name={tag}")]
-        public async Task<IActionResult> GetNodeByName(string tag)
+        public async Task<ActionResult<IEnumerable<Node>>> GetNodeByName(string tag)
         {
-            List<Node> nodesFound;
-            await using (var context = new ObjectContext())
-            {
-                nodesFound = context.Nodes
+            List<Node> nodesFound = await coContext.Nodes
                     .Include(n => n.Tag)
                     .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tag.ToLower()))
-                    .ToList();
-            }
-
-            if (nodesFound != null)
+                    .ToListAsync();
+            
+            if (nodesFound == null) return NotFound();
+            
+            var result = new List<PublicNode>();
+            foreach (Node node in nodesFound)
             {
-                var result = new List<PublicNode>();
-                foreach (Node node in nodesFound)
+                var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
                 {
-                    var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
-                    {
-                        ParentNode = await GetParentNode(node)
-                    };
-                    result.Add(publicNode);
-                }
-                return Ok(result);
+                    ParentNode = await GetParentNode(node)
+                };
+                result.Add(publicNode);
             }
-            return NotFound();
+            return Ok(result);
         }
 
         // GET: api/Node/123/Parent
         [HttpGet("{nodeId:int}/parent")]
-        public async Task<IActionResult> GetParentNode(int nodeId)
+        public async Task<ActionResult<PublicNode>> GetParentNode(int nodeId)
         {
-            PublicNode parentNode;
-            await using (var context = new ObjectContext())
-            {
-                var childNode = context.Nodes
-                    .FirstOrDefault(n => n.Id == nodeId);
-                parentNode = await GetParentNode(childNode);
-            }
+            Node childNode = await coContext.Nodes
+                    .FirstOrDefaultAsync(n => n.Id == nodeId);
+            PublicNode parentNode = await GetParentNode(childNode);
+            
             return Ok(parentNode);
         }
 
         // GET: api/Node/123/Children
         [HttpGet("{nodeId}/children")]
-        public async Task<IActionResult> GetChildNodes(int nodeId)
+        public async Task<ActionResult<IEnumerable<PublicNode>>> GetChildNodes(int nodeId)
         {
-            IEnumerable childNodes;
-            await using (var context = new ObjectContext())
-            {
-                childNodes = context.Nodes
-                    .Include(n => n.Children)
-                    .Where(n => n.Id == nodeId)
-                    .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag)cn.Tag).Name)))
-                    .FirstOrDefault();
-            }
+            IEnumerable<PublicNode> childNodes = await coContext.Nodes.Include(n => n.Children)
+                .Where(n => n.Id == nodeId)
+                .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag) cn.Tag).Name)))
+                .FirstOrDefaultAsync();
+
             return Ok(childNodes);
         }
 
         #region HelperMethods:
         private async Task<PublicNode> GetParentNode(Node child)
         {
-            PublicNode parentNode;
-            await using (var context = new ObjectContext())
-            {
-                parentNode = context.Nodes
-                    .Where(n => n.Children.Contains(child))
-                    .Include(n => n.Tag)
-                    .Select(n => new PublicNode(n.Id,((AlphanumericalTag)n.Tag).Name))
-                    .FirstOrDefault();
-            }
-
+            PublicNode parentNode = await coContext.Nodes
+                .Where(n => n.Children.Contains(child))
+                .Include(n => n.Tag)
+                .Select(n => new PublicNode(n.Id,((AlphanumericalTag)n.Tag).Name))
+                .FirstOrDefaultAsync();
+            
             return parentNode;
         }
 
@@ -134,14 +115,14 @@ namespace ObjectCubeServer.Controllers
             foreach(Node childNode in parentNode.Children)
             {
                 Node childNodeWithTagAndChildren;
-                await using (var context = new ObjectContext())
+                await using (var context = new ObjectContext()) //use new context, since recursion can't be used with same context
                 {
-                    childNodeWithTagAndChildren = context.Nodes
+                    childNodeWithTagAndChildren = await context.Nodes
                         .Where(n => n.Id == childNode.Id)
                         .Include(n => n.Tag)
                         .Include(n => n.Children)
                             .ThenInclude(cn => cn.Tag)
-                        .FirstOrDefault();
+                        .FirstOrDefaultAsync();
                 }
                 childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = await RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
