@@ -20,38 +20,76 @@ export default class Fetcher{
         let xDefined: boolean = xAxis !== null;
         let yDefined: boolean = yAxis !== null;
         let zDefined: boolean = zAxis !== null;
-        
+
         let queryString: string = this.baseUrl + "/cell/?";
         if(xDefined) { queryString += "xAxis=" + this.parseAxis(xAxis!)}
         if(yDefined) { queryString += "&yAxis=" + this.parseAxis(yAxis!)}
         if(zDefined) { queryString += "&zAxis=" + this.parseAxis(zAxis!)}
-        if(filters.length > 0){ queryString += "&filters=" + JSON.stringify(filters)}
+        if(filters.length > 0){ queryString += "&filters=" + this.parseFilters(filters!)}
         console.log(queryString);
-            
+
         return fetch(queryString)
             .then(result => {return result.json();});
+    }
+
+    private static parseFilters(filters: Filter[]) : string{
+        let sorted: Filter[] = filters.sort((a, b) => (a.type > b.type) ? 1 : -1);
+        var result:  any[] = [];
+        var dowfilter: any = { type: "tag", ids: []};
+        var semfilter: any = { type: "tag", ids: []};
+        for (var filter of filters) {
+            switch (filter.type) {
+                case "tagset":
+                    result.push({ type: "tagset", ids: [filter.Id]})
+                    break;
+                case "node":
+                    result.push({ type: "node", ids: [filter.Id]})
+                    break;
+                case "day of week":
+                    dowfilter.ids.push(filter.Id);
+                    break;
+                case "tag":
+                    semfilter.ids.push(filter.Id);
+                    break;
+                case "time":
+                    let name: string = filter.name;
+                    let ranges = name.split("-");
+                    result.push({ type: "timerange", ids: [3], ranges: [ranges]})
+                    break;
+                default:
+                    result.push({ type: "tag", ids: [filter.Id]});
+                    break;
+            }
+        }
+        if (dowfilter.ids.length > 0) {
+            result.push(dowfilter);
+        }
+        if (semfilter.ids.length > 0) {
+            result.push(semfilter);
+        }
+        return JSON.stringify(result);
     }
 
     /**
      * Helper method for parsing an Axis into an object that is smaller than the Axis.ts class.
      * Is parsed to ParsedAxis.cs on the server.
      * Is a consice way of specifing an axis in a query to the server.
-     * @param axis 
+     * @param axis
      */
     private static parseAxis(axis: Axis) : string{
         console.log(axis.TitleString);
-        return JSON.stringify( 
+        return JSON.stringify(
             {
-                AxisType: axis.AxisType,
-                Id: axis.Id,
-            } 
+                type: axis.AxisType,
+                id: axis.Id,
+            }
         );
     }
 
     /**
      * Returns all hierarchies.
      */
-    static async FetchHierarchies(){
+        static async FetchHierarchies(){
         return await fetch(Fetcher.baseUrl + "/hierarchy")
         .then(result => {return result.json()});
     }
