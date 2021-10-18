@@ -10,7 +10,6 @@ namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
     public class CubeObjectController : ControllerBase
     {
         private readonly ObjectContext coContext;

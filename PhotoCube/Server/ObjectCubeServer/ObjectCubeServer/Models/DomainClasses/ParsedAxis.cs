@@ -17,14 +17,14 @@ namespace ObjectCubeServer.Models.DomainClasses
         public int Id { get; set; }
         internal Dictionary<int,int> Ids { get;  set; }
 
-        internal void initializeIds()
+        internal void initializeIds(ObjectContext context)
         {
             var IdList = new Dictionary<int,int>();
             int i = 1;
             switch (Type)
             {
                 case "tagset":
-                    List<Tag> tags = ExtractTagsFromTagsetAxis(); // Could not query Tags table using raw sql - seems like it doesn't support TPT hierarchies.
+                    List<Tag> tags = ExtractTagsFromTagsetAxis(context); // Could not query Tags table using raw sql - seems like it doesn't support TPT hierarchies.
 
                     foreach (var tag in tags)
                     {
@@ -36,7 +36,7 @@ namespace ObjectCubeServer.Models.DomainClasses
 
                 case "node":
                     // Find children nodes that is 1 level below
-                    List<Node> childNodes = ExtractChildNodesFromHierarchyAxis();
+                    List<Node> childNodes = ExtractChildNodesFromHierarchyAxis(context);
 
                     foreach (var node in childNodes)
                     {
@@ -53,9 +53,8 @@ namespace ObjectCubeServer.Models.DomainClasses
             }
         }
 
-        private List<Node> ExtractChildNodesFromHierarchyAxis()
+        private List<Node> ExtractChildNodesFromHierarchyAxis(ObjectContext context)
         {
-            using var context = new ObjectContext();
             var currentNode = context.Nodes.FirstOrDefault(n => n.Id == Id);
             if (currentNode != null)
             {
@@ -71,9 +70,8 @@ namespace ObjectCubeServer.Models.DomainClasses
 
             throw new NullReferenceException("currentNode");
         }
-        private List<Tag> ExtractTagsFromTagsetAxis()
+        private List<Tag> ExtractTagsFromTagsetAxis(ObjectContext context)
         {
-            using var context = new ObjectContext();
             var tagset = context.Tagsets
                 .Include(ts => ts.Tags)
                 .FirstOrDefault(ts => ts.Id == Id);

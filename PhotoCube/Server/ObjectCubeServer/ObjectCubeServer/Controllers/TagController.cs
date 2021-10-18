@@ -12,7 +12,6 @@ namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
     public class TagController : ControllerBase
     {
         private readonly ObjectContext coContext;

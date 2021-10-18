@@ -12,7 +12,6 @@ namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
     public class CellController : ControllerBase
     {
         private readonly QueryGenerationService queryGenerationService = new();
@@ -95,9 +94,9 @@ namespace ObjectCubeServer.Controllers
             //    //queryGenerationService.generateFilterQuery(filtersList);
             //}
 
-            axisX.initializeIds();
-            axisY.initializeIds();
-            axisZ.initializeIds();
+            axisX.initializeIds(coContext);
+            axisY.initializeIds(coContext);
+            axisZ.initializeIds(coContext);
 
             // Need to run the query, extract the results, and convert the coordinates
             //coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id)).ToList();

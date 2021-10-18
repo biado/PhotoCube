@@ -11,7 +11,6 @@ namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
     public class HierarchyController : ControllerBase
     {
         private readonly ObjectContext coContext;
@@ -32,9 +31,9 @@ namespace ObjectCubeServer.Controllers
             
             //TODO see if this can be made partly parallel
             //Add rootnode and recursively add subnodes and their tags:
-            allHierarchies.ForEach(async h => h.Nodes =  new List<Node>
+            allHierarchies.ForEach(h => h.Nodes = new List<Node>()
             {
-                 await RecursiveAddChildrenAndTags(h.Nodes.FirstOrDefault(n => n.Id == h.RootNodeId))
+                RecursiveAddChildrenAndTags(h.Nodes.FirstOrDefault(n => n.Id == h.RootNodeId))
             });
 
             return Ok(allHierarchies);
@@ -57,24 +56,23 @@ namespace ObjectCubeServer.Controllers
         }
 
         #region HelperMethods:
-        private async Task<Node> RecursiveAddChildrenAndTags(Node parentNode)
+        private Node RecursiveAddChildrenAndTags(Node parentNode)
         {
             //we need to find the type of the tag which is at the root of the hierarchy
             List<Node> newChildNodes = new List<Node>();
             foreach (Node childNode in parentNode.Children)
             {
                 Node childNodeWithTagAndChildren;
-                await using (var context = new ObjectContext())//use new context, since recursion can't be used with same context
-                {
-                    childNodeWithTagAndChildren = await context.Nodes
-                        .Where(n => n.Id == childNode.Id)
-                        .Include(n => n.Tag)
-                        .Include(n => n.Children)
-                            .ThenInclude(cn => cn.Tag)
-                        .FirstOrDefaultAsync();
-                }
+               
+                childNodeWithTagAndChildren = coContext.Nodes
+                    .Where(n => n.Id == childNode.Id)
+                    .Include(n => n.Tag)
+                    .Include(n => n.Children)
+                        .ThenInclude(cn => cn.Tag)
+                    .FirstOrDefault();
+                
                 childNodeWithTagAndChildren?.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
-                childNodeWithTagAndChildren = await RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
+                childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }
             parentNode.Children = newChildNodes;

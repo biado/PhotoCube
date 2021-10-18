@@ -12,7 +12,6 @@ namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
     public class NodeController : ControllerBase
     {
         private readonly ObjectContext coContext;
@@ -115,15 +114,14 @@ namespace ObjectCubeServer.Controllers
             foreach(Node childNode in parentNode.Children)
             {
                 Node childNodeWithTagAndChildren;
-                await using (var context = new ObjectContext()) //use new context, since recursion can't be used with same context
-                {
-                    childNodeWithTagAndChildren = await context.Nodes
-                        .Where(n => n.Id == childNode.Id)
-                        .Include(n => n.Tag)
-                        .Include(n => n.Children)
-                            .ThenInclude(cn => cn.Tag)
-                        .FirstOrDefaultAsync();
-                }
+                
+                childNodeWithTagAndChildren = await coContext.Nodes
+                    .Where(n => n.Id == childNode.Id)
+                    .Include(n => n.Tag)
+                    .Include(n => n.Children)
+                        .ThenInclude(cn => cn.Tag)
+                    .FirstOrDefaultAsync();
+                
                 childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = await RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);

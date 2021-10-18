@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.PublicClasses;
@@ -29,22 +28,11 @@ namespace ObjectCubeServer.Models.Contexts
     /// </summary>
     public class ObjectContext : DbContext
     {
-        public ObjectContext()
-        {
-            
-        }
 
         public ObjectContext(DbContextOptions<ObjectContext> options) : base(options)
         {
 
         }
-
-        public ObjectContext(string connectionString)
-        {
-            this.connectionString = connectionString;
-        }
-
-        private readonly string connectionString;
 
         /*
          * Exposing which DBSets are available to get, add, update and delete from:
@@ -155,38 +143,6 @@ namespace ObjectCubeServer.Models.Contexts
 
             //Calling on model creating:
             base.OnModelCreating(modelBuilder);
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            //base.OnConfiguring(optionsBuilder);
-            OperatingSystem OS = Environment.OSVersion;
-            PlatformID platformId = OS.Platform;
-            switch (platformId)
-            {
-                case PlatformID.Unix: //Mac 
-                    if (connectionString != null)
-                    {
-                        optionsBuilder.UseNpgsql(connectionString);
-                    }
-                    else
-                    {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lscAll-rawsql; User Id = photocube; Password = postgres;");
-                    }
-                    break;
-                case PlatformID.Win32NT: //Windows & postgres (Jihye)
-                    if (connectionString != null)
-                    {
-                        optionsBuilder.UseNpgsql(connectionString);
-                    }
-                    else
-                    {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = photocube; User Id = photocube; Password = postgres;");
-                    }
-                    break;
-                default:
-                    throw new PlatformNotSupportedException("Platform not supported");
-            }
         }
     }
 }
