@@ -8,7 +8,7 @@ namespace ObjectCubeServer.Models.DomainClasses
         public ParsedAxis? xAxis { get; set; }
         public ParsedAxis? yAxis { get; set; }
         public ParsedAxis? zAxis { get; set; }
-        public List<ParsedFilter>? filters { get; }
-        public bool? all { get; }
+        public IList<ParsedFilter>? filters { get; set; }
+        public bool? all { get; set; }
     }
 }

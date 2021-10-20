@@ -80,6 +80,8 @@ namespace ObjectCubeServer.Controllers
             Node childNode = await coContext.Nodes
                     .FirstOrDefaultAsync(n => n.Id == nodeId);
             PublicNode parentNode = await GetParentNode(childNode);
+
+            if (parentNode == null) return NotFound();
             
             return Ok(parentNode);
         }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,7 @@ namespace ObjectCubeServer.Controllers
         }
 
         // GET: api/tagset/5
-        [HttpGet("{id}", Name = "GetTagset")]
+        [HttpGet("{id:int}", Name = "GetTagset")]
         public async Task<ActionResult<Tagset>> Get(int id)
         {
             Tagset tagsetWithId = await coContext.Tagsets
@@ -49,12 +50,12 @@ namespace ObjectCubeServer.Controllers
         /// Returns all tags in a tagset as a list, where Tagset.name == tagsetName.
         /// </summary>
         /// <param tagsetName="tagsetName"></param>
-        [HttpGet("name={name}")]
-        public async Task<ActionResult<IEnumerable<PublicTag>>> GetAllTagsByTagsetName(string name)
+        [HttpGet("name={tagsetName}")]
+        public async Task<ActionResult<IEnumerable<PublicTag>>> GetAllTagsByTagsetName(string tagsetName)
         {
             var tagset = await coContext.Tagsets
                 .Include(ts => ts.Tags)
-                .FirstOrDefaultAsync(ts => ts.Name.ToLower() == name.ToLower());
+                .FirstOrDefaultAsync(ts => ts.Name.ToLower() == tagsetName.ToLower());
             List<Tag>  tagsFound = tagset?.Tags;
 
             if (tagsFound == null) return NotFound();

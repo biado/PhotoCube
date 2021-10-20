@@ -17,7 +17,7 @@ namespace ObjectCubeServer
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -34,8 +34,9 @@ namespace ObjectCubeServer
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PhotoCube API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PhotoCube API", Version = "v2" });
             });
+            services.AddSwaggerGenNewtonsoftSupport();
 
             /* CORS: To enable calls from other origins:
              * https://docs.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-2.2 */
@@ -59,7 +60,7 @@ namespace ObjectCubeServer
                 // specifying the Swagger JSON endpoint.
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("v1/swagger.json", "PhotoCube API V1");
+                    c.SwaggerEndpoint("v1/swagger.json", "PhotoCube API V2");
                 });
             }
             else

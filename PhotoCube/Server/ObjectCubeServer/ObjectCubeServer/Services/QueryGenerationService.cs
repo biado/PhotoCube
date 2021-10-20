@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace ObjectCubeServer.Services
         private int numberOfFilters;  // internal counter
         //private string filterQuery;
 
-        internal string generateSQLQueryForCells(string xType, int xVertexId, string yType, int yVertexId, string zType, int zVertexId, List<ParsedFilter> filtersList)
+        internal string generateSQLQueryForCells(string xType, int xVertexId, string yType, int yVertexId, string zType, int zVertexId, IList<ParsedFilter>? filtersList)
         {
             numberOfAdditionalFilters = filtersList?.Count ?? 0;
             totalNumberOfFilters = numberOfAdditionalFilters + ((xType != "") ? 1 : 0) + ((yType != "") ? 1 : 0) + ((zType != "") ? 1 : 0);
@@ -26,113 +27,111 @@ namespace ObjectCubeServer.Services
                 const string baseQuery = "select X.idx as x, X.idy as y, X.idz as z, X.object_id as id, O.file_uri as fileURI, X.cnt as count from(select 1 as idx, 1 as idy, 1 as idz, max(R1.id) as object_id, count(*) as cnt from cubeobjects R1 group by idx, idy, idz) X join cubeobjects O on X.object_id = O.id;";
                 return baseQuery;
             }
-
-            string queryfront = "select X.idx as x, X.idy as y, X.idz as z, X.object_id as id, O.file_uri as fileURI, X.cnt as count from (select ";
-            string querymiddle = " from (";
-            string queryend = " group by idx, idy, idz";
+            
+            var queryFront = new StringBuilder("select X.idx as x, X.idy as y, X.idz as z, X.object_id as id, O.file_uri as fileURI, X.cnt as count from (select ");
+            var queryMiddle =  new StringBuilder(" from (");
+            var queryEnd =  new StringBuilder(" group by idx, idy, idz");
             //string queryendsep = "";
 
             numberOfFilters += (xType == "") ? 0 : 1;
-            queryfront += (xType == "") ? "1 as idx, " : String.Format("R{0}.id as idx, ", numberOfFilters);
+            queryFront.Append((xType == "") ? "1 as idx, " : $"R{numberOfFilters}.id as idx, ");
             //queryend += (xType == "") ? "" : " idx";
             //queryendsep = (xType == "") ? queryendsep : ", ";
 
-            querymiddle += generateVertexQuery(xType, xVertexId);
-            querymiddle += (xType == "")
+            queryMiddle.Append(generateVertexQuery(xType, xVertexId));
+            queryMiddle.Append((xType == "")
                 ? ""         // There is no x-value
                 : (numberOfFilters == totalNumberOfFilters)
                 ? ""         // There is an x-value, but nothing more
-                : " join ("; // There is an x-value, and something more
+                : " join ("); // There is an x-value, and something more
 
             numberOfFilters += (yType == "") ? 0 : 1;
-            queryfront += (yType == "") ? "1 as idy, " : String.Format("R{0}.id as idy, ", numberOfFilters);
+            queryFront.Append((yType == "") ? "1 as idy, " : String.Format("R{0}.id as idy, ", numberOfFilters));
             //queryend += (yType == "") ? "" : String.Format("{0} idy", queryendsep);
             //queryendsep = (yType == "") ? queryendsep : ", ";
 
-            querymiddle += generateVertexQuery(yType, yVertexId);
-            querymiddle += (yType == "")
+            queryMiddle.Append(generateVertexQuery(yType, yVertexId));
+            queryMiddle.Append((yType == "")
                 ? ""         // There is no y-value
                 : ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
                 ? ""  // This is the first entry, and there is nothing more
                 : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
                 ? " join ("  // This is the first entry, and there is something more
                 : (numberOfFilters == totalNumberOfFilters)
-                ? String.Format(" on R1.object_id = R{0}.object_id ", numberOfFilters)        // Not first, but nothing more
-                : String.Format(" on R1.object_id = R{0}.object_id join (", numberOfFilters); // Not first, and something more
+                ? $" on R1.object_id = R{numberOfFilters}.object_id " // Not first, but nothing more
+                : $" on R1.object_id = R{numberOfFilters}.object_id join ("); // Not first, and something more
 
             numberOfFilters += (zType == "") ? 0 : 1;
-            queryfront += (zType == "") ? "1 as idz, " : String.Format("R{0}.id as idz, ", numberOfFilters);
+            queryFront.Append((zType == "") ? "1 as idz, " : String.Format("R{0}.id as idz, ", numberOfFilters));
             //queryend += (zType == "") ? "" : String.Format("{0} idz", queryendsep);
 
-            querymiddle += generateVertexQuery(zType, zVertexId);
-            querymiddle += (zType == "")
+            queryMiddle.Append(generateVertexQuery(zType, zVertexId));
+            queryMiddle.Append((zType == "")
                 ? ""         // There is no z-value
                 : ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
                 ? ""  // This is the first entry, and there is nothing more
                 : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
                 ? " join ("  // This is the first entry, and there is something more
                 : (numberOfFilters == totalNumberOfFilters)
-                ? String.Format(" on R1.object_id = R{0}.object_id ", numberOfFilters)        // Not first, but nothing more
-                : String.Format(" on R1.object_id = R{0}.object_id join (", numberOfFilters); // Not first, and something more
+                ? $" on R1.object_id = R{numberOfFilters}.object_id " // Not first, but nothing more
+                : $" on R1.object_id = R{numberOfFilters}.object_id join ("); // Not first, and something more
 
-            queryfront += "max(R1.object_id) as object_id, count(distinct R1.object_id) as cnt ";
-            queryend += ") X join cubeobjects O on X.object_id = O.id;";
+            queryFront.Append("max(R1.object_id) as object_id, count(distinct R1.object_id) as cnt ");
+            queryEnd.Append(") X join cubeobjects O on X.object_id = O.id;");
 
             if (filtersList != null)
             {
                 foreach (var filter in filtersList)
                 {
                     numberOfFilters++;
-                    querymiddle += generateFilterQueryPerType(filter);
-                    querymiddle += ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
+                    queryMiddle.Append(generateFilterQueryPerType(filter));
+                    queryMiddle.Append(((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
                         ? ""  // This is the first entry, and there is nothing more
                         : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
                         ? " join ("  // This is the first entry, and there is something more
                         : (numberOfFilters == totalNumberOfFilters)
-                        ? String.Format(" on R1.object_id = R{0}.object_id ", numberOfFilters)        // Not first, but nothing more
-                        : String.Format(" on R1.object_id = R{0}.object_id join (", numberOfFilters); // Not first, and something more
+                        ? $" on R1.object_id = R{numberOfFilters}.object_id " // Not first, but nothing more
+                        : $" on R1.object_id = R{numberOfFilters}.object_id join ("); // Not first, and something more
                 }
             }
 
-            string SQLQuery = queryfront + querymiddle + queryend;
-            Console.WriteLine(SQLQuery);
+            string SQLQuery = queryFront.Append(queryMiddle.Append(queryEnd)).ToString();
             return SQLQuery;
         }
 
-        internal string generateSQLQueryForObjects(List<ParsedFilter> filtersList)
+        internal string generateSQLQueryForObjects(IList<ParsedFilter>? filtersList)
         {
-            numberOfAdditionalFilters = (filtersList == null) ? 0 : filtersList.Count;
+            numberOfAdditionalFilters = filtersList == null ? 0 : filtersList.Count;
             totalNumberOfFilters = numberOfAdditionalFilters;
             numberOfFilters = 0;
 
             if (totalNumberOfFilters == 0)
             {
                 string BaseQuery = "select O.id as Id, O.file_uri as fileURI from cubeobjects O;";
-                Console.Write(BaseQuery);
                 return BaseQuery;
             }
 
-            string queryfront = "select distinct O.id as Id, O.file_uri as fileURI from (select R1.object_id ";
-            string querymiddle = " from (";
-            string queryend = ") X join cubeobjects O on X.object_id = O.id;";
+            var queryFront = new StringBuilder("select distinct O.id as Id, O.file_uri as fileURI from (select R1.object_id ");
+            var queryMiddle = new StringBuilder(" from (");
+            var queryEnd = new StringBuilder(") X join cubeobjects O on X.object_id = O.id;");
 
             if (filtersList != null)
             {
                 foreach (var filter in filtersList)
                 {
                     numberOfFilters++;
-                    querymiddle += generateFilterQueryPerTypeObjects(filter);
-                    querymiddle += ((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
+                    queryMiddle.Append(generateFilterQueryPerTypeObjects(filter));
+                    queryMiddle.Append(((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
                         ? ""  // This is the first entry, and there is nothing more
                         : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
                         ? " join ("  // This is the first entry, and there is something more
                         : (numberOfFilters == totalNumberOfFilters)
-                        ? String.Format(" on R1.object_id = R{0}.object_id ", numberOfFilters)        // Not first, but nothing more
-                        : String.Format(" on R1.object_id = R{0}.object_id join (", numberOfFilters); // Not first, and something more
+                        ? $" on R1.object_id = R{numberOfFilters}.object_id " // Not first, but nothing more
+                        : $" on R1.object_id = R{numberOfFilters}.object_id join ("); // Not first, and something more
                 }
             }
 
-            string SQLQuery = queryfront + querymiddle + queryend;
+            string SQLQuery = queryFront.Append(queryMiddle.Append(queryEnd)).ToString();
             Console.WriteLine(SQLQuery);
             return SQLQuery;
         }
@@ -230,11 +229,13 @@ namespace ObjectCubeServer.Services
                 case "node":
                     if (filter.Ids.Count == 1)
                     {
-                        query += String.Format(" select N.object_id from nodes_taggings N where N.node_id = {0}) R{1}", filter.Ids[0], numberOfFilters);
+                        query +=
+                            $" select N.object_id from nodes_taggings N where N.node_id = {filter.Ids[0]}) R{numberOfFilters}";
                     }
                     else
                     {
-                        query += String.Format(" select N.object_id from nodes_taggings N where N.node_id in {0}) R{1}", generateIdList(filter), numberOfFilters);
+                        query +=
+                            $" select N.object_id from nodes_taggings N where N.node_id in {generateIdList(filter)}) R{numberOfFilters}";
                     }
                     break;
 
@@ -290,32 +291,33 @@ namespace ObjectCubeServer.Services
 
         private string generateIdList(ParsedFilter filter)
         {
-            string idList = "(";
+            var idList = new StringBuilder("(");
             string separator = "";
 
             foreach (var id in filter.Ids)
             {
-                idList += separator + id.ToString();
+                idList.Append(separator + id);
                 separator = ", ";
             }
 
-            idList += ")";
-            return idList;
+            idList.Append(')');
+            return idList.ToString();
         }
 
         private string generateRangeList(ParsedFilter filter, string quote)
         {
-            string rangeList = "(";
+            var rangeList = new StringBuilder("(");
             string separator = "";
 
-            for (var i = 0; i < filter.Ids.Count(); i++)
+            for (var i = 0; i < filter.Ids.Count; i++)
             {
-                rangeList += separator + String.Format("T.tagset_id = {0} and T.name between {3}{1}{3} and {3}{2}{3}", filter.Ids[i], filter.Ranges[i][0], filter.Ranges[i][1], quote);
+                rangeList.Append(separator +
+                                 $"T.tagset_id = {filter.Ids[i]} and T.name between {quote}{filter.Ranges[i][0]}{quote} and {quote}{filter.Ranges[i][1]}{quote}");
                 separator = ") or (";
             }
 
-            rangeList += ")";
-            return rangeList;
+            rangeList.Append(')');
+            return rangeList.ToString();
         }
     }
 }

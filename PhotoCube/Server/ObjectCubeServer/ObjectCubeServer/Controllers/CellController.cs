@@ -34,7 +34,7 @@ namespace ObjectCubeServer.Controllers
             ParsedAxis axisX = xDefined ? cq.xAxis : new ParsedAxis { Type = "", Id = -1 };
             ParsedAxis axisY = yDefined ? cq.yAxis : new ParsedAxis { Type = "", Id = -1 };
             ParsedAxis axisZ = zDefined ? cq.zAxis : new ParsedAxis { Type = "", Id = -1 };
-            List<ParsedFilter> filtersList =
+            IList<ParsedFilter> filtersList =
                 filtersDefined ? cq.filters : null;
             //Potential refactor: Parsed filter inheritance & make factory class to parse and instantiate filters without losing information
 
