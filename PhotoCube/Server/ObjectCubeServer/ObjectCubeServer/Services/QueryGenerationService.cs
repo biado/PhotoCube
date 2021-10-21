@@ -108,14 +108,15 @@ namespace ObjectCubeServer.Services
 
             if (totalNumberOfFilters == 0)
             {
+                // No ordering here, would be very expensive!
                 string BaseQuery = "select O.id as Id, O.file_uri as fileURI from cubeobjects O;";
                 Console.Write(BaseQuery);
                 return BaseQuery;
             }
 
-            string queryfront = "select distinct O.id as Id, O.file_uri as fileURI from (select R1.object_id ";
+            string queryfront = "select distinct O.id as Id, O.file_uri as fileURI, DT.name as D, TT.name as T from (select R1.object_id ";
             string querymiddle = " from (";
-            string queryend = ") X join cubeobjects O on X.object_id = O.id;";
+            string queryend = ") X join cubeobjects O on X.object_id = O.id join objecttagrelations R1 on O.id = R1.object_id join date_tags DT on R1.tag_id = DT.id join objecttagrelations R2 on O.id = R2.object_id join time_tags TT on R2.tag_id = TT.id order by DT.name, TT.name;";
 
             if (filtersList != null)
             {
