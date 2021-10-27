@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.PublicClasses;
@@ -23,19 +24,19 @@ namespace ObjectCubeServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SingleObjectCell>>> Get([FromQuery] CellRequest cq)
+        public async Task<ActionResult<IEnumerable<SingleObjectCell>>> Get(string xAxis, string yAxis, string zAxis, string filters, string all)
         {
-            bool xDefined = cq.xAxis != null;
-            bool yDefined = cq.yAxis != null;
-            bool zDefined = cq.zAxis != null;
-            bool filtersDefined = cq.filters != null;
-            bool allDefined = cq.all != null;
+            bool xDefined = xAxis != null;
+            bool yDefined = yAxis != null;
+            bool zDefined = zAxis != null;
+            bool filtersDefined = filters != null;
+            bool allDefined = all != null;
             //Parsing:
-            ParsedAxis axisX = xDefined ? cq.xAxis : new ParsedAxis { Type = "", Id = -1 };
-            ParsedAxis axisY = yDefined ? cq.yAxis : new ParsedAxis { Type = "", Id = -1 };
-            ParsedAxis axisZ = zDefined ? cq.zAxis : new ParsedAxis { Type = "", Id = -1 };
-            IList<ParsedFilter> filtersList =
-                filtersDefined ? cq.filters : null;
+            ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : new ParsedAxis { Type = "", Id = -1 };
+            ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : new ParsedAxis { Type = "", Id = -1 };
+            ParsedAxis axisZ = zDefined ? JsonConvert.DeserializeObject<ParsedAxis>(zAxis) : new ParsedAxis { Type = "", Id = -1 };
+            List<ParsedFilter> filtersList =
+                filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
             //Potential refactor: Parsed filter inheritance & make factory class to parse and instantiate filters without losing information
 
             if (allDefined)
