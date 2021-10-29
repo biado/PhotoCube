@@ -2,6 +2,7 @@ import React from 'react';
 import '../../../css/GridBrowser.css';
 import CubeObject from '../CubeBrowser/CubeObject';
 import { BrowsingModes } from '../../RightDock/BrowsingModeChanger';
+import Fetcher from '../CubeBrowser/Fetcher';
 
 /**
  * The GridBrowser allows the user to browse a collection of photos side by side in a grid to get an overview.
@@ -12,11 +13,15 @@ export default class GridBrowser extends React.Component<{
     cubeObjects: CubeObject[],
     onBrowsingModeChanged: (browsingMode: BrowsingModes) => void
 }>{
+
+    state = {
+        imagesInCell: []
+    }
     render(){
         let images = this.props.cubeObjects.map((co, index) => <img 
             key={"image-"+index} 
             className="image" 
-            src={process.env.REACT_APP_IMAGE_SERVER + co.FileURI}
+            src={process.env.REACT_APP_IMAGE_SERVER + co.fileURI}
             ></img>)
 
         return(
@@ -26,6 +31,12 @@ export default class GridBrowser extends React.Component<{
                 </div>
             </div>
         );
+    }
+
+    private async fetchAllImages() {
+        await Fetcher.FetchAllImages().then((images:Object[]) => {
+            this.setState({imagesInCell: images})
+        });
     }
 
     /**

@@ -9,6 +9,7 @@ import { Filter } from "../../Filter";
  */
 export default class Fetcher{
     static baseUrl = process.env.REACT_APP_BASE_URL;
+    static latestQuery = "";
     /**
      * Fetches Cells from the PhotoCube Server. See CellController.cs in server implementation.
      * @param xAxis
@@ -26,11 +27,29 @@ export default class Fetcher{
         if(yDefined) { queryString += "&yAxis=" + this.parseAxis(yAxis!)}
         if(zDefined) { queryString += "&zAxis=" + this.parseAxis(zAxis!)}
         if(filters.length > 0){ queryString += "&filters=" + this.parseFilters(filters!)}
-        console.log(queryString);
-
-        return fetch(queryString)
-            .then(result => {return result.json();});
+        console.log("querystring:", queryString);
+        this.latestQuery = queryString;
+        try {
+            const response = await fetch(queryString)
+            const data = await response.json()
+            console.log("cubedata", data)
+            return data
+        } catch (error) {
+            console.error(error)
+        }
     }
+
+  /*   static async FetchTagsByTagsetName(tagsetName: string){
+        console.log(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
+         try {
+             const response = await fetch(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
+             const data = await response.json();
+             //console.log(data)
+             return data;
+         } catch (error) {
+             console.error(error)
+         }
+    } */
 
     private static parseFilters(filters: Filter[]) : string{
         let sorted: Filter[] = filters.sort((a, b) => (a.type > b.type) ? 1 : -1);
@@ -86,6 +105,12 @@ export default class Fetcher{
         );
     }
 
+    static async FetchAllImages() {
+        console.log(Fetcher.latestQuery + "&all=[]")
+        return await fetch(Fetcher.latestQuery + "&all=[]")
+        .then(result => {return result.json()});
+    }
+
     /**
      * Returns all hierarchies.
      */
@@ -117,10 +142,28 @@ export default class Fetcher{
      * Currently only works for tags of numerical type.
      * @param tagsetName
      */
+    
          static async FetchTagsByTagsetName(tagsetName: string){
-            return await fetch(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
-                .then(result => {return result.json()});
+            console.log(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
+             try {
+                 const response = await fetch(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
+                 const data = await response.json();
+                 //console.log(data)
+                 return data;
+             } catch (error) {
+                 console.error(error)
+             }
         }
+
+       /*  static async FetchTagsByTagsetName(tagsetName: string){
+            console.log(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
+           return await fetch(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
+               .then(result => {
+                   return result.json()
+               }).then(
+                   json => console.log("from tagsbytagsetname", json)
+               )
+       } */
 
     /**
      * Fetches a single Node with nodeId from the server.
@@ -163,8 +206,16 @@ export default class Fetcher{
      * Returns all tagsets.
      */
     static async FetchTagsets(){
-        return await fetch(Fetcher.baseUrl + "/tagset")
-        .then(result => {return result.json()});
+        try {
+            const response = await fetch(Fetcher.baseUrl + "/tagset")
+            const data = await response.json()
+            console.log("fetchtagset", data)
+            return data
+        } catch (error) {
+            console.error(error)
+        }
+        /* return await fetch(Fetcher.baseUrl + "/tagset")
+        .then(result => {return result.json()}); */
     }
 
     /**
@@ -214,21 +265,21 @@ export default class Fetcher{
 
     //Not in use:
     static async FetchCubeObjectsWithTag(tag: Tag){
-        return await fetch(this.baseUrl + "cubeobject/fromTagId/" + tag.Id)
+        return await fetch(this.baseUrl + "cubeobject/fromTagId/" + tag.id)
             .then(result => {return result.json();})
             .then((cubeObjectArr: CubeObject[]) => {return cubeObjectArr});
     }
 
     //Not in use:
     static async FetchCubeObjectsWith2Tags(tag1: Tag, tag2: Tag){
-        return await fetch(this.baseUrl + "cubeobject/from2TagIds/" + tag1.Id + "/" + tag2.Id)
+        return await fetch(this.baseUrl + "cubeobject/from2TagIds/" + tag1.id + "/" + tag2.id)
             .then(result => {return result.json();})
             .then((cubeObjectArr: CubeObject[]) => {return cubeObjectArr});
     }
 
     //Not in use:
     static async FetchCubeObjectsWith3Tags(tag1: Tag, tag2: Tag, tag3: Tag){
-        return await fetch(this.baseUrl + "cubeobject/from3TagIds/" + tag1.Id + "/" + tag2.Id + "/" + tag3.Id)
+        return await fetch(this.baseUrl + "cubeobject/from3TagIds/" + tag1.id + "/" + tag2.id + "/" + tag3.id)
             .then(result => {return result.json();})
             .then((cubeObjectArr: CubeObject[]) => {return cubeObjectArr});
     }

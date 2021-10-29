@@ -3,6 +3,6 @@
  * Based on PublicTag.cs at the server side.
  */
  export interface Tag {
-    Id: number,
-    Name: string
+    id: number,
+    name: string
 }

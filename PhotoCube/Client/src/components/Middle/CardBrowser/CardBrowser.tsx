@@ -18,14 +18,15 @@ export default class CardBrowser extends React.Component<{
         currentPhotoClassName: "",
         spinnerVisibility: "hidden",
         photoVisibility: "visible",
-        tagNamesWithCubeObjectId: []
+        tagNamesWithCubeObjectId: [],
+        imagesInCell: []
     }
 
     render(){
         if(this.props.cubeObjects.length > 0){
             let fileName: string = "";
-            if(this.props.cubeObjects[this.state.photoIndex].FileURI) {
-                fileName = this.props.cubeObjects[this.state.photoIndex].FileURI!;
+            if(this.props.cubeObjects[this.state.photoIndex].fileURI) {
+                fileName = this.props.cubeObjects[this.state.photoIndex].fileURI!;
             }
             return(
                 <div className="grid-item cardBrowserContainer">
@@ -44,7 +45,7 @@ export default class CardBrowser extends React.Component<{
                         <img id="currentPhoto" 
                             className={this.state.currentPhotoClassName + " " + this.state.photoVisibility} 
                             onLoad={(e) => this.onImageLoad(e)} 
-                            src={process.env.REACT_APP_IMAGE_SERVER + this.props.cubeObjects[this.state.photoIndex].FileURI}></img>
+                            src={process.env.REACT_APP_IMAGE_SERVER + this.props.cubeObjects[this.state.photoIndex].fileURI}></img>
                     </div>        
                 </div>
             );
@@ -59,18 +60,54 @@ export default class CardBrowser extends React.Component<{
     /**
      * Get's tags associated with each and updates state.
      */
-    private async updateTagsInState() {
+  /*   private async updateTagsInState() {
         if(this.props.cubeObjects.length > 0){
             await Fetcher.FetchTagsWithCubeObjectId(this.props.cubeObjects[this.state.photoIndex].Id)
             .then((tags:string[]) => {
                 this.setState({tagNamesWithCubeObjectId: tags})
             });
         }   
+        console.log(this.props.cubeObjects[this.state.photoIndex].Id);
+    } */
+
+    private async updateTagsInState() {
+        let a = this.state.imagesInCell[0]["id"];
+        if(this.props.cubeObjects.length > 0){
+            await Fetcher.FetchTagsWithCubeObjectId(a)
+            .then((tags:string[]) => {
+                this.setState({tagNamesWithCubeObjectId: tags})
+            });
+        }   
+        console.log(this.props.cubeObjects[this.state.photoIndex].id);
+        console.log(a);
     }
+
+    private async fetchAllImages() {
+        await Fetcher.FetchAllImages().then((images:Object[]) => {
+            this.setState({imagesInCell: images})
+        });
+    }
+
+    private async updateTagsAndFectImages() {
+        try {
+            await this.fetchAllImages();
+            await this.updateTagsInState();
+        } catch (error) {
+            
+        }
+
+
+    }
+
+  /*   componentDidMount(){
+        document.addEventListener("keydown", (e) => this.onKeydown(e));
+        this.updateTagsInState();
+        this.fetchAllImages();
+    } */
 
     componentDidMount(){
         document.addEventListener("keydown", (e) => this.onKeydown(e));
-        this.updateTagsInState();
+        this.updateTagsAndFectImages();
     }
 
     componentWillUnmount(){
@@ -107,6 +144,10 @@ export default class CardBrowser extends React.Component<{
                 this.setState({photoIndex: this.state.photoIndex + 1});
                 this.updateTagsInState();
             }
+         /*    let a = JSON.stringify(this.state.imagesInCell[0]);
+            let b = this.state.imagesInCell.length;
+            console.log(a);
+            console.log(b); */
         }else if(e.key === "ArrowLeft"){
             if(this.state.photoIndex != 0){
                 this.setState({photoIndex: this.state.photoIndex - 1});
