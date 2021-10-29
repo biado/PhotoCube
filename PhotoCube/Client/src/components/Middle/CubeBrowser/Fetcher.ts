@@ -106,9 +106,15 @@ export default class Fetcher{
     }
 
     static async FetchAllImages() {
-        console.log(Fetcher.latestQuery + "&all=[]")
-        return await fetch(Fetcher.latestQuery + "&all=[]")
-        .then(result => {return result.json()});
+        console.log("from fetchallimages", Fetcher.latestQuery + "&all=[]")
+        try {
+            const response = await fetch(Fetcher.latestQuery + "&all=[]")
+            const data = await response.json()
+            console.log("allimages", data)
+            return data 
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     /**
@@ -174,7 +180,7 @@ export default class Fetcher{
             const call = Fetcher.baseUrl + "/node/" + nodeId
             const response = await fetch(call)
             const data = await response.json()
-            console.log("from fetchnode", data)
+            //console.log("from fetchnode", data)
         } catch (error) {
             console.error(error)
         }
@@ -208,10 +214,10 @@ export default class Fetcher{
      static async FetchChildNodes(nodeId: number){
          try {
              const call = Fetcher.baseUrl + "/node/" + nodeId + "/children"
-             console.log("call from fetchchildnodes", call)
+             //console.log("call from fetchchildnodes", call)
              const response = await fetch(call)
              const data = await response.json()
-             console.log("from fetchchildnodes", data)
+             //console.log("from fetchchildnodes", data)
              return data
          } catch (error) {
              console.error(error)
@@ -227,7 +233,7 @@ export default class Fetcher{
         try {
             const response = await fetch(Fetcher.baseUrl + "/tagset")
             const data = await response.json()
-            console.log("fetchtagset", data)
+            //console.log("fetchtagset", data)
             return data
         } catch (error) {
             console.error(error)

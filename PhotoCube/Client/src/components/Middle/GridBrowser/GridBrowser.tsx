@@ -18,10 +18,16 @@ export default class GridBrowser extends React.Component<{
         imagesInCell: []
     }
     render(){
-        let images = this.props.cubeObjects.map((co, index) => <img 
+  /*       let images = this.props.cubeObjects.map((co, index) => <img 
             key={"image-"+index} 
             className="image" 
             src={process.env.REACT_APP_IMAGE_SERVER + co.fileURI}
+            ></img>) */
+
+            let images = this.state.imagesInCell.map(image => <img 
+            //key={"image-"+index} 
+            className="image" 
+            src={process.env.REACT_APP_IMAGE_SERVER + image["fileURI"]}
             ></img>)
 
         return(
@@ -44,6 +50,7 @@ export default class GridBrowser extends React.Component<{
      */
     componentDidMount(){
         document.addEventListener("keydown", (e) => this.onKeydown(e));
+        this.fetchAllImages()
     }
 
     /**
