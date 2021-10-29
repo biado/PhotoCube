@@ -24,7 +24,7 @@ export default class GridBrowser extends React.Component<{
             src={process.env.REACT_APP_IMAGE_SERVER + co.fileURI}
             ></img>) */
 
-            let images = this.state.imagesInCell.map(image => <img 
+            let images = this.state.imagesInCell.slice(0, 20).map(image => <img 
             //key={"image-"+index} 
             className="image" 
             src={process.env.REACT_APP_IMAGE_SERVER + image["fileURI"]}
