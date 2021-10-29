@@ -55,10 +55,10 @@ export default class Axis{
         this.IsReady = false;
         this.AxisType = AxisTypeEnum.Tagset;
         //Tagset id
-        this.Id = tagset.Id;
+        this.Id = tagset.id;
         //Sort tags alphabethically:
-        tagset.Tags!.sort((a:Tag,b:Tag) => a.Name > b.Name ? 1 : a.Name < b.Name ? -1 : 0);
-        this.Tags = tagset.Tags!.filter((a:Tag) => a.Name != 'Root(-1)' && a.Name != tagset.Name);
+        tagset.tags!.sort((a:Tag,b:Tag) => a.name > b.name ? 1 : a.name < b.name ? -1 : 0);
+        this.Tags = tagset.tags!.filter((a:Tag) => a.name != 'Root(-1)' && a.name != tagset.name);
         let color: Colors = 
             this.AxisDirection === AxisDirection.X ? Colors.Red:
             this.AxisDirection === AxisDirection.Y ? Colors.Green:
@@ -84,7 +84,7 @@ export default class Axis{
         );
         this.LabelThreeObjects = this.Tags.map((tag,index) => {
             return addTextCallback(
-                tag.Name.toString(),     //Label name
+                tag.name.toString(),     //Label name
                 {                        //Position
                     x:this.AxisDirection === AxisDirection.X ? index + 1 : 0,
                     y:this.AxisDirection === AxisDirection.Y ? index + 1 : 0,
@@ -105,9 +105,9 @@ export default class Axis{
         this.IsReady = false;
         this.AxisType = AxisTypeEnum.Hierarchy;
         //Rootnode id
-        this.Id = hierarchy.Id;
-        this.Hierarchies = hierarchy.Children;
-        this.Hierarchies.sort((a:HierarchyNode,b:HierarchyNode) => a.Tag.Name > b.Tag.Name ? 1 : a.Tag.Name < b.Tag.Name ? -1 : 0);
+        this.Id = hierarchy.id;
+        this.Hierarchies = hierarchy.children;
+        this.Hierarchies.sort((a:HierarchyNode,b:HierarchyNode) => a.tag.name > b.tag.name ? 1 : a.tag.name < b.tag.name ? -1 : 0);
         
         let color: Colors = 
             this.AxisDirection === AxisDirection.X ? Colors.Red:
@@ -138,7 +138,7 @@ export default class Axis{
         this.LabelThreeObjects = this.Hierarchies.map((hirarchy,index) => {
             return addTextCallback(
                 //Label name:
-                hirarchy.Tag.Name,
+                hirarchy.tag.name,
                 //Position:
                 {                 
                     x:this.AxisDirection === AxisDirection.X ? index + 1 : 0,
@@ -162,7 +162,7 @@ export default class Axis{
         this.IsReady = false;
         this.AxisType = AxisTypeEnum.HierarchyLeaf;
         //Rootnode id
-        this.Id = hierarchy.Id;
+        this.Id = hierarchy.id;
         this.Hierarchies = [hierarchy];
         
         let color: Colors = 
@@ -194,7 +194,7 @@ export default class Axis{
         this.LabelThreeObjects = [ 
              addTextCallback(
                 //Label name:
-                hierarchy.Tag.Name,
+                hierarchy.tag.name,
                 //Position:
                 {                 
                     x:this.AxisDirection === AxisDirection.X ? 1 : 0,

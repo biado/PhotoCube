@@ -27,10 +27,10 @@ const BrowserNode =
     }
 
     return (
-        <li key={props.node.Id} className="hierarchy node">
+        <li key={props.node.id} className="hierarchy node">
             <label>
                 <input onClick={() => props.onSelect(props.node)} type="radio" name="node"/>
-                {props.node.Name}
+                {props.node.name}
             </label><br/>
             {!isExpanded ? 
             <MdExpandMore className="expand hierarchy" onClick={() => onExpand()}/>  
@@ -54,11 +54,11 @@ const BrowserNodeWithChildren =
         if (props.showChildren) {
             getChildren();
         }
-    }, [props.parent.Id])
+    }, [props.parent.id])
 
     async function getChildren() {
         if (props.showChildren || childNodes === null) {
-            await fetchChildNodes(props.parent.Id).then(response => {
+            await fetchChildNodes(props.parent.id).then(response => {
                 setChildren(response);
             });
         } 
@@ -94,8 +94,8 @@ export const HierarchyBrowser =
     const [buttonDisabled, disableButton] = useState<boolean>(false);
 
     useEffect(() => {
-        fetchParent(props.startNode.Id);
-    }, [props.startNode.Id])
+        fetchParent(props.startNode.id);
+    }, [props.startNode.id])
 
     async function fetchParent(nodeId: number) {
         const response = await Fetcher.FetchParentNode(nodeId);
@@ -108,11 +108,11 @@ export const HierarchyBrowser =
 
     const onSelect = (node: Node) => {
         updateSelection(node);
-        disableButton(props.activeFilters.some(af => af.Id === node.Id));
+        disableButton(props.activeFilters.some(af => af.Id === node.id));
     }
 
     const onButtonClick = () => {
-        const filter: Filter = createFilter(selectedNode!.Name, selectedNode!.Id, "hierarchy");
+        const filter: Filter = createFilter(selectedNode!.name, selectedNode!.id, "hierarchy");
         if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
@@ -124,9 +124,9 @@ export const HierarchyBrowser =
             <h5>Browse hierarchy:</h5>
             <ul className="scrollable hierarchy">
                 {(parentNode !== null) ? 
-                <li key={parentNode.Id} id="parent" className="hierarchy node">
+                <li key={parentNode.id} id="parent" className="hierarchy node">
                     <label>
-                        <input onChange={() => onSelect(parentNode)} type="radio" name="node"/>{parentNode.Name}
+                        <input onChange={() => onSelect(parentNode)} type="radio" name="node"/>{parentNode.name}
                     </label>
                 </li> 
                 : <li key={0} className="hierarchy node"><button disabled={true}>No further parent</button></li>}
@@ -141,10 +141,11 @@ export const HierarchyBrowser =
 
 //utility function
 async function fetchChildNodes(nodeId: number){
+    console.log("from hierachybrow", nodeId)
     const response = await Fetcher.FetchChildNodes(nodeId);
     let children = [];
         if (response.length > 0) {
-            children = response.map((node: Node) => { return { Id: node.Id, Name: node.Name}});
+            children = response.map((node: Node) => { return { id: node.id, name: node.name}});
         }
     return children;
 }

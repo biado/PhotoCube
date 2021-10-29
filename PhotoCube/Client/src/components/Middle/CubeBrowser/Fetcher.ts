@@ -170,6 +170,14 @@ export default class Fetcher{
      * @param nodeId 
      */
     static async FetchNode(nodeId: number){
+        try {
+            const call = Fetcher.baseUrl + "/node/" + nodeId
+            const response = await fetch(call)
+            const data = await response.json()
+            console.log("from fetchnode", data)
+        } catch (error) {
+            console.error(error)
+        }
         return await fetch(Fetcher.baseUrl + "/node/" + nodeId)
             .then(result => {return result.json()});
     }
@@ -198,8 +206,18 @@ export default class Fetcher{
      * @param nodeId
      */
      static async FetchChildNodes(nodeId: number){
-        return await fetch(Fetcher.baseUrl + "/node/" + nodeId + "/children")
-            .then(result => {return result.json()});
+         try {
+             const call = Fetcher.baseUrl + "/node/" + nodeId + "/children"
+             console.log("call from fetchchildnodes", call)
+             const response = await fetch(call)
+             const data = await response.json()
+             console.log("from fetchchildnodes", data)
+             return data
+         } catch (error) {
+             console.error(error)
+         }
+       /*  return await fetch(Fetcher.baseUrl + "/node/" + nodeId + "/children")
+            .then(result => {return result.json()}); */
     }
 
     /**

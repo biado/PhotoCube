@@ -10,7 +10,7 @@ import { BrowsingModes } from './RightDock/BrowsingModeChanger';
 import { BrowsingState } from './Middle/CubeBrowser/BrowsingState';
 import PickedDimension from './RightDock/PickedDimension';
 import CubeObject from './Middle/CubeBrowser/CubeObject';
-import { Filter } from './Filter';
+import { Filter } from './types/types';
 
 
 interface ClientState {

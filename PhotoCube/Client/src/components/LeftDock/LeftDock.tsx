@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import '../../css/LeftDock/LeftDock.css';
 import '../../css/PhotoCubeClient.css';
-import { Filter } from '../Filter';
+import { Filter } from '../types/types';
 import { DateTagDropdown } from './DateFilter';
 import DayOfWeekFilter from './DayOfWeekFilter';
 import { TagSearcher } from './TagFilter';

@@ -325,28 +325,28 @@ export default class CubeBrowser extends React.Component<{
                 if(intersects[0].object.userData.x !== 0 && this.xAxis.AxisType === AxisTypeEnum.Tagset){
                     infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].name)
                 }else if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
-                    infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].Tag.name)
+                    infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].tag.name)
                 }
                 else if(this.xAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
-                    infoText += ",  X: " + (this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].Tag.name)
+                    infoText += ",  X: " + (this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].tag.name)
                 }
             }
             if(yDefined){
                 if(intersects[0].object.userData.y !== 0 && this.yAxis.AxisType === AxisTypeEnum.Tagset){
                     infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].name);
                 }else if(this.yAxis.AxisType === AxisTypeEnum.Hierarchy){
-                    infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].Tag.name);
+                    infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].tag.name);
                 }else if(this.yAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
-                    infoText += ",  Y: " + (this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].Tag.name)
+                    infoText += ",  Y: " + (this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].tag.name)
                 }
             }
             if(zDefined){
                 if(intersects[0].object.userData.z !== 0 && this.zAxis.AxisType === AxisTypeEnum.Tagset){
                     infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].name);
                 }else if(this.zAxis.AxisType === AxisTypeEnum.Hierarchy){
-                    infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].Tag.name);
+                    infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].tag.name);
                 }else if(this.zAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
-                    infoText += ",  Z: " + (this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].Tag.name)
+                    infoText += ",  Z: " + (this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].tag.name)
                 }
             }
             this.setState({infoText: infoText});
@@ -508,7 +508,7 @@ export default class CubeBrowser extends React.Component<{
         switch(dimension.type){
             case "hierarchy":
                 let rootNode: HierarchyNode = await Fetcher.FetchNode(dimension.id);
-                axis.TitleString = rootNode.Tag.name + " (hierarchy)";
+                axis.TitleString = rootNode.tag.name + " (hierarchy)";
                 axis.AddHierarchy(rootNode, this.addTextCallback, this.addLineCallback);
                 break;
             case "tagset":
@@ -518,8 +518,8 @@ export default class CubeBrowser extends React.Component<{
                 break;
             case "hierarchyNode":
                 let rootNode2: HierarchyNode = await Fetcher.FetchNode(dimension.id);
-                axis.TitleString = rootNode2.Tag.name + " (hierarchy)";
-                if(rootNode2.Children.length === 0){
+                axis.TitleString = rootNode2.tag.name + " (hierarchy)";
+                if(rootNode2.children.length === 0){
                     axis.AddHierarchyLeaf(rootNode2, this.addTextCallback, this.addLineCallback)
                 }
                 else {
