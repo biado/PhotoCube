@@ -1,20 +1,8 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import com.google.gson.*;
+import java.io.*;
+import java.util.*;
 
 /**
  * JsonHierarchyGenerator keeps track of all the hierarchies for semantic tags in json, including their semantic duplicates. Semantic tags have been derived from the ImageNet Shuffle and WordNet.

@@ -206,6 +206,7 @@ public class ImageTagGenerator {
 
     private void addDateTimeRelatedTags(StringBuilder sb, String timestamp) {
         DateTimeFormatter formatter = new DateTimeFormatter(timestamp);
+        sb.append(delimiter + "Timestamp" + delimiter + formatter.getTimestampString());
         sb.append(delimiter + "Day of week (number)" + delimiter + formatter.getDayOfWeekNumber());
         sb.append(delimiter + "Day of week (string)" + delimiter + formatter.getDayOfWeekString());
         sb.append(delimiter + "Day within month" + delimiter + formatter.getDayWithinMonth());
