@@ -64,7 +64,7 @@ public class DateTimeFormatter {
     }
 
     public static void main(String[] args) {
-        DateTimeFormatter dtf = new DateTimeFormatter("2015-05-17_23:20");
+        DateTimeFormatter dtf = new DateTimeFormatter("2015-05-17_23:20:02");
         System.out.println(dtf.getTimestampString());
     }
 }

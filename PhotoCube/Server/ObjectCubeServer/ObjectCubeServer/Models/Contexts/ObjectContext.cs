@@ -108,6 +108,11 @@ namespace ObjectCubeServer.Models.Contexts
                 .HasOne<Tagset>()
                 .WithMany()
                 .HasForeignKey(at => at.TagsetIdReplicate);
+            
+            modelBuilder.Entity<TimestampTag>()
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(dt => dt.TagsetIdReplicate);
 
             modelBuilder.Entity<DateTag>()
                 .HasOne<Tagset>()
@@ -125,6 +130,10 @@ namespace ObjectCubeServer.Models.Contexts
                 .HasForeignKey(nt => nt.TagsetIdReplicate);
 
             //Enforce that a typed tag is unqiue within a tagset
+            modelBuilder.Entity<TimestampTag>()
+                .HasIndex(tst => new { tst.TagsetIdReplicate, tst.Name })
+                .IsUnique();
+            
             modelBuilder.Entity<DateTag>()
                 .HasIndex(dt => new { dt.TagsetIdReplicate, dt.Name })
                 .IsUnique();

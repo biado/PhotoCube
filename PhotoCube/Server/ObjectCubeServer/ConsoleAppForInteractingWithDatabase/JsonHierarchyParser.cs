@@ -27,7 +27,7 @@ namespace ConsoleAppForInteractingWithDatabase
             // "root" has 3 children: Timezone, Day of week, Entity. These 3 becomes top nodes. We don't store "root" in the database.
             foreach (JSNode rootChild in root.children)
             {
-                setParentJSNodes_Recursive(root, rootChild);
+                setParentJSNodes_Recursive(null, rootChild);
             }
         }
 

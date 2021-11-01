@@ -162,6 +162,7 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 {"Entity", "alphanumerical"},
                 {"Location name", "alphanumerical"},
+                {"Timestamp", "timestamp"},
                 {"Time", "time"},
                 {"Date", "date"},
                 {"Timezone", "alphanumerical"},
@@ -205,6 +206,10 @@ namespace ConsoleAppForInteractingWithDatabase
                     return DomainClassFactory.NewAlphanumericalTag(tagType, tagset, tagName);
                 case "numerical":
                     return DomainClassFactory.NewNumericalTag(tagType, tagset, int.Parse(tagName));
+                case "timestamp":
+                    DateTime timestamp = DateTime.ParseExact(tagName, "yyyy-MM-dd HH:mm:ss",
+                        System.Globalization.CultureInfo.InvariantCulture);
+                    return DomainClassFactory.NewTimestampTag(tagType, tagset, timestamp);
                 case "time":
                     TimeSpan time = DateTime
                         .ParseExact(tagName, "HH:mm", System.Globalization.CultureInfo.InvariantCulture).TimeOfDay;
@@ -388,32 +393,36 @@ namespace ConsoleAppForInteractingWithDatabase
         private void BuildHierarchiesAndNodes_Recursive(JSNode currentJSNode, Tagset tagset, Hierarchy hierarchy,
             Node parentNode)
         {
-            //Finding parent tag:
-            string parentTagName = currentJSNode.parentJSNode.name; // TODO: handle null to avoid creating the ROOT tag. (No ROOT node is made at least)
-            Tag parentTag;
-            Dictionary<int, Tag> tagList;
+            //handle when parent is null - eg. ROOT(-1)
+            if (currentJSNode.parentJSNode != null)
+            {
+                //Finding parent tag:
+                string parentTagName = currentJSNode.parentJSNode.name;
+                Tag parentTag;
+                Dictionary<int, Tag> tagList;
 
-            //If parentTag does not exist, create it:
-            if (!tags.ContainsKey(parentTagName))
-            {
-                parentTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, parentTagName);
-                tagList = new Dictionary<int, Tag>();
-                tagList[parentTag.TagsetId] = parentTag;
-                tags[parentTagName] = tagList;
-            }
-            else
-            {
-                tagList = tags[parentTagName];
-                if (!tagList.ContainsKey(tagset.Id))
+                //If parentTag does not exist, create it:
+                if (!tags.ContainsKey(parentTagName))
                 {
-                    parentTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset,
-                        parentTagName);
+                    parentTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, parentTagName);
+                    tagList = new Dictionary<int, Tag>();
                     tagList[parentTag.TagsetId] = parentTag;
                     tags[parentTagName] = tagList;
                 }
                 else
                 {
-                    parentTag = tagList[tagset.Id];
+                    tagList = tags[parentTagName];
+                    if (!tagList.ContainsKey(tagset.Id))
+                    {
+                        parentTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset,
+                            parentTagName);
+                        tagList[parentTag.TagsetId] = parentTag;
+                        tags[parentTagName] = tagList;
+                    }
+                    else
+                    {
+                        parentTag = tagList[tagset.Id];
+                    }
                 }
             }
 
@@ -558,6 +567,10 @@ namespace ConsoleAppForInteractingWithDatabase
                         case NumericalTag nt:
                             insertStatement += "INSERT INTO numerical_tags(id, name, tagset_id) VALUES(" + nt.Id + "," +
                                                nt.Name + "," + nt.TagsetId + "); \n";
+                            break;
+                        case TimestampTag tst:
+                            insertStatement += "INSERT INTO timestamp_tags(id, name, tagset_id) VALUES(" + tst.Id + ",'" +
+                                               tst.Name.ToString() + "'," + tst.TagsetId + "); \n";
                             break;
                         case DateTag dt:
                             insertStatement += "INSERT INTO date_tags(id, name, tagset_id) VALUES(" + dt.Id + ",'" +

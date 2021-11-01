@@ -102,7 +102,7 @@ public class ImageTagGenerator {
             sb.append(makeTagsFromJSON(filename)); // semantic tags
             if (filename_metadataLine_map.containsKey(filename)) { // metadata tags
                 String metadataLine = filename_metadataLine_map.get(filename);
-                sb.append(makeTagsFromMetadata(metadataLine));
+                sb.append(makeTagsFromMetadata(metadataLine,filename));
             }
             sb.append("\n");
         }
@@ -174,7 +174,9 @@ public class ImageTagGenerator {
         return newPath.toString();
     }
 
-    private String makeTagsFromMetadata(String metadataLine) throws ParseException { // metadata tags
+    private String makeTagsFromMetadata(String metadataLine, String filename) throws ParseException { // metadata tags
+        String fileTimestamp = extractTimestampFromFilename(filename);
+
         String[] input = metadataLine.split(",");
         String[] formattedMetadataLine = metadataFormatter.formatMetadataLine(input);
         StringBuilder sb = new StringBuilder();
@@ -185,8 +187,7 @@ public class ImageTagGenerator {
         String[] date_time = formattedMetadataLine[2].split("_");
         sb.append(delimiter + "Date" + delimiter + date_time[0]);
         sb.append(delimiter + "Time" + delimiter + date_time[1]);
-
-        addDateTimeRelatedTags(sb, formattedMetadataLine[2]);
+        addDateTimeRelatedTags(sb, formattedMetadataLine[2],fileTimestamp);
 
         // timezone (i=3) only use the city name as the tag (Europe/Dublin -> Timezone,,Dublin)
         String[] region_city = formattedMetadataLine[3].split("/");
@@ -204,9 +205,26 @@ public class ImageTagGenerator {
         return sb.toString();
     }
 
-    private void addDateTimeRelatedTags(StringBuilder sb, String timestamp) {
-        DateTimeFormatter formatter = new DateTimeFormatter(timestamp);
-        sb.append(delimiter + "Timestamp" + delimiter + formatter.getTimestampString());
+    private String extractTimestampFromFilename(String filename) {
+        /*filename types in lsc:
+        2015-02-23/b00000000_21i6bq_20150223_070647e.jpg
+        2016-08-11/20160811_131315_000.jpg
+        2018-05-04/B00003452_21I6X0_20180504_072707E.JPG
+         */
+        //TODO replace with regex like "_[0-9]{6}(e|_)"
+        String[] filenameParts = filename.split("\\\\");
+        String[] dateTimeParts = filenameParts[filenameParts.length - 1].split("_");
+        String timeDigits = dateTimeParts[dateTimeParts.length - 1].length() > 7 ? dateTimeParts[dateTimeParts.length - 1] : dateTimeParts[dateTimeParts.length - 2];
+        timeDigits = timeDigits.length() == 6 ? timeDigits : timeDigits.substring(0, 6); // remove extension if necesarry
+        //convert 6 digits to HH:mm:ss string
+        String time = String.format("%02d:%02d:%02d", Integer.parseInt(timeDigits.substring(0, 2)), Integer.parseInt(timeDigits.substring(2, 4)), Integer.parseInt(timeDigits.substring(4, 6)));
+        //add date
+        return filenameParts[0] + " " + time;
+    }
+
+    private void addDateTimeRelatedTags(StringBuilder sb, String localTime, String fileTimestamp) {
+        DateTimeFormatter formatter = new DateTimeFormatter(localTime);
+        sb.append(delimiter + "Timestamp" + delimiter + fileTimestamp);
         sb.append(delimiter + "Day of week (number)" + delimiter + formatter.getDayOfWeekNumber());
         sb.append(delimiter + "Day of week (string)" + delimiter + formatter.getDayOfWeekString());
         sb.append(delimiter + "Day within month" + delimiter + formatter.getDayWithinMonth());
