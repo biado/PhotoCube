@@ -458,7 +458,7 @@ export default class CubeBrowser extends React.Component<{
     private addCubeCallback = (imageUrl: string, aPosition: Position) => {
         //If image is already loaded previously, get it, otherwise load it:
         let imageMaterial : THREE.MeshBasicMaterial;
-        console.log(imageUrl);
+        //console.log(imageUrl);
         if(this.boxTextures.has(imageUrl)){
             imageMaterial = this.boxTextures.get(imageUrl)!;
         }else{
@@ -598,7 +598,7 @@ export default class CubeBrowser extends React.Component<{
 
         this.cells = newCells;
 
-        console.log(this.cells.length)
+        //console.log(this.cells.length)
 
         console.log("Done computing cells")
 

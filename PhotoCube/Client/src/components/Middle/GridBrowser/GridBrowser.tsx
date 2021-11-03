@@ -10,14 +10,19 @@ import { Image } from "../../../interfaces/types";
  * this.props.cubeObjects contains the cube object which photos are shown.
  * this.props.onBrowsingModeChanged is a callback funtion that tells parent component that the browsing mode has been changed.
  */
-const GridBrowser = (props: {
-  onBrowsingModeChanged: (arg0: BrowsingModes) => void;
-}) => {
+interface FuncProps {
+  onBrowsingModeChanged: (browsingMode: BrowsingModes) => void;
+}
+
+const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
     fetchAllImages();
-    //document.addEventListener("keydown", (e) => onKeydown(e))
+    document.addEventListener("keydown", (e) => onKeydown(e));
+    return () => {
+      document.removeEventListener("keydown", (e) => onKeydown(e));
+    };
   }, []);
 
   const fetchAllImages = async () => {
@@ -29,7 +34,7 @@ const GridBrowser = (props: {
     }
   };
   const onKeydown = (e: KeyboardEvent) => {
-    //console.log(e.key);
+    console.log(e.key);
     if (e.key === "Escape") {
       props.onBrowsingModeChanged(BrowsingModes.Cube);
     }

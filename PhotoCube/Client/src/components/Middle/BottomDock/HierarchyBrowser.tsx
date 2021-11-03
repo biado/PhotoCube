@@ -141,7 +141,7 @@ export const HierarchyBrowser =
 
 //utility function
 async function fetchChildNodes(nodeId: number){
-    console.log("from hierachybrow", nodeId)
+    //console.log("from hierachybrow", nodeId)
     const response = await Fetcher.FetchChildNodes(nodeId);
     let children = [];
         if (response.length > 0) {
