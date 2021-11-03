@@ -14,19 +14,20 @@ namespace ObjectCubeServer.Models.DomainClasses
         public int x { get; set; }
         public int y { get; set; }
         public int z { get; set; }
+        public int count { get; set; }
         public List<CubeObject> CubeObjects { get; set; }
 
         // To change the domain model cell to public model cell
         public PublicCell GetPublicCell()
         {
             List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).ToList();
-            return new PublicCell(this.x, this.y, this.z, cubeObjects);
+            return new PublicCell(this.x, this.y, this.z, this.count, cubeObjects);
         }
 
         public PublicCell GetPublicCell(int skip, int pageSize)
         {
             List<PublicCubeObject> cubeObjects = CubeObjects.Select(co => co.GetPublicCubeObject()).Skip(skip).Take(pageSize).ToList();
-            return new PublicCell(this.x, this.y, this.z, cubeObjects);
+            return new PublicCell(this.x, this.y, this.z, this.count, cubeObjects);
         }
     }
 }

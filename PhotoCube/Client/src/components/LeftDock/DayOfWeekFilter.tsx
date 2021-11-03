@@ -25,7 +25,7 @@ export default class DayOfWeekFilter extends React.Component<{
             <div className="dow filter">
                 <ul>
                     {this.state.daysOfWeek.map((dow: Tag) => 
-                        <li key={dow.Id}>{this.renderDow(dow)}</li>
+                        <li key={dow.id}>{this.renderDow(dow)}</li>
                     )}
                 </ul>
             </div>
@@ -40,9 +40,17 @@ export default class DayOfWeekFilter extends React.Component<{
      * Fetches tags in Day of Week tagset from the server, and presents them with a checkbox.
      */
     private async renderDaysOfWeek() {
-        const DOW: Tag[] = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
-        DOW.sort((a,b) => parseInt(a.Name) - parseInt(b.Name));
+        //console.log("fetching from dayOfTheWeekFilter")
+        const response = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
+        //console.log("response to dayoftheweekfilet", response)
+        const DOW: Tag[] = response;
+        //DOW.forEach(d => console.log("dow", d))
+        DOW.sort((a,b) => parseInt(a.name) - parseInt(b.name));
+        //DOW.forEach(d => console.log("dow", d))
         this.setState({daysOfWeek: DOW})
+       /*  this.state.daysOfWeek.forEach(day => {
+            console.log("this is a day", day)
+        }) */
     }
 
     /**
@@ -51,12 +59,12 @@ export default class DayOfWeekFilter extends React.Component<{
     private renderDow(dowTag: Tag) {
         let inputElement = <input
             type="checkbox"
-            name={dowTag.Name}
-            value={dowTag.Id}
+            name={dowTag.name}
+            value={dowTag.id}
             onChange={e => this.onChange(e)} />;
         let result = <div className="dow checkbox">
                 {inputElement}
-                <p>{this.state.dayNames[parseInt(dowTag.Name)-1].substring(0,1)}</p>
+                <p>{this.state.dayNames[parseInt(dowTag.name)-1].substring(0,1)}</p>
             </div>
         return result;
     }

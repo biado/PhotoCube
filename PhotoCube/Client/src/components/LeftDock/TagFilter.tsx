@@ -17,7 +17,7 @@ const TagFilter = (props: {
 
     useEffect(() => {
         updateSelection(props.selectedTag);
-        if (!props.activeFilters.some(af => af.Id === props.selectedTag.Id)) {
+        if (!props.activeFilters.some(af => af.Id === props.selectedTag.id)) {
             disableButton(false);
         } else {
             disableButton(true);
@@ -25,7 +25,7 @@ const TagFilter = (props: {
     }, [props.selectedTag])
 
     const onButtonClick = () => {
-        const filter: Filter = createFilter(selectedTag!.Name, selectedTag!.Id, "tag");
+        const filter: Filter = createFilter(selectedTag!.name, selectedTag!.id, "tag");
         if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
@@ -59,7 +59,7 @@ const SearchResults = (props: {
             <h5>{props.options.length} occurence(s) found:</h5>
             <select value={selected} onChange={e => onOptionSelected(e)} className="tag result dropdown">
                 <option key={0} value="">Select filter</option>
-                {props.options.map(o => <option key={o.Id} value={JSON.stringify(o)}>{o.Name}</option>)}
+                {props.options.map(o => <option key={o.id} value={JSON.stringify(o)}>{o.name}</option>)}
             </select> 
         </div>
     )

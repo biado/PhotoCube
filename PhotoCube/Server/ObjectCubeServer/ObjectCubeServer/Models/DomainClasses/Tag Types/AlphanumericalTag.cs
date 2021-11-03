@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ObjectCubeServer.Models.DomainClasses.TagTypes
+namespace ObjectCubeServer.Models.DomainClasses.Tag_Types
 {
     [Table("alphanumerical_tags")]
     public class AlphanumericalTag : Tag, IComparable

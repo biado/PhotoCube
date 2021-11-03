@@ -52,9 +52,9 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
     const onOptionSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selected: Option = JSON.parse(e.currentTarget.value);
         const node: Node = {
-            Id: selected.NodeId,
-            Name: selected.NodeName,
-            ParentNode: null
+            id: selected.NodeId,
+            name: selected.NodeName,
+            parentNode: null
         }
         updateSelection(node);
     }
@@ -63,9 +63,9 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
         e.preventDefault();
         const response = await Fetcher.FetchNodeByName(input);
         const options = response.map((node: Node) => ({
-            NodeId: node.Id,
-            NodeName: node.Name,
-            ParentnodeName: node.ParentNode !== null ? node.ParentNode!.Name : null
+            NodeId: node.id,
+            NodeName: node.name,
+            ParentnodeName: node.parentNode !== null ? node.parentNode!.name : null
         }) as Option);
         updateOptions(options);
     }

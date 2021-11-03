@@ -21,12 +21,13 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
 
     async function fetchTagsets () {
         const response = await Fetcher.FetchTagsets();
-        const tagsets = response.map((ts: Tagset) => {return {Id: ts.Id, Name: ts.Name }});
-        setDropdownOptions(tagsets.map((ts: Tagset) => {return {value: ts.Id.toString(), label: ts.Name}}));
+        //console.log("from tagsetfilter", response)
+        const tagsets = response.map((ts: Tagset) => {return {id: ts.id, name: ts.name }});
+        setDropdownOptions(tagsets.map((ts: Tagset) => {return {value: ts.id.toString(), label: ts.name}}));
     }
 
     const addFilter = () => {
-        const filter: Filter = createFilter(selectedTagset!.Name, selectedTagset!.Id, "tagset");
+        const filter: Filter = createFilter(selectedTagset!.name, selectedTagset!.id, "tagset");
         if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
@@ -34,7 +35,7 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
     }
 
     const updateDropdown = (e: Option) => {
-        updateSelection({Id: parseInt(e.value), Name: e.label!.toString(), Tags: null});
+        updateSelection({id: parseInt(e.value), name: e.label!.toString(), tags: null});
         disableButton(props.activeFilters.some(af => af.Id === parseInt(e.value)));
     }
 

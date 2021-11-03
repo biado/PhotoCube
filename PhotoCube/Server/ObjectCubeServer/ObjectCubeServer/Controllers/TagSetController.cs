@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.PublicClasses;
 
@@ -16,38 +14,35 @@ namespace ObjectCubeServer.Controllers
     [ApiController]
     public class TagsetController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public TagsetController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/tagset
         [HttpGet]
-        public IActionResult Get()
+        public async Task<ActionResult<IEnumerable<PublicTagset>>> Get()
         {
-            List<PublicTagset> allTagsets;
-            using (var context = new ObjectContext())
-            {
-                allTagsets = context.Tagsets
-                    .Select(t => new PublicTagset(t.Id, t.Name))
-                    .ToList();
-            }
+            List<PublicTagset> allTagsets = await coContext.Tagsets
+                .Select(t => new PublicTagset(t.Id, t.Name))
+                .ToListAsync();
 
-            return Ok(JsonConvert.SerializeObject(allTagsets,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore })); //Ignore self referencing loops
+            return Ok(allTagsets); //implicit Ignore self referencing loops
         }
 
         // GET: api/tagset/5
-        [HttpGet("{id}", Name = "GetTagset")]
-        public IActionResult Get(int id)
+        [HttpGet("{id:int}", Name = "GetTagset")]
+        public async Task<ActionResult<Tagset>> Get(int id)
         {
-            Tagset tagsetWithId;
-            using (var context = new ObjectContext())
-            {
-                tagsetWithId = context.Tagsets
-                    .Where(ts => ts.Id == id)
-                    .Include(ts => ts.Tags)
-                    .Include(ts => ts.Hierarchies)
-                    .FirstOrDefault();
-            }
-            return Ok(JsonConvert.SerializeObject(tagsetWithId, 
-                new JsonSerializerSettings(){ReferenceLoopHandling = ReferenceLoopHandling.Ignore})
-            );
+            Tagset tagsetWithId = await coContext.Tagsets
+                .Where(ts => ts.Id == id)
+                .Include(ts => ts.Tags)
+                .Include(ts => ts.Hierarchies)
+                .FirstOrDefaultAsync();
+            
+            return Ok(tagsetWithId);
         }
 
         // GET: api/tagset/name=Year
@@ -55,29 +50,19 @@ namespace ObjectCubeServer.Controllers
         /// Returns all tags in a tagset as a list, where Tagset.name == tagsetName.
         /// </summary>
         /// <param tagsetName="tagsetName"></param>
-        [HttpGet("name={name}")]
-        public IActionResult GetAllTagsByTagsetName(string name)
+        [HttpGet("name={tagsetName}")]
+        public async Task<ActionResult<IEnumerable<PublicTag>>> GetAllTagsByTagsetName(string tagsetName)
         {
-            List<Tag> tagsFound;
-            using (var context = new ObjectContext())
-            {
-                var Tagset = context.Tagsets
-                    .Include(ts => ts.Tags)
-                    .FirstOrDefault(ts => ts.Name.ToLower() == name.ToLower());
-                tagsFound = Tagset.Tags;
-            }
+            var tagset = await coContext.Tagsets
+                .Include(ts => ts.Tags)
+                .FirstOrDefaultAsync(ts => ts.Name.ToLower() == tagsetName.ToLower());
+            List<Tag>  tagsFound = tagset?.Tags;
 
-            if (tagsFound != null)
-            {
-                var result = new List<PublicTag>();
-                foreach (Tag tag in tagsFound)
-                {
-                    var publicTag = new PublicTag(tag.Id, tag.GetTagName());
-                    result.Add(publicTag);
-                }
-                return Ok(JsonConvert.SerializeObject(result));
-            }
-            return NotFound();
+            if (tagsFound == null) return NotFound();
+            
+            var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName())).ToList();
+            
+            return Ok(result);
         }
     }
 }

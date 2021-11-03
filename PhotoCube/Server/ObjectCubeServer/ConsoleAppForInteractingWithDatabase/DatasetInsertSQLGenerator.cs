@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ObjectCubeServer.Models;
-using ObjectCubeServer.Models.DataAccess;
-using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
+﻿using ObjectCubeServer.Models.DomainClasses;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -10,11 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
+using ObjectCubeServer.Models.HelperClasses;
 
 namespace ConsoleAppForInteractingWithDatabase
 {

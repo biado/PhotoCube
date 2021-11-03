@@ -6,10 +6,10 @@ import Hierarchy from "./Hierarchy";
  * Is similar to Node.cs in server implementation.
  */
 export default interface HierarchyNode{
-    Id: number;
-    TagId: number;
-    Tag: Tag;
-    HierarchyId: number;
-    Hierarchy: Hierarchy|null;
-    Children: HierarchyNode[];
+    id: number;
+    tagId: number;
+    tag: Tag;
+    hierarchyId: number;
+    hierarchy: Hierarchy|null;
+    children: HierarchyNode[];
 }

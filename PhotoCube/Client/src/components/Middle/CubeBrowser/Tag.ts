@@ -3,9 +3,9 @@
  * Is similar to Tag.cs in the server implementation.
  */
 export default interface Tag{
-    Id: number,
-    Name: string,
-    Tagset: any,
-    TagsetId: number,
-    ObjectTagRelations: any
+    id: number,
+    name: string,
+    tagset: any,
+    tagsetId: number,
+    objectTagRelations: any
 }

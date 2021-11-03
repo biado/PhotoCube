@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
@@ -17,6 +14,13 @@ namespace ObjectCubeServer.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public TagController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/Tag
         // GET: api/tag?cubeObjectId=1
         /// <summary>
@@ -26,33 +30,23 @@ namespace ObjectCubeServer.Controllers
         /// <param name="cubeObjectId"></param>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult Get(int? cubeObjectId)
+        public async Task<ActionResult<IEnumerable<Tag>>> Get(int? cubeObjectId)
         {
             if (cubeObjectId == null)
             {
-                List<Tag> allTags;
-                using (var context = new ObjectContext())
-                {
-                    allTags = context.Tags.ToList();
-                }
-                return Ok(JsonConvert.SerializeObject(allTags));
+                List<Tag>  allTags = await coContext.Tags.ToListAsync();
+                
+                return Ok(allTags);
             }
-            else
-            {
-                List<string> tagsFound;
-                using (var context = new ObjectContext())
-                {
-                    tagsFound = context.ObjectTagRelations
-                        .Where(otr => otr.ObjectId == cubeObjectId)
-                        .Select(otr => otr.Tag.GetTagName())
-                        .ToList();
-                }
-                if (tagsFound != null)
-                {
-                    return Ok(JsonConvert.SerializeObject(tagsFound));
-                }
-                else return NotFound();
-            }
+
+            List<string> tagsFound = await coContext.ObjectTagRelations
+                .Where(otr => otr.ObjectId == cubeObjectId)
+                .Select(otr => otr.Tag.GetTagName())
+                .ToListAsync();
+
+            if (tagsFound == null) return NotFound();
+            
+            return Ok(tagsFound);
         }
 
         // GET: api/Tag/5
@@ -62,18 +56,13 @@ namespace ObjectCubeServer.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetTag")]
-        public IActionResult Get(int id)
+        public async Task<ActionResult<Tag>> Get(int id)
         {
-            Tag tagFound;
-            using (var context = new ObjectContext())
-            {
-                tagFound = context.Tags.Where(t => t.Id == id).FirstOrDefault();
-            }
-            if (tagFound != null)
-            {
-                return Ok(JsonConvert.SerializeObject(tagFound));
-            }
-            else return NotFound();   
+            Tag tagFound = await coContext.Tags.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tagFound == null) return NotFound();
+            
+            return Ok(tagFound);
         }
 
         // GET: api/Tag/name=computer
@@ -83,27 +72,16 @@ namespace ObjectCubeServer.Controllers
         /// <param name="name"></param>
         /// <returns></returns>
         [HttpGet("name={name}")]
-        public IActionResult GetTagByName(string name)
+        public async Task<ActionResult<IEnumerable<Tag>>> GetTagByName(string name)
         {
-            List<Tag> tagsFound;
-            using (var context = new ObjectContext())
-            {
-                tagsFound = context.Tags
+            List<Tag> tagsFound = await coContext.Tags
                     .Where(t => ((AlphanumericalTag)t).Name.ToLower().StartsWith(name.ToLower()))
-                    .ToList();
-            }
-
-            if (tagsFound != null)
-            {
-                var result = new List<PublicTag>();
-                foreach (Tag tag in tagsFound)
-                {
-                    var publicTag = new PublicTag(tag.Id, ((AlphanumericalTag)tag).Name);
-                    result.Add(publicTag);
-                }
-                return Ok(JsonConvert.SerializeObject(result));
-            }
-            return NotFound();
+                    .ToListAsync();
+            
+            if (tagsFound == null) return NotFound();
+            var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name)).ToList();
+            
+            return Ok(result);
         }
     }
 }

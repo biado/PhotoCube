@@ -11,8 +11,11 @@ export default interface ICell{
     y: number;
     z: number;
 
+    //count of images
+    count: number;
+
     //Data nessesary for cube to get own data.
-    CubeObjects: CubeObject[];
+    cubeObjects: CubeObject[];
 }
 
 /**
@@ -28,6 +31,9 @@ export default class Cell{
     y: number;
     z: number;
 
+    //the count property references the number of images in the cell
+    count: number;
+
     //Data nessesary for cube to get own data.
     CubeObjects: CubeObject[];
     threeObject: THREE.Mesh | null;
@@ -38,8 +44,11 @@ export default class Cell{
         scene:THREE.Scene, 
         textureLoader:THREE.TextureLoader, 
         addCubeCallback: (imageUrl: string, aPosition: Position) => THREE.Mesh, aPosition:Position, 
-        cubeObjectData: CubeObject[]
+        cubeObjectData: CubeObject[],
+        countOfImages: number
         ){
+
+        this.count = countOfImages;
         
         this.scene = scene;
         this.textureLoader = textureLoader;
@@ -49,8 +58,9 @@ export default class Cell{
         this.z = aPosition.z;
         this.CubeObjects = cubeObjectData;
         if(cubeObjectData.length > 0){
-            this.threeObject = addCubeCallback(process.env.REACT_APP_IMAGE_SERVER + this.CubeObjects[0].FileURI, {x: this.x, y: this.y, z:this.z});
-            this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.CubeObjects.length, cubeObjects: this.CubeObjects };
+            //console.log(this.CubeObjects[0].fileURI)
+            this.threeObject = addCubeCallback(process.env.REACT_APP_IMAGE_SERVER + this.CubeObjects[0].fileURI, {x: this.x, y: this.y, z:this.z});
+            this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.count, cubeObjects: this.CubeObjects };
             //this.ToggleSwitchingImagesEveryXms(10000);
         }
         else{

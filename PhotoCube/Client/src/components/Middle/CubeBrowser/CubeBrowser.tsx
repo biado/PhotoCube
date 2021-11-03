@@ -15,7 +15,6 @@ import { BrowsingState } from './BrowsingState';
 import PickedDimension from '../../RightDock/PickedDimension';
 import { Colors } from './Colors';
 import { Filter } from '../../Filter';
-import Page from './Page';
 
 const OrbitControls = require('three-orbitcontrols')
 
@@ -37,7 +36,6 @@ export default class CubeBrowser extends React.Component<{
         infoText: "Hover with mouse on a cube to see info",
         showContextMenu: false,
         showErrorMessage: false,
-        currentPage: 1
     };
 
     render(){
@@ -325,30 +323,30 @@ export default class CubeBrowser extends React.Component<{
             let infoText : string = "Number of photos: " + intersects[0].object.userData.size;
             if(xDefined){
                 if(intersects[0].object.userData.x !== 0 && this.xAxis.AxisType === AxisTypeEnum.Tagset){
-                    infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].Name)
+                    infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].name)
                 }else if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
-                    infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].Tag.Name)
+                    infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].tag.name)
                 }
                 else if(this.xAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
-                    infoText += ",  X: " + (this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].Tag.Name)
+                    infoText += ",  X: " + (this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].tag.name)
                 }
             }
             if(yDefined){
                 if(intersects[0].object.userData.y !== 0 && this.yAxis.AxisType === AxisTypeEnum.Tagset){
-                    infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].Name);
+                    infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].name);
                 }else if(this.yAxis.AxisType === AxisTypeEnum.Hierarchy){
-                    infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].Tag.Name);
+                    infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].tag.name);
                 }else if(this.yAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
-                    infoText += ",  Y: " + (this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].Tag.Name)
+                    infoText += ",  Y: " + (this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].tag.name)
                 }
             }
             if(zDefined){
                 if(intersects[0].object.userData.z !== 0 && this.zAxis.AxisType === AxisTypeEnum.Tagset){
-                    infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].Name);
+                    infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].name);
                 }else if(this.zAxis.AxisType === AxisTypeEnum.Hierarchy){
-                    infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].Tag.Name);
+                    infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].tag.name);
                 }else if(this.zAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
-                    infoText += ",  Z: " + (this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].Tag.Name)
+                    infoText += ",  Z: " + (this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].tag.name)
                 }
             }
             this.setState({infoText: infoText});
@@ -460,6 +458,7 @@ export default class CubeBrowser extends React.Component<{
     private addCubeCallback = (imageUrl: string, aPosition: Position) => {
         //If image is already loaded previously, get it, otherwise load it:
         let imageMaterial : THREE.MeshBasicMaterial;
+        //console.log(imageUrl);
         if(this.boxTextures.has(imageUrl)){
             imageMaterial = this.boxTextures.get(imageUrl)!;
         }else{
@@ -509,18 +508,18 @@ export default class CubeBrowser extends React.Component<{
         switch(dimension.type){
             case "hierarchy":
                 let rootNode: HierarchyNode = await Fetcher.FetchNode(dimension.id);
-                axis.TitleString = rootNode.Tag.Name + " (hierarchy)";
+                axis.TitleString = rootNode.tag.name + " (hierarchy)";
                 axis.AddHierarchy(rootNode, this.addTextCallback, this.addLineCallback);
                 break;
             case "tagset":
                 let tagset: Tagset = await Fetcher.FetchTagset(dimension.id);
-                axis.TitleString = tagset.Name + " (tagset)";
+                axis.TitleString = tagset.name + " (tagset)";
                 axis.AddTagset(tagset, this.addTextCallback, this.addLineCallback);
                 break;
             case "hierarchyNode":
                 let rootNode2: HierarchyNode = await Fetcher.FetchNode(dimension.id);
-                axis.TitleString = rootNode2.Tag.Name + " (hierarchy)";
-                if(rootNode2.Children.length === 0){
+                axis.TitleString = rootNode2.tag.name + " (hierarchy)";
+                if(rootNode2.children.length === 0){
                     axis.AddHierarchyLeaf(rootNode2, this.addTextCallback, this.addLineCallback)
                 }
                 else {
@@ -563,55 +562,51 @@ export default class CubeBrowser extends React.Component<{
         const filters: Filter[] = this.props.filters.filter(f => 
             f.Id !== this.xAxis.Id && f.Id !== this.yAxis.Id && f.Id !== this.zAxis.Id);
 
-        let page: Page | null = null;
         let newCells: Cell[] = [];
-
+            try {
+                if(xDefined && yDefined && zDefined){   //X and Y and Z
+                    //Render all three axis
+                    let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, this.zAxis, filters);
+                    ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.cubeObjects, c.count)));
+                }else if(xDefined && yDefined){         //X and Y
+                    let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, null, filters);
+                    ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.cubeObjects, c.count)));
+                }else if(xDefined && zDefined){         //X and Z
+                    let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, null, this.zAxis, filters);
+                    ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.cubeObjects, c.count)));
+                }else if(yDefined && zDefined){         //Y and Z
+                    let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, this.yAxis, this.zAxis, filters);
+                    ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.cubeObjects, c.count)));
+                }else if(xDefined){                     //X
+                    let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(this.xAxis, null, null, filters);
+                    ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.cubeObjects, c.count)));
+                }else if(yDefined){                     //Y
+                    let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, this.yAxis, null, filters);
+                    ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.cubeObjects, c.count)));
+                }else if(zDefined){                     //Z
+                    let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, null, this.zAxis, filters);
+                    ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.cubeObjects, c.count)));
+                } else if(!xDefined && !yDefined && !zDefined){
+                    let ICells : ICell[] = await Fetcher.FetchCellsFromAxis(null, null, null, filters);
+                    ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.cubeObjects, c.count)));
+                }
+                
+            } catch (error) {
+                console.error(error);
+            }
         //Fetch cells based on which axis are defined:
-        if(xDefined && yDefined && zDefined){   //X and Y and Z
-            //Render all three axis
-            page = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, this.zAxis, filters, this.state.currentPage);
-            let ICells : ICell[] = page!.Results;
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
-        }else if(xDefined && yDefined){         //X and Y
-            page = await Fetcher.FetchCellsFromAxis(this.xAxis, this.yAxis, null, filters, this.state.currentPage);
-            let ICells : ICell[] = page!.Results;
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
-        }else if(xDefined && zDefined){         //X and Z
-            page = await Fetcher.FetchCellsFromAxis(this.xAxis, null, this.zAxis, filters, this.state.currentPage);
-            let ICells : ICell[] = page!.Results;
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
-        }else if(yDefined && zDefined){         //Y and Z
-            page = await Fetcher.FetchCellsFromAxis(null, this.yAxis, this.zAxis, filters, this.state.currentPage);
-            let ICells : ICell[] = page!.Results;
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
-        }else if(xDefined){                     //X
-            page = await Fetcher.FetchCellsFromAxis(this.xAxis, null, null, filters, this.state.currentPage);
-            let ICells : ICell[] = page!.Results;
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
-        }else if(yDefined){                     //Y
-            page = await Fetcher.FetchCellsFromAxis(null, this.yAxis, null, filters, this.state.currentPage);
-            let ICells : ICell[] = page!.Results;
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
-        }else if(zDefined){                     //Z
-            page = await Fetcher.FetchCellsFromAxis(null, null, this.zAxis, filters, this.state.currentPage);
-            let ICells : ICell[] = page!.Results;
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
-        } else if(!xDefined && !yDefined && !zDefined){
-            page = await Fetcher.FetchCellsFromAxis(null, null, null, filters, this.state.currentPage);
-            let ICells : ICell[] = page!.Results;
-            ICells.forEach((c:ICell) => newCells.push(new Cell(this.scene, this.textureLoader, this.addCubeCallback, {x: c.x, y: c.y, z:c.z}, c.CubeObjects)));
-        }
 
         this.cells = newCells;
+
+        //console.log(this.cells.length)
 
         console.log("Done computing cells")
 
         //Update filecount:
-        this.props.onFileCountChanged(page!.TotalFileCount);
-        // let uniquePhotos: Set<string> = new Set();
-        // this.cells.forEach((cell: Cell) => 
-        //     cell.CubeObjects.forEach(co => uniquePhotos.add(co.FileURI)));
-        // this.props.onFileCountChanged(uniquePhotos.size);
+        let uniquePhotos: Set<string> = new Set();
+        this.cells.forEach((cell: Cell) => 
+            cell.CubeObjects.forEach(co => uniquePhotos.add(co.fileURI)));
+        this.props.onFileCountChanged(uniquePhotos.size);
     }
 
     /**
@@ -662,9 +657,9 @@ export default class CubeBrowser extends React.Component<{
         let uniqueCubeObjectIds = new Set<number>();
         let listOfUniqueCubeObjects : CubeObject[] = [];
         this.cells.forEach(c => c.CubeObjects.forEach(co => {
-            if(!uniqueCubeObjectIds.has(co.Id)){
+            if(!uniqueCubeObjectIds.has(co.id)){
                 listOfUniqueCubeObjects.push(co);
-                uniqueCubeObjectIds.add(co.Id);
+                uniqueCubeObjectIds.add(co.id);
             }
         }));
         return listOfUniqueCubeObjects;

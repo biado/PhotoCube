@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using ObjectCubeServer.Models.DataAccess;
+using Microsoft.EntityFrameworkCore;
+using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 
 namespace ObjectCubeServer.Controllers
@@ -14,33 +12,37 @@ namespace ObjectCubeServer.Controllers
     [ApiController]
     public class ThumbnailController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public ThumbnailController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/Thumbnail
+        [Produces("application/json")]
         [HttpGet]
-        public IActionResult Get()
+        public async Task<ActionResult<IEnumerable<string>>> Get()
         {
             List<string> allThumbnailURIs;
-            using (var context = new ObjectContext())
-            {
-                allThumbnailURIs = context.CubeObjects.Select(co => co.ThumbnailURI).ToList();
-            }
-            if (allThumbnailURIs != null)
-            {
-                var data = new { thumbnailURIs = allThumbnailURIs };
-                return Ok(JsonConvert.SerializeObject(data)); //Does not return file!
-            }
-            else return NotFound();
+
+            allThumbnailURIs = await coContext.CubeObjects.Select(co => co.ThumbnailURI).ToListAsync();
+
+            if (allThumbnailURIs == null)
+                return NotFound();
+            var data = new {thumbnailURIs = allThumbnailURIs};
+            
+            return Ok(data); //Does not return file!
         }
 
         // GET: api/Thumbnail/5
-        [HttpGet("{id}", Name = "GetThumbnail")]
-        public IActionResult Get(int id)
+        [HttpGet("{id:int}", Name = "GetThumbnail")]
+        public async Task<ActionResult<string>> Get(int id)
         {
             string thumbnailURI;
-            using (var context = new ObjectContext())
-            {
-                CubeObject cubeObject = context.CubeObjects.Where(co => co.Id == id).FirstOrDefault();
-                thumbnailURI = cubeObject.ThumbnailURI;
-            }
+            CubeObject cubeObject = await coContext.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
+            thumbnailURI = cubeObject.ThumbnailURI;
+            
             if (thumbnailURI == null)
             {
                 return NotFound();

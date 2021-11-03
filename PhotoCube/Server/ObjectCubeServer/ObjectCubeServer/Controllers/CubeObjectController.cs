@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using ObjectCubeServer.Models.DataAccess;
+using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 
 namespace ObjectCubeServer.Controllers
@@ -12,102 +12,88 @@ namespace ObjectCubeServer.Controllers
     [ApiController]
     public class CubeObjectController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public CubeObjectController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/CubeObject (currently not in use)
         [HttpGet]
-        public IActionResult Get()
+        public async Task<ActionResult<IEnumerable<CubeObject>>> GetCubeObjects()
         {
-            List<CubeObject> allCubeObjects;
-            using (var context = new ObjectContext())
-            {
-                allCubeObjects = context.CubeObjects
-                    .Include(co => co.ObjectTagRelations)
-                    .ToList();
-            }
-            return Ok(JsonConvert.SerializeObject(allCubeObjects,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            var allCubeObjects = await coContext.CubeObjects
+                .Include(co => co.ObjectTagRelations)
+                .ToListAsync();
+
+            return Ok(allCubeObjects);
         }
 
         // GET: api/CubeObject/5 (currently not in use)
-        [HttpGet("{id}", Name = "GetCubeObject")]
-        public IActionResult Get(int id)
+        [HttpGet("{id:int}", Name = "GetCubeObject")]
+        public async Task<ActionResult<CubeObject>> Get(int id)
         {
-            CubeObject cubeObjectFound;
-            using (var context = new ObjectContext())
+            CubeObject cubeObjectFound = await coContext.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
+            
+            if (cubeObjectFound == null)
             {
-                cubeObjectFound = context.CubeObjects.Where(co => co.Id == id).FirstOrDefault();
+                return NotFound();
             }
-            if (cubeObjectFound != null)
-            {
-                return Ok(JsonConvert.SerializeObject(cubeObjectFound));
-            }
-            else return NotFound();
+            return Ok(cubeObjectFound);
         }
 
         // GET: api/CubeObject/fromTagId/1 (currently not in use)
-        [HttpGet("[action]/{tagId}")]
-        public IActionResult FromTagId(int tagId)
+        [HttpGet("[action]/{tagId:int}")]
+        public async Task<ActionResult<IEnumerable<CubeObject>>> FromTagId(int tagId)
         {
-            List<CubeObject> allCubeObjects;
-            using (var context = new ObjectContext())
-            {
-                allCubeObjects = context.CubeObjects
-                    //.Include(co => co.ObjectTagRelations)
-                    .Where(co => co.ObjectTagRelations.Where(otr => otr.TagId == tagId).Count() > 0) //Is tagged with tagId at least once
-                    .ToList();
-            }
-            return Ok(JsonConvert.SerializeObject(allCubeObjects,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            List<CubeObject> allCubeObjects = await coContext.CubeObjects
+                //.Include(co => co.ObjectTagRelations)
+                .Where(co => co.ObjectTagRelations.Any(otr => otr.TagId == tagId)) //Is tagged with tagId at least once
+                .ToListAsync();
+
+            return Ok(allCubeObjects);
         }
 
         // GET: api/CubeObject/from2TagIds/1/2 (currently not in use)
-        [HttpGet("[action]/{tagId1}/{tagId2}")]
-        public IActionResult From2TagIds(int tagId1, int tagId2)
+        [HttpGet("[action]/{tagId1:int}/{tagId2:int}")]
+        public async Task<ActionResult<IEnumerable<CubeObject>>> From2TagIds(int tagId1, int tagId2)
         {
-            List<CubeObject> allCubeObjects;
-            using (var context = new ObjectContext())
-            {
-                allCubeObjects = context.CubeObjects
-                    .Where(co => 
-                        co.ObjectTagRelations.Where(otr => otr.TagId == tagId1).Count() > 0 &&  //Is tagged with tag1
-                        co.ObjectTagRelations.Where(otr => otr.TagId == tagId2).Count() > 0     //Is tagged with tag2
-                    ).ToList();
-            }
-            return Ok(JsonConvert.SerializeObject(allCubeObjects,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+
+            List<CubeObject> allCubeObjects = await coContext.CubeObjects
+                .Where(co => 
+                        co.ObjectTagRelations.Any(otr => otr.TagId == tagId1) &&  //Is tagged with tag1
+                        co.ObjectTagRelations.Any(otr => otr.TagId == tagId2)     //Is tagged with tag2
+                        ).ToListAsync();
+            
+        return Ok(allCubeObjects);
         }
 
         // GET: api/CubeObject/from3TagIds/1/2/3 (currently not in use)
-        [HttpGet("[action]/{tagId1}/{tagId2}/{tagId3}")]
-        public IActionResult From3TagIds(int tagId1, int tagId2, int tagId3)
+        [HttpGet("[action]/{tagId1:int}/{tagId2:int}/{tagId3:int}")]
+        public async Task<ActionResult<IEnumerable<CubeObject>>> From3TagIds(int tagId1, int tagId2, int tagId3)
         {
-            List<CubeObject> allCubeObjects;
-            using (var context = new ObjectContext())
-            {
-                allCubeObjects = context.CubeObjects
-                    .Where(co =>
-                        co.ObjectTagRelations.Where(otr => otr.TagId == tagId1).Count() > 0 &&  //Is tagged with tag1
-                        co.ObjectTagRelations.Where(otr => otr.TagId == tagId2).Count() > 0 &&  //Is tagged with tag2
-                        co.ObjectTagRelations.Where(otr => otr.TagId == tagId3).Count() > 0     //Is tagged with tag3
-                    ).ToList();
-            }
-            return Ok(JsonConvert.SerializeObject(allCubeObjects,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            List<CubeObject> allCubeObjects = await coContext.CubeObjects
+                .Where(co =>
+                        co.ObjectTagRelations.Any(otr => otr.TagId == tagId1) &&  //Is tagged with tag1
+                        co.ObjectTagRelations.Any(otr => otr.TagId == tagId2) &&  //Is tagged with tag2
+                        co.ObjectTagRelations.Any(otr => otr.TagId == tagId3)     //Is tagged with tag3
+                ).ToListAsync();
+
+            return Ok(allCubeObjects);
+
         }
 
         // GET: api/CubeObject/fromTagIdWithOTR/1 (currently not in use)
         [HttpGet("[action]/{tagId}")]
-        public IActionResult FromTagIdWithOTR(int tagId) //OTR is ObjectTagRelations
+        public async Task<ActionResult<IEnumerable<CubeObject>>> FromTagIdWithOTR(int tagId) //OTR is ObjectTagRelations
         {
-            List<CubeObject> allCubeObjects;
-            using (var context = new ObjectContext())
-            {
-                allCubeObjects = context.CubeObjects
-                    .Include(co => co.ObjectTagRelations)
-                    .Where(co => co.ObjectTagRelations.Where(otr => otr.TagId == tagId).Count() > 0) //Is tagged with tagId at least once
-                    .ToList();
-            }
-            return Ok(JsonConvert.SerializeObject(allCubeObjects,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
+            List<CubeObject> allCubeObjects = await coContext.CubeObjects
+                .Include(co => co.ObjectTagRelations)
+                .Where(co => co.ObjectTagRelations.Any(otr => otr.TagId == tagId)) //Is tagged with tagId at least once
+                .ToListAsync();
+
+            return Ok(allCubeObjects);
         }
     }
 }

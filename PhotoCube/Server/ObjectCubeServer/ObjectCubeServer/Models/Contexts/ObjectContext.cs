@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
-using System;
-using System.Configuration;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
+using ObjectCubeServer.Models.PublicClasses;
 
-namespace ObjectCubeServer.Models.DataAccess
+namespace ObjectCubeServer.Models.Contexts
 {
     /// <summary>
     /// The ObjectContext is the entrypoint to the database.
@@ -30,22 +28,11 @@ namespace ObjectCubeServer.Models.DataAccess
     /// </summary>
     public class ObjectContext : DbContext
     {
-        public ObjectContext()
-        {
-
-        }
 
         public ObjectContext(DbContextOptions<ObjectContext> options) : base(options)
         {
 
         }
-
-        public ObjectContext(string connectionString)
-        {
-            this.connectionString = connectionString;
-        }
-
-        private string connectionString;
 
         /*
          * Exposing which DBSets are available to get, add, update and delete from:
@@ -57,7 +44,9 @@ namespace ObjectCubeServer.Models.DataAccess
         public DbSet<Hierarchy> Hierarchies { get; set; }
         public DbSet<Node> Nodes { get; set; }
         public DbSet<TagType> TagTypes { get; set; }
-        
+        public DbSet<SingleObjectCell> SingleObjectCells { get; set; }
+        public DbSet<PublicCubeObject> PublicCubeObjects { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
@@ -154,38 +143,6 @@ namespace ObjectCubeServer.Models.DataAccess
 
             //Calling on model creating:
             base.OnModelCreating(modelBuilder);
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            //base.OnConfiguring(optionsBuilder);
-            OperatingSystem OS = Environment.OSVersion;
-            PlatformID platformId = OS.Platform;
-            switch (platformId)
-            {
-                case PlatformID.Unix: //Mac 
-                    if (connectionString != null)
-                    {
-                        optionsBuilder.UseNpgsql(connectionString);
-                    }
-                    else
-                    {
-                        optionsBuilder.UseNpgsql("Server = localhost; Port = 5432; Database = lscAll-rawsql; User Id = photocube; Password = postgres;");
-                    }
-                    break;
-                case PlatformID.Win32NT: //Windows
-                    if (connectionString != null)
-                    {
-                        optionsBuilder.UseSqlServer(connectionString);
-                    }
-                    else
-                    {
-                        optionsBuilder.UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = LSCWholeFinal; Trusted_Connection = True; AttachDbFileName=C:\\Databases\\LSCWholeFinal.mdf");
-                    }
-                    break;
-                default:
-                    throw new System.Exception("Please specify the path to the database");
-            }
         }
     }
 }

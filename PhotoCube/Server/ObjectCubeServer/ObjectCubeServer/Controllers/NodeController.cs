@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ObjectCubeServer.Models.DataAccess;
 using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.TagTypes;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.Collections;
+using System.Threading.Tasks;
+using ObjectCubeServer.Models.Contexts;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
@@ -18,137 +14,118 @@ namespace ObjectCubeServer.Controllers
     [ApiController]
     public class NodeController : ControllerBase
     {
+        private readonly ObjectContext coContext;
+
+        public NodeController(ObjectContext coContext)
+        {
+            this.coContext = coContext;
+        }
+
         // GET: api/Node
         [HttpGet]
-        public IActionResult Get()
+        public async Task<ActionResult<IEnumerable<Node>>> Get()
         {
-            List<Node> allNodes;
-            using (var context = new ObjectContext())
-            {
-                allNodes = context.Nodes
-                    .Include(n => n.Children)
-                    .ToList();
-            }
-            return Ok(JsonConvert.SerializeObject(allNodes));
+            List<Node> allNodes = await coContext.Nodes
+                .Include(n => n.Children)
+                .ToListAsync();
+            
+            return Ok(allNodes);
         }
 
         // GET: api/Node/5
-        [HttpGet("{id}", Name = "GetNodes")]
-        public IActionResult Get(int id)
+        [HttpGet("{id:int}", Name = "GetNodes")]
+        public async Task<ActionResult<Node>> Get(int id)
         {
-            Node nodeFound;
-            using (var context = new ObjectContext())
-            {
-                nodeFound = context.Nodes
-                    .Where(n => n.Id == id)
-                    .Include(n => n.Tag)
-                    .Include(n => n.Children)
-                        .ThenInclude(cn => cn.Tag)
-                    .FirstOrDefault();
-            }
+            Node nodeFound = await coContext.Nodes
+                .Where(n => n.Id == id)
+                .Include(n => n.Tag)
+                .Include(n => n.Children)
+                    .ThenInclude(cn => cn.Tag)
+                .FirstOrDefaultAsync();
+            
             if (nodeFound == null) { return NotFound(); }
-            else
-            {
-                nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
-                nodeFound = RecursiveAddChildrenAndTags(nodeFound);
-                return Ok(JsonConvert.SerializeObject(nodeFound,
-                new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
-            }
+
+            nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+            nodeFound = await RecursiveAddChildrenAndTags(nodeFound);
+            return Ok(nodeFound);
         }
 
         // GET: api/Node/name=wood
         [HttpGet("name={tag}")]
-        public IActionResult GetNodeByName(string tag)
+        public async Task<ActionResult<IEnumerable<Node>>> GetNodeByName(string tag)
         {
-            List<Node> nodesFound;
-            using (var context = new ObjectContext())
-            {
-                nodesFound = context.Nodes
+            List<Node> nodesFound = await coContext.Nodes
                     .Include(n => n.Tag)
                     .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tag.ToLower()))
-                    .ToList();
-            }
-
-            if (nodesFound != null)
+                    .ToListAsync();
+            
+            if (nodesFound == null) return NotFound();
+            
+            var result = new List<PublicNode>();
+            foreach (Node node in nodesFound)
             {
-                var result = new List<PublicNode>();
-                foreach (Node node in nodesFound)
+                var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
                 {
-                    var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
-                    {
-                        ParentNode = GetParentNode(node)
-                    };
-                    result.Add(publicNode);
-                }
-                return Ok(JsonConvert.SerializeObject(result));
+                    ParentNode = await GetParentNode(node)
+                };
+                result.Add(publicNode);
             }
-            return NotFound();
+            return Ok(result);
         }
 
         // GET: api/Node/123/Parent
-        [HttpGet("{nodeId}/parent")]
-        public IActionResult GetParentNode(int nodeId)
+        [HttpGet("{nodeId:int}/parent")]
+        public async Task<ActionResult<PublicNode>> GetParentNode(int nodeId)
         {
-            PublicNode parentNode;
-            using (var context = new ObjectContext())
-            {
-                var childNode = context.Nodes
-                    .Where(n => n.Id == nodeId)
-                    .FirstOrDefault();
-                parentNode = GetParentNode(childNode);
-            }
-            return Ok(JsonConvert.SerializeObject(parentNode));
+            Node childNode = await coContext.Nodes
+                    .FirstOrDefaultAsync(n => n.Id == nodeId);
+            PublicNode parentNode = await GetParentNode(childNode);
+
+            if (parentNode == null) return NotFound();
+            
+            return Ok(parentNode);
         }
 
         // GET: api/Node/123/Children
         [HttpGet("{nodeId}/children")]
-        public IActionResult GetChildNodes(int nodeId)
+        public async Task<ActionResult<IEnumerable<PublicNode>>> GetChildNodes(int nodeId)
         {
-            IEnumerable childNodes;
-            using (var context = new ObjectContext())
-            {
-                childNodes = context.Nodes
-                    .Include(n => n.Children)
-                    .Where(n => n.Id == nodeId)
-                    .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag)cn.Tag).Name)))
-                    .FirstOrDefault();
-            }
-            return Ok(JsonConvert.SerializeObject(childNodes));
+            IEnumerable<PublicNode> childNodes = await coContext.Nodes.Include(n => n.Children)
+                .Where(n => n.Id == nodeId)
+                .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag) cn.Tag).Name)))
+                .FirstOrDefaultAsync();
+
+            return Ok(childNodes);
         }
 
         #region HelperMethods:
-        private PublicNode GetParentNode(Node child)
+        private async Task<PublicNode> GetParentNode(Node child)
         {
-            PublicNode parentNode;
-            using (var context = new ObjectContext())
-            {
-                parentNode = context.Nodes
-                    .Where(n => n.Children.Contains(child))
-                    .Include(n => n.Tag)
-                    .Select(n => new PublicNode(n.Id,((AlphanumericalTag)n.Tag).Name))
-                    .FirstOrDefault();
-            }
-
+            PublicNode parentNode = await coContext.Nodes
+                .Where(n => n.Children.Contains(child))
+                .Include(n => n.Tag)
+                .Select(n => new PublicNode(n.Id,((AlphanumericalTag)n.Tag).Name))
+                .FirstOrDefaultAsync();
+            
             return parentNode;
         }
 
-        private Node RecursiveAddChildrenAndTags(Node parentNode)
+        private async Task<Node> RecursiveAddChildrenAndTags(Node parentNode)
         {
             List<Node> newChildNodes = new List<Node>();
             foreach(Node childNode in parentNode.Children)
             {
                 Node childNodeWithTagAndChildren;
-                using (var context = new ObjectContext())
-                {
-                    childNodeWithTagAndChildren = context.Nodes
-                        .Where(n => n.Id == childNode.Id)
-                        .Include(n => n.Tag)
-                        .Include(n => n.Children)
-                            .ThenInclude(cn => cn.Tag)
-                        .FirstOrDefault();
-                }
+                
+                childNodeWithTagAndChildren = await coContext.Nodes
+                    .Where(n => n.Id == childNode.Id)
+                    .Include(n => n.Tag)
+                    .Include(n => n.Children)
+                        .ThenInclude(cn => cn.Tag)
+                    .FirstOrDefaultAsync();
+                
                 childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
-                childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
+                childNodeWithTagAndChildren = await RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }
             parentNode.Children = newChildNodes;

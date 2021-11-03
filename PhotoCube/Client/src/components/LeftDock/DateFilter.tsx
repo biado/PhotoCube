@@ -24,10 +24,14 @@ import '../../css/LeftDock/DateFilter.css';
     }, []);
 
     async function FetchTagsByTagsetName () {
+        //console.log("fetching from dateFilter")
         const response = await Fetcher.FetchTagsByTagsetName(props.tagsetName);
-        const tags: Tag[] = response.map((t: Tag) => {return {Id: t.Id, Name: t.Name }});
+        //console.log("response to datefilter", response);
+        const tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name }});
         //sort tags
-        tags.sort((a,b) => parseInt(a.Name) - parseInt(b.Name));
+        //tags.forEach(t => console.log("unsorted tag", t))
+        tags.sort((a,b) => parseInt(a.name) - parseInt(b.name));
+        //tags.forEach(t => console.log("sorted tag", t))
         //format days and months
         const formattedTags = formatTags(tags);
         //set dropdown options
@@ -35,7 +39,7 @@ import '../../css/LeftDock/DateFilter.css';
     }
 
     const addFilter = (option: Tag) => {
-        const filter: Filter = createFilter(option.Name, option.Id, "date");
+        const filter: Filter = createFilter(option.name, option.id, "date");
         if (!props.activeFilters.some(af => af.Id === filter.Id)) {
             props.onFiltersChanged(filter);
             updatePrevious(filter);
@@ -45,7 +49,7 @@ import '../../css/LeftDock/DateFilter.css';
 
     const replaceFilter = (option: Tag) => {
         updatePrevious(selectedFilter);
-        const newFilter: Filter = createFilter(option.Name, option.Id, "date");
+        const newFilter: Filter = createFilter(option.name, option.id, "date");
         if (!props.activeFilters.some(af => af.Id === newFilter.Id)) {
             props.onFilterReplaced(selectedFilter!, newFilter);
             updateSelection(newFilter);
@@ -72,7 +76,7 @@ import '../../css/LeftDock/DateFilter.css';
             <select className="Date Selector" value={displayed} onChange={(e) => updateDropdown(e)}>
                 <option key={0} value={""}>{"Select "+ props.tagsetName.split(" ")[0]}</option>
                 {options.map(option =>
-                    <option key={option.Id} value={JSON.stringify(option)}>{option.Name}</option>)}
+                    <option key={option.id} value={JSON.stringify(option)}>{option.name}</option>)}
                 </select>
             <button onClick={() => onClear()}>Clear</button>
         </div>
@@ -82,8 +86,8 @@ import '../../css/LeftDock/DateFilter.css';
 //utility function 
 export const formatTags = (months: Tag[]) => {
     return months.map((tag: Tag) => {
-        if (tag.Name.length === 1) {
-            return { Name: "0".concat(tag.Name), Id: tag.Id };
+        if (tag.name.length === 1) {
+            return { name: "0".concat(tag.name), id: tag.id };
         } else {
             return tag;
         }
