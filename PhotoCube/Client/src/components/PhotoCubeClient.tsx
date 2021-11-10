@@ -47,7 +47,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
         filters={this.state.filters}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
-      currentBrowser = <GridBrowser /* cubeObjects={this.cubeObjects} */ onBrowsingModeChanged={this.onBrowsingModeChanged}/>
+      currentBrowser = <GridBrowser filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Card){
       currentBrowser = <CardBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }
@@ -103,7 +103,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
    */
   onFilterRemoved = (filterId : number) => {
     let callback = () => { if(this.CubeBrowser.current){ this.CubeBrowser.current.RecomputeCells(); }}
-    this.setState({filters : this.state.filters.filter(filter => filter.Id !== filterId)}, callback);
+    this.setState({filters : this.state.filters.filter(filter => filter.id !== filterId)}, callback);
   }
 
   /**
@@ -119,7 +119,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   */
   onFilterReplaced = (oldFilter:Filter, newFilter: Filter) => {
     let callback = () => { if (this.CubeBrowser.current) { this.CubeBrowser.current.RecomputeCells(); } }
-    let newFilters: Filter[] = this.state.filters.filter(filter => filter.Id !== oldFilter.Id);
+    let newFilters: Filter[] = this.state.filters.filter(filter => filter.id !== oldFilter.id);
     newFilters.unshift(newFilter);
     this.setState({ filters: newFilters.flat() }, callback);
   }
@@ -188,6 +188,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
    */
   onOpenCubeInCardMode = (cubeObjects: CubeObject[]) => {
     console.log("Opening cube in card mode:");
+    console.log("from opencubeincardmode: ", cubeObjects)
     this.CubeBrowserBrowsingState = this.CubeBrowser.current!.GetCurrentBrowsingState();
     this.cubeObjects = cubeObjects;
     this.setState({BrowsingMode: BrowsingModes.Card});

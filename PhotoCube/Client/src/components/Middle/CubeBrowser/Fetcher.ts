@@ -42,6 +42,7 @@ export default class Fetcher {
     }
     console.log("querystring:", queryString);
     this.latestQuery = queryString;
+    console.log("latestquery: ", this.latestQuery)
     try {
       const response = await fetch(queryString);
       const data = await response.json();
@@ -60,16 +61,16 @@ export default class Fetcher {
     for (var filter of filters) {
       switch (filter.type) {
         case "tagset":
-          result.push({ type: "tagset", ids: [filter.Id] });
+          result.push({ type: "tagset", ids: [filter.id] });
           break;
         case "node":
-          result.push({ type: "node", ids: [filter.Id] });
+          result.push({ type: "node", ids: [filter.id] });
           break;
         case "day of week":
-          dowfilter.ids.push(filter.Id);
+          dowfilter.ids.push(filter.id);
           break;
         case "tag":
-          semfilter.ids.push(filter.Id);
+          semfilter.ids.push(filter.id);
           break;
         case "time":
           let name: string = filter.name;
@@ -77,7 +78,7 @@ export default class Fetcher {
           result.push({ type: "timerange", ids: [3], ranges: [ranges] });
           break;
         default:
-          result.push({ type: "tag", ids: [filter.Id] });
+          result.push({ type: "tag", ids: [filter.id] });
           break;
       }
     }

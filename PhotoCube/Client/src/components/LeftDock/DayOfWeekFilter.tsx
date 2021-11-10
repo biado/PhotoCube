@@ -84,7 +84,7 @@ export default class DayOfWeekFilter extends React.Component<{
         } else {
             //Remove filter
             const filterId = parseInt(e.target.value);
-            if (this.props.activeFilters.some(af => af.Id === filterId)) {
+            if (this.props.activeFilters.some(af => af.id === filterId)) {
                 this.props.onFilterRemoved(filterId);
             }
         }

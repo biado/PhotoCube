@@ -506,7 +506,7 @@ export default class CubeBrowser extends React.Component<{
         axis.PickedDimension = dimension;
 
         switch(dimension.type){
-            case "hierarchy":
+            case "node":
                 let rootNode: HierarchyNode = await Fetcher.FetchNode(dimension.id);
                 axis.TitleString = rootNode.tag.name + " (hierarchy)";
                 axis.AddHierarchy(rootNode, this.addTextCallback, this.addLineCallback);
@@ -560,7 +560,7 @@ export default class CubeBrowser extends React.Component<{
 
         //Exclude projected filters in API call
         const filters: Filter[] = this.props.filters.filter(f => 
-            f.Id !== this.xAxis.Id && f.Id !== this.yAxis.Id && f.Id !== this.zAxis.Id);
+            f.id !== this.xAxis.Id && f.id !== this.yAxis.Id && f.id !== this.zAxis.Id);
 
         let newCells: Cell[] = [];
             try {

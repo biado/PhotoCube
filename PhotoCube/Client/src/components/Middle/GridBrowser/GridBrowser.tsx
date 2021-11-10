@@ -4,6 +4,7 @@ import CubeObject from "../CubeBrowser/CubeObject";
 import { BrowsingModes } from "../../RightDock/BrowsingModeChanger";
 import Fetcher from "../CubeBrowser/Fetcher";
 import { Image } from "../../../interfaces/types";
+import { Filter } from "../../Filter";
 
 /**
  * The GridBrowser allows the user to browse a collection of photos side by side in a grid to get an overview.
@@ -11,14 +12,17 @@ import { Image } from "../../../interfaces/types";
  * this.props.onBrowsingModeChanged is a callback funtion that tells parent component that the browsing mode has been changed.
  */
 interface FuncProps {
+  cubeObjects: CubeObject[];
   onBrowsingModeChanged: (browsingMode: BrowsingModes) => void;
+  filters: Filter[];
 }
 
 const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
-  const [images, setImages] = useState<Image[]>([]);
+const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
     fetchAllImages();
+    console.log("Filters:", props.filters)
     document.addEventListener("keydown", (e) => onKeydown(e));
     return () => {
       document.removeEventListener("keydown", (e) => onKeydown(e));

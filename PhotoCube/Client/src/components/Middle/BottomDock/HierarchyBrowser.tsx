@@ -108,12 +108,12 @@ export const HierarchyBrowser =
 
     const onSelect = (node: Node) => {
         updateSelection(node);
-        disableButton(props.activeFilters.some(af => af.Id === node.id));
+        disableButton(props.activeFilters.some(af => af.id === node.id));
     }
 
     const onButtonClick = () => {
-        const filter: Filter = createFilter(selectedNode!.name, selectedNode!.id, "hierarchy");
-        if (!props.activeFilters.some(af => af.Id === filter.Id)) {
+        const filter: Filter = createFilter(selectedNode!.name, selectedNode!.id, "node");
+        if (!props.activeFilters.some(af => af.id === filter.id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
         }

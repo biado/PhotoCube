@@ -40,7 +40,7 @@ import '../../css/LeftDock/DateFilter.css';
 
     const addFilter = (option: Tag) => {
         const filter: Filter = createFilter(option.name, option.id, "date");
-        if (!props.activeFilters.some(af => af.Id === filter.Id)) {
+        if (!props.activeFilters.some(af => af.id === filter.id)) {
             props.onFiltersChanged(filter);
             updatePrevious(filter);
             updateSelection(filter);
@@ -50,7 +50,7 @@ import '../../css/LeftDock/DateFilter.css';
     const replaceFilter = (option: Tag) => {
         updatePrevious(selectedFilter);
         const newFilter: Filter = createFilter(option.name, option.id, "date");
-        if (!props.activeFilters.some(af => af.Id === newFilter.Id)) {
+        if (!props.activeFilters.some(af => af.id === newFilter.id)) {
             props.onFilterReplaced(selectedFilter!, newFilter);
             updateSelection(newFilter);
         }
@@ -64,7 +64,7 @@ import '../../css/LeftDock/DateFilter.css';
 
     const onClear = () => {
         if (selectedFilter !== null) {
-            props.onFilterRemoved(selectedFilter.Id);
+            props.onFilterRemoved(selectedFilter.id);
             updatePrevious(null);
             updateSelection(null);
             updateDisplay("");
