@@ -117,6 +117,29 @@ export default class Fetcher {
     }
   }
 
+  static async FetchAllImagesWithProjection(s : string) {
+    try {
+       //const response = await fetch(`${Fetcher.baseUrl}${s}&all=[]`)
+       console.log(s);
+       const response = await fetch(s)
+       const data = await response.json()
+       console.log("From fetchwithProjection", data)
+       return data 
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  static async SubmitImage(fileUri: string) {
+    try {
+       const response = await fetch(`https://vbs.itec.aau.at:9443/api/v1/submit?item=${fileUri.slice(11, -4)}&session=${process.env.REACT_APP_SESSIONID}`)
+       const data = await response.json()
+       return data
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   /**
    * Returns all hierarchies.
    */

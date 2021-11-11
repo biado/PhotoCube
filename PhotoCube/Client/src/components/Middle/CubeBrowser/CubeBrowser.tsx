@@ -27,7 +27,7 @@ export default class CubeBrowser extends React.Component<{
         onFileCountChanged: (fileCount: number) => void,
         previousBrowsingState: BrowsingState|null,
         onOpenCubeInCardMode: (cubeObjects: CubeObject[]) => void,
-        onOpenCubeInGridMode: (cubeObjects: CubeObject[]) => void,
+        onOpenCubeInGridMode: (cubeObjects: CubeObject[], info: string, obj: object, s: string) => void,
         filters: Filter[]
     }>{
 
@@ -36,6 +36,9 @@ export default class CubeBrowser extends React.Component<{
         infoText: "Hover with mouse on a cube to see info",
         showContextMenu: false,
         showErrorMessage: false,
+        infostring: "",
+        obj: {},
+        s: "",
     };
 
     render(){
@@ -300,9 +303,119 @@ export default class CubeBrowser extends React.Component<{
             let y = (me.clientY + 20) + 'px';
             conMenu!.style.top = y;
             conMenu!.style.left = x;
-            this.setState({showContextMenu: true});
+            //this.setState({showContextMenu: true});
             this.contextMenuCubeObjects = intersects[0].object.userData.cubeObjects;
+            console.log("Userdata:", intersects[0].object.userData)
+            let xDefined : boolean = this.xAxis.TitleString !== "X";
+            let yDefined : boolean = this.yAxis.TitleString !== "Y";
+            let zDefined : boolean = this.zAxis.TitleString !== "Z";
+            let infoText : string = "Number of photos: " + intersects[0].object.userData.size;
+            let arrx: number[] = []; 
+            let arry: number[] = []; 
+            let arrz: number[] = []; 
+            let ob = {
+                size: 0,
+                isProjected: false,
+                x: {
+                    parentType: "",
+                    parentId: 0,
+                    type: "",
+                    ids: arrx
+                },
+                y: {
+                    parentType: "",
+                    parentId: 0,
+                    type: "",
+                    ids: arry
+                },
+                z: {
+                    parentType: "",
+                    parentId: 0,
+                    type: "",
+                    ids: arrz  
+                } 
+                 
+            }
+            ob.size = intersects[0].object.userData.size;
+            if(xDefined){
+                ob.isProjected = true
+                if(intersects[0].object.userData.x !== 0 && this.xAxis.AxisType === AxisTypeEnum.Tagset){
+                    infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].id)
+                    ob.x.parentType = this.xAxis.AxisType
+                    ob.x.parentId = this.xAxis.Id
+                    ob.x.type = "tag"
+                    ob.x.ids.push(this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].id)
+                }else if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
+                    infoText += ",  X: " + (this.xAxis.TitleString + ": " + this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].id)
+                    ob.x.parentType = this.xAxis.AxisType
+                    ob.x.parentId = this.xAxis.Id 
+                    ob.x.type = "node"
+                    ob.x.ids.push(this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].id)
+                }
+                else if(this.xAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
+                    infoText += ",  X: " + (this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].id)
+                    ob.x.parentType = this.xAxis.AxisType
+                    ob.x.parentId = this.xAxis.Id
+                    ob.x.type = "hierarchyLeaf"
+                    ob.x.ids.push(this.xAxis.Hierarchies[parseInt(intersects[0].object.userData.x) - 1].id)
+                }
+            }
+            if(yDefined){
+                ob.isProjected = true
+                if(intersects[0].object.userData.y !== 0 && this.yAxis.AxisType === AxisTypeEnum.Tagset){
+                    infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].id);
+                    ob.y.parentType = this.yAxis.AxisType
+                    ob.y.parentId = this.yAxis.Id
+                    ob.y.type = "tag"
+                    ob.y.ids.push(this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].id)
+                }else if(this.yAxis.AxisType === AxisTypeEnum.Hierarchy){
+                    infoText += ",  Y: " + (this.yAxis.TitleString + ": " + this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].id);
+                    ob.y.parentType = this.yAxis.AxisType
+                    ob.y.parentId = this.yAxis.Id
+                    ob.y.type = "node"
+                    ob.y.ids.push(this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].id)
+                }else if(this.yAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
+                    infoText += ",  Y: " + (this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].id)
+                    ob.y.parentType = this.yAxis.AxisType
+                    ob.y.parentId = this.yAxis.Id
+                    ob.y.type = "hierarchyLeaf"
+                    ob.y.ids.push(this.yAxis.Hierarchies[parseInt(intersects[0].object.userData.y) - 1].id)
+                }
+            }
+            if(zDefined){
+                ob.isProjected = true
+                if(intersects[0].object.userData.z !== 0 && this.zAxis.AxisType === AxisTypeEnum.Tagset){
+                    infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].id);
+                    ob.z.parentType = this.zAxis.AxisType
+                    ob.z.parentId = this.zAxis.Id
+                    ob.z.type = "tag"
+                    ob.z.ids.push(this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].id)
+                }else if(this.zAxis.AxisType === AxisTypeEnum.Hierarchy){
+                    infoText += ",  Z: " + (this.zAxis.TitleString + ": " + this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].id);
+                    ob.z.parentType = this.zAxis.AxisType
+                    ob.z.parentId = this.zAxis.Id
+                    ob.z.type = "node"
+                    ob.z.ids.push(this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].id)
+                }else if(this.zAxis.AxisType === AxisTypeEnum.HierarchyLeaf){
+                    infoText += ",  Z: " + (this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].id)
+                    ob.z.parentType = this.zAxis.AxisType
+                    ob.z.parentId = this.zAxis.Id
+                    ob.z.type = "hierarchyLeaf"
+                    ob.z.ids.push(this.zAxis.Hierarchies[parseInt(intersects[0].object.userData.z) - 1].id)
+                }
+            }
+            this.setState({infostring:infoText})
+            this.setState({obj: ob})
+         /* console.log("infotext", infoText)
+            console.log("THE OBJECT", this.state.obj)
+            console.log(this.state.infostring) 
+            console.log("Filters from cubebrowser", this.props.filters) */
+            const s = `https://localhost:5001/api/cell?filters=[{"type": "tag", "ids": [184]},{"type": "node", "ids": [63]}]&all=[]`
+            this.setState({s: s})
+        }else{
+            this.setState({infostring:""})
         }
+        this.onOpenCubeInGridMode()
         return false;
     }
 
@@ -380,7 +493,7 @@ export default class CubeBrowser extends React.Component<{
      * Handler to rightclick - Open cube in grid mode.
      */
     private onOpenCubeInGridMode(){
-        this.props.onOpenCubeInGridMode(this.contextMenuCubeObjects);
+        this.props.onOpenCubeInGridMode(this.contextMenuCubeObjects, this.state.infostring, this.state.obj, this.state.s);
     }
 
     /**

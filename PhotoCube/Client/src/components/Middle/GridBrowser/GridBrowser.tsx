@@ -15,19 +15,68 @@ interface FuncProps {
   cubeObjects: CubeObject[];
   onBrowsingModeChanged: (browsingMode: BrowsingModes) => void;
   filters: Filter[];
+  inforstring: string;
+  s: string;
+  //obj: {};
+  obj: {
+    size: number;
+    isProjected: boolean;
+    x: {
+      parentType: "";
+      parentId: 0;
+      type: "";
+      ids: [];
+    };
+    y: {
+      parentType: "";
+      parentId: 0;
+      type: "";
+      ids: [];
+    };
+    z: {
+      parentType: "";
+      parentId: 0;
+      type: "";
+      ids: [];
+    };
+  };
 }
 
 const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
-const [images, setImages] = useState<Image[]>([]);
+  const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
-    fetchAllImages();
-    console.log("Filters:", props.filters)
+    if (!props.obj.isProjected) {
+      fetchAllImages();
+    } else {
+      fetchWithProjection();
+    }
+    props.filters.forEach(f => console.log(f.id))
+    console.log("Filters:", props.filters);
+    console.log("the object: ", props.obj);
     document.addEventListener("keydown", (e) => onKeydown(e));
     return () => {
       document.removeEventListener("keydown", (e) => onKeydown(e));
     };
   }, []);
+
+/*   const stringParser = () => {
+    const s = `https://localhost:5001/api/cell?filters=[{"type": "tag", "ids": [184]},{"type": "node", "ids": [63]}]&all=[]`
+    const arr = [props.obj.x.parentId, props.obj.y.parentId, props.obj.z.parentId]
+    const arr2 = Number[]
+    props.filters.forEach(f => arr2.push(f.id))
+    let result = arr2.every(function (element: { id: number; }) {return arr.includes(element)})
+    return s
+  } */
+
+  const fetchWithProjection = async () => {
+    try {
+      const response = await Fetcher.FetchAllImagesWithProjection(props.s)
+      setImages(response)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const fetchAllImages = async () => {
     try {
@@ -37,6 +86,17 @@ const [images, setImages] = useState<Image[]>([]);
       console.error(error);
     }
   };
+
+  const submitImage = async (fileUri: string) => {
+    try {
+      Fetcher.SubmitImage(fileUri).then((r) => {
+        console.log(r);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const onKeydown = (e: KeyboardEvent) => {
     console.log(e.key);
     if (e.key === "Escape") {
@@ -47,13 +107,25 @@ const [images, setImages] = useState<Image[]>([]);
   return (
     <div className="grid-item">
       <div className="imageContainer">
-        {images.slice(0, 20).map((image) => (
-          <img
-            key={image.id}
-            className="image"
-            src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
-          ></img>
-        ))}
+        {images.length > 20
+          ? images
+              .slice(0, 20)
+              .map((image) => (
+                <img
+                  onDoubleClick={() => submitImage(image.fileURI)}
+                  key={image.id}
+                  className="image"
+                  src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
+                ></img>
+              ))
+          : images.map((image) => (
+              <img
+                onDoubleClick={() => submitImage(image.fileURI)}
+                key={image.id}
+                className="image"
+                src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
+              ></img>
+            ))}
       </div>
     </div>
   );
