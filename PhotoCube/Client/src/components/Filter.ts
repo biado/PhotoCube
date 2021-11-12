@@ -3,6 +3,6 @@
  */
  export interface Filter{
     type: string,
-    Id: number, 
+    id: number, 
     name: string
 }

@@ -52,6 +52,19 @@ export default class Fetcher {
     }
   }
 
+  static async FetchAllImagesWithProjection(filters: Filter[]) {
+    let queryString: string = this.baseUrl + "/cell/?";
+    queryString += "&filters=" + this.parseFilters(filters!) + "&all=[]";
+    try {
+      const response = await fetch(queryString);
+      const data = await response.json();
+      console.log("cubedata", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   private static parseFilters(filters: Filter[]): string {
     let sorted: Filter[] = filters.sort((a, b) => (a.type > b.type ? 1 : -1));
     var result: any[] = [];
@@ -60,16 +73,16 @@ export default class Fetcher {
     for (var filter of filters) {
       switch (filter.type) {
         case "tagset":
-          result.push({ type: "tagset", ids: [filter.Id] });
+          result.push({ type: "tagset", ids: [filter.id] });
           break;
         case "node":
-          result.push({ type: "node", ids: [filter.Id] });
+          result.push({ type: "node", ids: [filter.id] });
           break;
         case "day of week":
-          dowfilter.ids.push(filter.Id);
+          dowfilter.ids.push(filter.id);
           break;
         case "tag":
-          semfilter.ids.push(filter.Id);
+          semfilter.ids.push(filter.id);
           break;
         case "time":
           let name: string = filter.name;
@@ -77,7 +90,7 @@ export default class Fetcher {
           result.push({ type: "timerange", ids: [3], ranges: [ranges] });
           break;
         default:
-          result.push({ type: "tag", ids: [filter.Id] });
+          result.push({ type: "tag", ids: [filter.id] });
           break;
       }
     }
@@ -97,7 +110,6 @@ export default class Fetcher {
    * @param axis
    */
   private static parseAxis(axis: Axis): string {
-    console.log(axis.TitleString);
     return JSON.stringify({
       type: axis.AxisType,
       id: axis.Id,
@@ -105,7 +117,6 @@ export default class Fetcher {
   }
 
   static async FetchAllImages() {
-    console.log("from fetchallimages", Fetcher.latestQuery + "&all=[]");
     try {
       const response = await fetch(Fetcher.latestQuery + "&all=[]");
       const data = await response.json();
@@ -113,6 +124,18 @@ export default class Fetcher {
       return data;
     } catch (error) {
       console.error(error);
+    }
+  }
+
+  
+
+  static async SubmitImage(fileUri: string) {
+    try {
+       const response = await fetch(`https://vbs.itec.aau.at:9443/api/v1/submit?item=${fileUri.slice(11, -4)}&session=${process.env.REACT_APP_SESSIONID}`)
+       const data = await response.json()
+       return data
+    } catch (error) {
+      console.error(error)
     }
   }
 
@@ -156,13 +179,11 @@ export default class Fetcher {
    */
 
   static async FetchTagsByTagsetName(tagsetName: string) {
-    console.log(Fetcher.baseUrl + "/tagset/name=" + tagsetName);
     try {
       const response = await fetch(
         Fetcher.baseUrl + "/tagset/name=" + tagsetName
       );
       const data = await response.json();
-      //console.log(data)
       return data;
     } catch (error) {
       console.error(error);
@@ -215,10 +236,8 @@ export default class Fetcher {
   static async FetchChildNodes(nodeId: number) {
     try {
       const call = Fetcher.baseUrl + "/node/" + nodeId + "/children";
-      //console.log("call from fetchchildnodes", call)
       const response = await fetch(call);
       const data = await response.json();
-      //console.log("from fetchchildnodes", data)
       return data;
     } catch (error) {
       console.error(error);
@@ -275,8 +294,6 @@ export default class Fetcher {
 
   static async FetchTagsWithCubeObjectId(cubeObjectId: number) {
     try {
-      const call = Fetcher.baseUrl + "/tag?cubeObjectId=" + cubeObjectId;
-      console.log(call);
       const response = await fetch(
         Fetcher.baseUrl + "/tag?cubeObjectId=" + cubeObjectId
       );
