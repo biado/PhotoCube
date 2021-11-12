@@ -35,10 +35,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
 
   CubeBrowserBrowsingState : BrowsingState|null = null;
   cubeObjects : CubeObject[] = [];
-  infostring : string | any;
-  obj : object | any;
-  s: string|any;
   projectedFilters : Filter[] = [];
+  isProjected: boolean | any;
 
   render() {
     //Conditional rendering:
@@ -51,7 +49,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
         filters={this.state.filters}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
-      currentBrowser = <GridBrowser projectedFilters={this.projectedFilters} s={this.s} obj={this.obj} inforstring={this.infostring} filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
+      currentBrowser = <GridBrowser isProjected={this.isProjected} projectedFilters={this.projectedFilters} filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Card){
       currentBrowser = <CardBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }
@@ -192,7 +190,6 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
    */
   onOpenCubeInCardMode = (cubeObjects: CubeObject[]) => {
     console.log("Opening cube in card mode:");
-    console.log("from opencubeincardmode: ", cubeObjects)
     this.CubeBrowserBrowsingState = this.CubeBrowser.current!.GetCurrentBrowsingState();
     this.cubeObjects = cubeObjects;
     this.setState({BrowsingMode: BrowsingModes.Card});
@@ -202,14 +199,12 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   /**
    * Can be called from sub-components to open CubeObject array in GridMode.
    */
-  onOpenCubeInGridMode = (cubeObjects: CubeObject[], infostring: string, obj: object, s: string, projectedFilters: Filter[]) => {
+  onOpenCubeInGridMode = (cubeObjects: CubeObject[], projectedFilters: Filter[], isProjected: boolean) => {
     console.log("Opening cube in grid mode:");
     this.CubeBrowserBrowsingState = this.CubeBrowser.current!.GetCurrentBrowsingState();
     this.cubeObjects = cubeObjects;
-    this.infostring = infostring;
-    this.obj = obj;
-    this.s = s;
     this.projectedFilters = projectedFilters;
+    this.isProjected = isProjected;
     this.setState({BrowsingMode: BrowsingModes.Grid});
     this.rightDock.current!.ChangeBrowsingMode(BrowsingModes.Grid);
   }

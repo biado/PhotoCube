@@ -40,17 +40,10 @@ export default class DayOfWeekFilter extends React.Component<{
      * Fetches tags in Day of Week tagset from the server, and presents them with a checkbox.
      */
     private async renderDaysOfWeek() {
-        //console.log("fetching from dayOfTheWeekFilter")
         const response = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
-        //console.log("response to dayoftheweekfilet", response)
         const DOW: Tag[] = response;
-        //DOW.forEach(d => console.log("dow", d))
         DOW.sort((a,b) => parseInt(a.name) - parseInt(b.name));
-        //DOW.forEach(d => console.log("dow", d))
         this.setState({daysOfWeek: DOW})
-       /*  this.state.daysOfWeek.forEach(day => {
-            console.log("this is a day", day)
-        }) */
     }
 
     /**

@@ -30,10 +30,8 @@ export default class CubeBrowser extends React.Component<{
     onOpenCubeInCardMode: (cubeObjects: CubeObject[]) => void;
     onOpenCubeInGridMode: (
         cubeObjects: CubeObject[],
-        info: string,
-        obj: object,
-        s: string,
         projectedFilters: Filter[],
+        isProjected: boolean,
     ) => void;
     filters: Filter[];
 }> {
@@ -46,6 +44,7 @@ export default class CubeBrowser extends React.Component<{
         obj: {},
         s: "",
         projectedFilters: [],
+        isProjected: false,
     };
 
     render() {
@@ -404,57 +403,18 @@ export default class CubeBrowser extends React.Component<{
             conMenu!.style.left = x;
             //this.setState({showContextMenu: true});
             this.contextMenuCubeObjects = intersects[0].object.userData.cubeObjects;
-            console.log("Userdata:", intersects[0].object.userData);
+            //console.log("Userdata:", intersects[0].object.userData);
             let xDefined: boolean = this.xAxis.TitleString !== "X";
             let yDefined: boolean = this.yAxis.TitleString !== "Y";
             let zDefined: boolean = this.zAxis.TitleString !== "Z";
-            let infoText: string =
-                "Number of photos: " + intersects[0].object.userData.size;
-            let arrx: number[] = [];
-            let arry: number[] = [];
-            let arrz: number[] = [];
-            let ob = {
-                size: 0,
-                isProjected: false,
-                x: {
-                    parentType: "",
-                    parentId: 0,
-                    type: "",
-                    ids: arrx,
-                },
-                y: {
-                    parentType: "",
-                    parentId: 0,
-                    type: "",
-                    ids: arry,
-                },
-                z: {
-                    parentType: "",
-                    parentId: 0,
-                    type: "",
-                    ids: arrz,
-                },
-            };
-            ob.size = intersects[0].object.userData.size;
             let projectedFilter: Filter[] = [];
+            let filtersAreProjected = false;
             if (xDefined) {
-                ob.isProjected = true;
+                filtersAreProjected = true;
                 if (
                     intersects[0].object.userData.x !== 0 &&
                     this.xAxis.AxisType === AxisTypeEnum.Tagset
                 ) {
-                    infoText +=
-                        ",  X: " +
-                        (this.xAxis.TitleString +
-                            ": " +
-                            this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1]
-                                .id);
-                    ob.x.parentType = this.xAxis.AxisType;
-                    ob.x.parentId = this.xAxis.Id;
-                    ob.x.type = "tag";
-                    ob.x.ids.push(
-                        this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].id
-                    );
                     const xfilter: Filter = createFilter(
                         this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].name,
                         this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].id,
@@ -462,21 +422,6 @@ export default class CubeBrowser extends React.Component<{
                     );
                     projectedFilter.push(xfilter);
                 } else if (this.xAxis.AxisType === AxisTypeEnum.Hierarchy) {
-                    infoText +=
-                        ",  X: " +
-                        (this.xAxis.TitleString +
-                            ": " +
-                            this.xAxis.Hierarchies[
-                                parseInt(intersects[0].object.userData.x) - 1
-                            ].id);
-                    ob.x.parentType = this.xAxis.AxisType;
-                    ob.x.parentId = this.xAxis.Id;
-                    ob.x.type = "node";
-                    ob.x.ids.push(
-                        this.xAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.x) - 1
-                        ].id
-                    );
                     const xfilter: Filter = createFilter(
                         this.xAxis.Hierarchies[
                             parseInt(intersects[0].object.userData.x) - 1
@@ -488,39 +433,15 @@ export default class CubeBrowser extends React.Component<{
                     );
                     projectedFilter.push(xfilter);
                 } else if (this.xAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
-                    infoText +=
-                        ",  X: " +
-                        this.xAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.x) - 1
-                        ].id;
-                    ob.x.parentType = this.xAxis.AxisType;
-                    ob.x.parentId = this.xAxis.Id;
-                    ob.x.type = "hierarchyLeaf";
-                    ob.x.ids.push(
-                        this.xAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.x) - 1
-                        ].id
-                    );
+                    //what to do in this case, and what is this case??
                 }
             }
             if (yDefined) {
-                ob.isProjected = true;
+                filtersAreProjected = true;
                 if (
                     intersects[0].object.userData.y !== 0 &&
                     this.yAxis.AxisType === AxisTypeEnum.Tagset
                 ) {
-                    infoText +=
-                        ",  Y: " +
-                        (this.yAxis.TitleString +
-                            ": " +
-                            this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1]
-                                .id);
-                    ob.y.parentType = this.yAxis.AxisType;
-                    ob.y.parentId = this.yAxis.Id;
-                    ob.y.type = "tag";
-                    ob.y.ids.push(
-                        this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].id
-                    );
                     const yfilter: Filter = createFilter(
                         this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].name,
                         this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].id,
@@ -528,21 +449,6 @@ export default class CubeBrowser extends React.Component<{
                     );
                     projectedFilter.push(yfilter);
                 } else if (this.yAxis.AxisType === AxisTypeEnum.Hierarchy) {
-                    infoText +=
-                        ",  Y: " +
-                        (this.yAxis.TitleString +
-                            ": " +
-                            this.yAxis.Hierarchies[
-                                parseInt(intersects[0].object.userData.y) - 1
-                            ].id);
-                    ob.y.parentType = this.yAxis.AxisType;
-                    ob.y.parentId = this.yAxis.Id;
-                    ob.y.type = "node";
-                    ob.y.ids.push(
-                        this.yAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.y) - 1
-                        ].id
-                    );
                     const yfilter: Filter = createFilter(
                         this.yAxis.Hierarchies[
                             parseInt(intersects[0].object.userData.y) - 1
@@ -554,40 +460,15 @@ export default class CubeBrowser extends React.Component<{
                     );
                     projectedFilter.push(yfilter);
                 } else if (this.yAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
-                    infoText +=
-                        ",  Y: " +
-                        this.yAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.y) - 1
-                        ].id;
-                    ob.y.parentType = this.yAxis.AxisType;
-                    ob.y.parentId = this.yAxis.Id;
-                    ob.y.type = "hierarchyLeaf";
-                    ob.y.ids.push(
-                        this.yAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.y) - 1
-                        ].id
-                    );
-                    //const yfilter: Filter = createFilter()
+                    //what to do in this case, and what is this case??
                 }
             }
             if (zDefined) {
-                ob.isProjected = true;
+                filtersAreProjected = true;
                 if (
                     intersects[0].object.userData.z !== 0 &&
                     this.zAxis.AxisType === AxisTypeEnum.Tagset
                 ) {
-                    infoText +=
-                        ",  Z: " +
-                        (this.zAxis.TitleString +
-                            ": " +
-                            this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1]
-                                .id);
-                    ob.z.parentType = this.zAxis.AxisType;
-                    ob.z.parentId = this.zAxis.Id;
-                    ob.z.type = "tag";
-                    ob.z.ids.push(
-                        this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].id
-                    );
                     const zfilter: Filter = createFilter(
                         this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].name,
                         this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].id,
@@ -595,21 +476,6 @@ export default class CubeBrowser extends React.Component<{
                     );
                     projectedFilter.push(zfilter);
                 } else if (this.zAxis.AxisType === AxisTypeEnum.Hierarchy) {
-                    infoText +=
-                        ",  Z: " +
-                        (this.zAxis.TitleString +
-                            ": " +
-                            this.zAxis.Hierarchies[
-                                parseInt(intersects[0].object.userData.z) - 1
-                            ].id);
-                    ob.z.parentType = this.zAxis.AxisType;
-                    ob.z.parentId = this.zAxis.Id;
-                    ob.z.type = "node";
-                    ob.z.ids.push(
-                        this.zAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.z) - 1
-                        ].id
-                    );
                     const zfilter: Filter = createFilter(
                         this.zAxis.Hierarchies[
                             parseInt(intersects[0].object.userData.z) - 1
@@ -621,34 +487,12 @@ export default class CubeBrowser extends React.Component<{
                     );
                     projectedFilter.push(zfilter);
                 } else if (this.zAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
-                    infoText +=
-                        ",  Z: " +
-                        this.zAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.z) - 1
-                        ].id;
-                    ob.z.parentType = this.zAxis.AxisType;
-                    ob.z.parentId = this.zAxis.Id;
-                    ob.z.type = "hierarchyLeaf";
-                    ob.z.ids.push(
-                        this.zAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.z) - 1
-                        ].id
-                    );
-                    //const zfilter: Filter = createFilter()
+                    //what to do in this case, and what is this case??
                 }
             }
-            this.setState({ infostring: infoText });
-            this.setState({ obj: ob });
             this.setState({ projectedFilters: projectedFilter })
-            /* console.log("infotext", infoText)
-                  console.log("THE OBJECT", this.state.obj)
-                  console.log(this.state.infostring) 
-                  console.log("Filters from cubebrowser", this.props.filters) */
-            const s = `https://localhost:5001/api/cell?filters=[{"type": "tag", "ids": [184]},{"type": "node", "ids": [63]}]&all=[]`;
-            this.setState({ s: s });
-        } else {
-            this.setState({ infostring: "" });
-        }
+            this.setState({isProjected : filtersAreProjected})
+        } 
         this.onOpenCubeInGridMode();
         return false;
     };
@@ -782,10 +626,8 @@ export default class CubeBrowser extends React.Component<{
     private onOpenCubeInGridMode() {
         this.props.onOpenCubeInGridMode(
             this.contextMenuCubeObjects,
-            this.state.infostring,
-            this.state.obj,
-            this.state.s,
-            this.state.projectedFilters
+            this.state.projectedFilters,
+            this.state.isProjected,
         );
     }
 
@@ -891,7 +733,6 @@ export default class CubeBrowser extends React.Component<{
     private addCubeCallback = (imageUrl: string, aPosition: Position) => {
         //If image is already loaded previously, get it, otherwise load it:
         let imageMaterial: THREE.MeshBasicMaterial;
-        //console.log(imageUrl);
         if (this.boxTextures.has(imageUrl)) {
             imageMaterial = this.boxTextures.get(imageUrl)!;
         } else {
@@ -1175,8 +1016,6 @@ export default class CubeBrowser extends React.Component<{
         //Fetch cells based on which axis are defined:
 
         this.cells = newCells;
-
-        //console.log(this.cells.length)
 
         console.log("Done computing cells");
 

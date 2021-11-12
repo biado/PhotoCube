@@ -15,48 +15,19 @@ interface FuncProps {
   cubeObjects: CubeObject[];
   onBrowsingModeChanged: (browsingMode: BrowsingModes) => void;
   filters: Filter[];
-  inforstring: string;
-  s: string;
   projectedFilters: Filter[];
-  obj: {
-    size: number;
-    isProjected: boolean;
-    x: {
-      parentType: "";
-      parentId: 0;
-      type: "";
-      ids: [];
-    };
-    y: {
-      parentType: "";
-      parentId: 0;
-      type: "";
-      ids: [];
-    };
-    z: {
-      parentType: "";
-      parentId: 0;
-      type: "";
-      ids: [];
-    };
-  };
+  isProjected: boolean; 
 }
 
 const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   const [images, setImages] = useState<Image[]>([]);
 
-  const [filters, setFilters] = useState<any[]>([]);
-
   useEffect(() => {
-    if (!props.obj.isProjected) {
+    if (!props.isProjected) {
       fetchAllImages();
     } else {
       fetchWithProjection();
     }
-    props.filters.forEach(f => console.log(f.id))
-    console.log("Filters:", props.filters);
-    console.log("the object: ", props.obj);
-    console.log("projectyed fiulters", props.projectedFilters)
     document.addEventListener("keydown", (e) => onKeydown(e));
     return () => {
       document.removeEventListener("keydown", (e) => onKeydown(e));
@@ -65,7 +36,6 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
 
   const fetchWithProjection = async () => {
     const allFilters = [...props.filters, ...props.projectedFilters]
-    console.log(allFilters)
     try {
       const response = await Fetcher.FetchAllImagesWithProjection(allFilters)
       setImages(response)
@@ -104,9 +74,9 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   return (
     <div className="grid-item">
       <div className="imageContainer">
-        {images.length > 20
+        {images.length > 100
           ? images
-              .slice(0, 20)
+              .slice(0, 100)
               .map((image) => (
                 <img
                   onDoubleClick={() => submitImage(image.fileURI)}

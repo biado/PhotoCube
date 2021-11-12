@@ -24,14 +24,10 @@ import '../../css/LeftDock/DateFilter.css';
     }, []);
 
     async function FetchTagsByTagsetName () {
-        //console.log("fetching from dateFilter")
         const response = await Fetcher.FetchTagsByTagsetName(props.tagsetName);
-        //console.log("response to datefilter", response);
         const tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name }});
         //sort tags
-        //tags.forEach(t => console.log("unsorted tag", t))
         tags.sort((a,b) => parseInt(a.name) - parseInt(b.name));
-        //tags.forEach(t => console.log("sorted tag", t))
         //format days and months
         const formattedTags = formatTags(tags);
         //set dropdown options

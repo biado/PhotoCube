@@ -42,7 +42,6 @@ export default class Fetcher {
     }
     console.log("querystring:", queryString);
     this.latestQuery = queryString;
-    console.log("latestquery: ", this.latestQuery)
     try {
       const response = await fetch(queryString);
       const data = await response.json();
@@ -56,7 +55,6 @@ export default class Fetcher {
   static async FetchAllImagesWithProjection(filters: Filter[]) {
     let queryString: string = this.baseUrl + "/cell/?";
     queryString += "&filters=" + this.parseFilters(filters!) + "&all=[]";
-    console.log("from fetcher projected query", queryString)
     try {
       const response = await fetch(queryString);
       const data = await response.json();
@@ -112,7 +110,6 @@ export default class Fetcher {
    * @param axis
    */
   private static parseAxis(axis: Axis): string {
-    console.log(axis.TitleString);
     return JSON.stringify({
       type: axis.AxisType,
       id: axis.Id,
@@ -120,7 +117,6 @@ export default class Fetcher {
   }
 
   static async FetchAllImages() {
-    console.log("from fetchallimages", Fetcher.latestQuery + "&all=[]");
     try {
       const response = await fetch(Fetcher.latestQuery + "&all=[]");
       const data = await response.json();
@@ -183,13 +179,11 @@ export default class Fetcher {
    */
 
   static async FetchTagsByTagsetName(tagsetName: string) {
-    console.log(Fetcher.baseUrl + "/tagset/name=" + tagsetName);
     try {
       const response = await fetch(
         Fetcher.baseUrl + "/tagset/name=" + tagsetName
       );
       const data = await response.json();
-      //console.log(data)
       return data;
     } catch (error) {
       console.error(error);
@@ -242,10 +236,8 @@ export default class Fetcher {
   static async FetchChildNodes(nodeId: number) {
     try {
       const call = Fetcher.baseUrl + "/node/" + nodeId + "/children";
-      //console.log("call from fetchchildnodes", call)
       const response = await fetch(call);
       const data = await response.json();
-      //console.log("from fetchchildnodes", data)
       return data;
     } catch (error) {
       console.error(error);
@@ -302,8 +294,6 @@ export default class Fetcher {
 
   static async FetchTagsWithCubeObjectId(cubeObjectId: number) {
     try {
-      const call = Fetcher.baseUrl + "/tag?cubeObjectId=" + cubeObjectId;
-      console.log(call);
       const response = await fetch(
         Fetcher.baseUrl + "/tag?cubeObjectId=" + cubeObjectId
       );
