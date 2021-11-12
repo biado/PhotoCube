@@ -53,6 +53,20 @@ export default class Fetcher {
     }
   }
 
+  static async FetchAllImagesWithProjection(filters: Filter[]) {
+    let queryString: string = this.baseUrl + "/cell/?";
+    queryString += "&filters=" + this.parseFilters(filters!) + "&all=[]";
+    console.log("from fetcher projected query", queryString)
+    try {
+      const response = await fetch(queryString);
+      const data = await response.json();
+      console.log("cubedata", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   private static parseFilters(filters: Filter[]): string {
     let sorted: Filter[] = filters.sort((a, b) => (a.type > b.type ? 1 : -1));
     var result: any[] = [];
@@ -117,18 +131,7 @@ export default class Fetcher {
     }
   }
 
-  static async FetchAllImagesWithProjection(s : string) {
-    try {
-       //const response = await fetch(`${Fetcher.baseUrl}${s}&all=[]`)
-       console.log(s);
-       const response = await fetch(s)
-       const data = await response.json()
-       console.log("From fetchwithProjection", data)
-       return data 
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  
 
   static async SubmitImage(fileUri: string) {
     try {

@@ -17,7 +17,7 @@ interface FuncProps {
   filters: Filter[];
   inforstring: string;
   s: string;
-  //obj: {};
+  projectedFilters: Filter[];
   obj: {
     size: number;
     isProjected: boolean;
@@ -45,6 +45,8 @@ interface FuncProps {
 const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   const [images, setImages] = useState<Image[]>([]);
 
+  const [filters, setFilters] = useState<any[]>([]);
+
   useEffect(() => {
     if (!props.obj.isProjected) {
       fetchAllImages();
@@ -54,25 +56,20 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
     props.filters.forEach(f => console.log(f.id))
     console.log("Filters:", props.filters);
     console.log("the object: ", props.obj);
+    console.log("projectyed fiulters", props.projectedFilters)
     document.addEventListener("keydown", (e) => onKeydown(e));
     return () => {
       document.removeEventListener("keydown", (e) => onKeydown(e));
     };
   }, []);
 
-/*   const stringParser = () => {
-    const s = `https://localhost:5001/api/cell?filters=[{"type": "tag", "ids": [184]},{"type": "node", "ids": [63]}]&all=[]`
-    const arr = [props.obj.x.parentId, props.obj.y.parentId, props.obj.z.parentId]
-    const arr2 = Number[]
-    props.filters.forEach(f => arr2.push(f.id))
-    let result = arr2.every(function (element: { id: number; }) {return arr.includes(element)})
-    return s
-  } */
-
   const fetchWithProjection = async () => {
+    const allFilters = [...props.filters, ...props.projectedFilters]
+    console.log(allFilters)
     try {
-      const response = await Fetcher.FetchAllImagesWithProjection(props.s)
+      const response = await Fetcher.FetchAllImagesWithProjection(allFilters)
       setImages(response)
+      console.log(response)
     } catch (error) {
       console.error(error)
     }
