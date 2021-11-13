@@ -1,9 +1,4 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -42,12 +37,14 @@ public class ImageTagGenerator {
     private MetadataFormatter metadataFormatter;
     private FeatureFinder featureFinder;
     private Set<String> filenames;
+    private Set<String> excludedFilenames;
     private Map<String, String> filename_metadataLine_map; // built by matching minute_id in Visual Concept and Metadata files.
 
     private static final String LSCFilename = FilepathReader.LSCFilename;
     private static final String LSCVisualConcept = FilepathReader.LSCVisualConcept; // Still needed, merely to check minute_id
     private static final String LSCmetadata = FilepathReader.LSCMetadata;
     private static final String outputPath = FilepathReader.LSCImageTagsOutput;
+    private static final String excludePath = FilepathReader.ExcludeFile;
 
     public ImageTagGenerator() throws IOException, ParseException {
         this.solutionFilenames = new SolutionListGenerator().getSolutionSet();
@@ -57,9 +54,22 @@ public class ImageTagGenerator {
         this.featureFinder = new FeatureFinder(jshg.getHomonyms());
         this.solutionsInFront = new StringBuilder();
         this.othersAtBack = new StringBuilder();
+        if(excludePath != null) {
+            this.excludedFilenames = new HashSet<>();
+            excludeFilenames();
+        }
         buildFilenameSet();
         buildFilename_MetadataLineMap();
         buildStrings();
+    }
+
+    private void excludeFilenames() throws IOException {
+        System.out.println("Excluding files from " + excludePath);
+        BufferedReader br = new BufferedReader(new FileReader(new File(excludePath)));
+        String line;
+        while ((line = br.readLine()) != null && !line.equals("")) {
+            this.excludedFilenames.add(line);
+        }
     }
 
     private void buildFilename_MetadataLineMap() throws IOException {
@@ -113,7 +123,13 @@ public class ImageTagGenerator {
         BufferedReader br = new BufferedReader(new FileReader(new File(LSCFilename)));
         String line;
         while ((line = br.readLine()) != null && !line.equals("")) {
-            filenames.add(makeImagePathFromLSCFilenames(line));
+            String[] pathParts = line.split("/");
+            String filename = pathParts[pathParts.length - 1].replaceAll("\"","");
+            if(excludePath != null && excludedFilenames.contains(filename)) {
+                System.out.println("Excluding: " + filename);
+            } else {
+                filenames.add(makeImagePathFromLSCFilenames(line));
+            }
         }
         br.close();
     }
