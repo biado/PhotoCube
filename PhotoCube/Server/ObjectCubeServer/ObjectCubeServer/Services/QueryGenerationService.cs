@@ -213,6 +213,10 @@ namespace ObjectCubeServer.Services
                     query +=
                         $" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
+                case "timestamprange":
+                    query +=
+                        $" select R.object_id from timestamp_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
             }
 
             return query;
@@ -280,6 +284,10 @@ namespace ObjectCubeServer.Services
                 case "timerange":
                     query +=
                         $" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
+                case "timestamprange":
+                    query +=
+                        $" select R.object_id from timestamp_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
             }
 

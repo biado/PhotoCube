@@ -75,8 +75,8 @@ namespace ObjectCubeServer.Models.DomainClasses
             var tagset = context.Tagsets
                 .Include(ts => ts.Tags)
                 .FirstOrDefault(ts => ts.Id == Id);
-            // Exclude 'Root(-1)' and tag that has same name as tagset (temporary fix - ideally need to fix the InsertSQLGenerator)
-            var tags = tagset?.Tags.Where(t => !(t.GetTagName().Equals("Root(-1)") || t.GetTagName().Equals(tagset.Name))).OrderBy(t => t.GetTagName()).ToList();
+            // Exclude tag that has same name as tagset (temporary fix - ideally need to fix the InsertSQLGenerator)
+            var tags = tagset?.Tags.Where(t => !t.GetTagName().Equals(tagset.Name)).OrderBy(t => t.GetTagName()).ToList();
             return tags;
         }
 

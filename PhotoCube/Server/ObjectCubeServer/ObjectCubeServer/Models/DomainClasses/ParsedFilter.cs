@@ -12,6 +12,7 @@ namespace ObjectCubeServer.Models.DomainClasses
             //"time": Time range filter. Tagged with tags between startTime tag and endTime tag
             //"date": Applied same as tag filter. Request with tags from Year, Month (number), Day within month may have this type.
             //"day of week": Tag filter with OR search
+            //"timestamp": timestamp range filter. Request with tags from Year, Month (number), Day, Hours, Minutes, Seconds within month may have this type.
         public List<int> Ids { get; set; }
         public List<List<string>> Ranges { get; set; }
 

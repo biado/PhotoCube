@@ -9,6 +9,7 @@ using System.Linq;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.HelperClasses;
 
@@ -21,6 +22,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToTagFile;
         private string pathToErrorLogFile;
         private string resultPath;
+        private bool mssqlFormat;
         private Stopwatch stopwatch;
         private int batchSize = 10000;
         private string SQLPath;
@@ -53,6 +55,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
             this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
             this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
+            this.mssqlFormat = Convert.ToBoolean(sAll.Get("mssqlFormat"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
             datatypes = MapDataTypestoTagTypes();
@@ -208,15 +211,15 @@ namespace ConsoleAppForInteractingWithDatabase
                     return DomainClassFactory.NewNumericalTag(tagType, tagset, int.Parse(tagName));
                 case "timestamp":
                     DateTime timestamp = DateTime.ParseExact(tagName, "yyyy-MM-dd HH:mm:ss",
-                        System.Globalization.CultureInfo.InvariantCulture);
+                        CultureInfo.InvariantCulture);
                     return DomainClassFactory.NewTimestampTag(tagType, tagset, timestamp);
                 case "time":
                     TimeSpan time = DateTime
-                        .ParseExact(tagName, "HH:mm", System.Globalization.CultureInfo.InvariantCulture).TimeOfDay;
+                        .ParseExact(tagName, "HH:mm", CultureInfo.InvariantCulture).TimeOfDay;
                     return DomainClassFactory.NewTimeTag(tagType, tagset, time);
                 case "date":
                     DateTime date = DateTime.ParseExact(tagName, "yyyy-MM-dd",
-                        System.Globalization.CultureInfo.InvariantCulture);
+                        CultureInfo.InvariantCulture);
                     return DomainClassFactory.NewDateTag(tagType, tagset, date);
                 default: return null;
             }
@@ -489,16 +492,17 @@ namespace ConsoleAppForInteractingWithDatabase
             // (column1, column2, ..)
             // values
             // (value1, value2, ..);
-
-            OperatingSystem OS = Environment.OSVersion;
-            PlatformID platformId = OS.Platform;
-
             int insertCount = 0;
+            
             //SQL server specific requirement
-            if (platformId == PlatformID.Win32NT)
+            if (mssqlFormat)
             {
                 File.AppendAllText(SQLPath, "SET QUOTED_IDENTIFIER ON\nGO\nSET ANSI_NULLS ON\nGO\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects ON;\nGO\n");
+            }
+            else
+            {
+                File.AppendAllText(SQLPath,"SELECT NOW();\n\\set AUTOCOMMIT off\nCOMMIT;\n");
             }
 
             //Insert all CubeObjects
@@ -509,17 +513,25 @@ namespace ConsoleAppForInteractingWithDatabase
                                          "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
                 insertCount++;
-                if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                if (insertCount % 100 == 0 && mssqlFormat)
                 {
                     File.AppendAllText(SQLPath, "GO\n");
+                } else if (insertCount % 100 == 0)
+                {
+                    File.AppendAllText(SQLPath,"COMMIT;\n");
                 }
             }
 
-            if (platformId == PlatformID.Win32NT)
+            if (mssqlFormat)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT cubeobjects OFF;\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets ON;\nGO\n");
             }
+            else
+            {
+                File.AppendAllText(SQLPath, "COMMIT;\n");
+            }
+            
 
             //Insert all Tagsets
             foreach (var ts in tagsets.Values)
@@ -528,11 +540,12 @@ namespace ConsoleAppForInteractingWithDatabase
                 File.AppendAllText(SQLPath, insertStatement);
             }
 
-            if (platformId == PlatformID.Win32NT)
+            if (mssqlFormat)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets OFF;\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tag_types ON;\n");
             }
+            
 
             //Insert all TagTypes
             foreach (var tt in tagtypes.Values)
@@ -542,7 +555,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 File.AppendAllText(SQLPath, insertStatement);
             }
 
-            if (platformId == PlatformID.Win32NT)
+            if (mssqlFormat)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tag_types OFF;\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags ON;\n");
@@ -569,8 +582,9 @@ namespace ConsoleAppForInteractingWithDatabase
                                                nt.Name + "," + nt.TagsetId + "); \n";
                             break;
                         case TimestampTag tst:
+                            String timestamp = tst.Name.ToString("yyyy-MM-dd HH:mm:ss").Replace('.',':');
                             insertStatement += "INSERT INTO timestamp_tags(id, name, tagset_id) VALUES(" + tst.Id + ",'" +
-                                               tst.Name.ToString() + "'," + tst.TagsetId + "); \n";
+                                               timestamp + "'," + tst.TagsetId + "); \n";
                             break;
                         case DateTag dt:
                             insertStatement += "INSERT INTO date_tags(id, name, tagset_id) VALUES(" + dt.Id + ",'" +
@@ -584,14 +598,17 @@ namespace ConsoleAppForInteractingWithDatabase
 
                     File.AppendAllText(SQLPath, insertStatement);
                     insertCount++;
-                    if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                    if (insertCount % 100 == 0 && mssqlFormat)
                     {
                         File.AppendAllText(SQLPath, "GO\n");
+                    } else if (insertCount % 100 == 0)
+                    {
+                        File.AppendAllText(SQLPath,"COMMIT;\n");
                     }
                 }
             }
 
-            if (platformId == PlatformID.Win32NT)
+            if (mssqlFormat)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tags OFF;\n");
             }
@@ -606,16 +623,23 @@ namespace ConsoleAppForInteractingWithDatabase
                                              otr.ObjectId + "," + otr.TagId + "); \n";
                     File.AppendAllText(SQLPath, insertStatement);
                     insertCount++;
-                    if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                    if (insertCount % 100 == 0 && mssqlFormat)
                     {
                         File.AppendAllText(SQLPath, "GO\n");
+                    } else if (insertCount % 100 == 0)
+                    {
+                        File.AppendAllText(SQLPath,"COMMIT;\n");
                     }
                 }
             }
 
-            if (platformId == PlatformID.Win32NT)
+            if (mssqlFormat)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies ON;\nGO\n");
+            }
+            else
+            {
+                File.AppendAllText(SQLPath, "COMMIT;\n");
             }
 
             //Insert all Hierarchies
@@ -626,10 +650,14 @@ namespace ConsoleAppForInteractingWithDatabase
                 File.AppendAllText(SQLPath, insertStatement);
             }
 
-            if (platformId == PlatformID.Win32NT)
+            if (mssqlFormat)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT hierarchies OFF;\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes ON;\nGO\n");
+            }
+            else
+            {
+                File.AppendAllText(SQLPath, "COMMIT;\n");
             }
 
             //Insert all Nodes first without setting parent node to avoid violating FK constraint
@@ -640,9 +668,12 @@ namespace ConsoleAppForInteractingWithDatabase
                                          "," + n.HierarchyId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
                 insertCount++;
-                if (insertCount % 100 == 0 && platformId == PlatformID.Win32NT)
+                if (insertCount % 100 == 0 && mssqlFormat)
                 {
                     File.AppendAllText(SQLPath, "GO\n");
+                } else if (insertCount % 100 == 0)
+                {
+                    File.AppendAllText(SQLPath,"COMMIT;\n");
                 }
             }
 
@@ -658,9 +689,15 @@ namespace ConsoleAppForInteractingWithDatabase
                 }
             }
 
-            if (platformId == PlatformID.Win32NT)
+            if (mssqlFormat)
             {
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT nodes OFF;\nGO");
+            }
+            else
+            {
+                File.AppendAllText(SQLPath, "COMMIT;\n");
+                File.AppendAllText(SQLPath,"\\set AUTOCOMMIT on");
+                File.AppendAllText(SQLPath,"SELECT NOW();\n");
             }
         }
     }
