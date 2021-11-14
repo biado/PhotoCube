@@ -587,8 +587,9 @@ namespace ConsoleAppForInteractingWithDatabase
                                                timestamp + "'," + tst.TagsetId + "); \n";
                             break;
                         case DateTag dt:
+                            String date = dt.Name.ToString("yyyy-MM-dd");
                             insertStatement += "INSERT INTO date_tags(id, name, tagset_id) VALUES(" + dt.Id + ",'" +
-                                               dt.Name.ToString() + "'," + dt.TagsetId + "); \n";
+                                               date + "'," + dt.TagsetId + "); \n";
                             break;
                         case TimeTag tt:
                             insertStatement += "INSERT INTO time_tags(id, name, tagset_id) VALUES(" + tt.Id + ",'" +
@@ -696,7 +697,7 @@ namespace ConsoleAppForInteractingWithDatabase
             else
             {
                 File.AppendAllText(SQLPath, "COMMIT;\n");
-                File.AppendAllText(SQLPath,"\\set AUTOCOMMIT on");
+                File.AppendAllText(SQLPath,"\\set AUTOCOMMIT on\n");
                 File.AppendAllText(SQLPath,"SELECT NOW();\n");
             }
         }
