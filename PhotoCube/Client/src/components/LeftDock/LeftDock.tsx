@@ -6,6 +6,8 @@ import { DateTagDropdown } from './DateFilter';
 import DayOfWeekFilter from './DayOfWeekFilter';
 import { TagSearcher } from './TagFilter';
 import { TimeFilter } from './TimeFilter';
+import { HierarchyExplorer } from '../Middle/BottomDock/HierarchyFilter';
+import { DimensionBrowser } from '../Middle/BottomDock/DimensionBrowser';
 
 /**
  * LeftDock is the left portion of the interface.
@@ -40,10 +42,14 @@ export default class LeftDock extends Component<{
                     <h4 className="Header">Time range filter:</h4>
                     <TimeFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplacedByType={this.props.onFilterReplacedByType} onFilterRemovedByType={this.props.onFilterRemovedByType}/>
                 </div>
-                <div className={visibility}>
+                <div className="hierarchy explorer">
+                    <h4 className="Header">Hierarchy filter:</h4>
+                    <HierarchyExplorer activeFilters={this.props.activeFilters.filter(af => af.type === 'hierarchy')} onFiltersChanged={this.props.onFiltersChanged}/>
+                </div>
+                {/* <div className={visibility}>
                     <h4 className="Header">Tag filter:</h4>
                     <TagSearcher onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}/>
-                </div>
+                </div> */}
 	  		</div>
         );
     }
