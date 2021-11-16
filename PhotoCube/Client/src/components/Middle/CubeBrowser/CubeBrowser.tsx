@@ -8,7 +8,7 @@ import Cell from "./Cell";
 import Fetcher from "./Fetcher";
 import Tagset from "./Tagset";
 import HierarchyNode from "./HierarchyNode";
-import { Raycaster } from "three";
+import { Raycaster, SphereGeometry } from "three";
 import CubeObject from "./CubeObject";
 import ICell from "./Cell";
 import { BrowsingState } from "./BrowsingState";
@@ -33,6 +33,7 @@ export default class CubeBrowser extends React.Component<{
         projectedFilters: Filter[],
         isProjected: boolean,
     ) => void;
+    onDrillDown: (oldNodeName: string, oldNodeId: number, oldNodeType: string, hierarchyNode: HierarchyNode) => void,
     filters: Filter[];
 }> {
     /* The state desides what is shown in the interface, and is changesd with a this.setState call. */
@@ -108,10 +109,12 @@ export default class CubeBrowser extends React.Component<{
     //Used to find IntersectedObjects with this.raycaster:
     private boxMeshes: THREE.Mesh[] = [];
     private textMeshes: THREE.Mesh[] = [];
+    private sphereMeshes: THREE.Mesh[] = []; // NEW
     private contextMenuCubeObjects: CubeObject[] = [];
 
     //Reusing THREE Geometries and Materials to save memory, to speed things up, and to dispose them after:
-    private boxGeometry: THREE.BoxGeometry = new THREE.BoxGeometry(1, 1, 1);
+    private boxGeometry: THREE.BoxGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+    private sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(0.05, 20, 20); //NEW
     private boxTextures: Map<string, THREE.MeshBasicMaterial> = new Map<
         string,
         THREE.MeshBasicMaterial
@@ -135,6 +138,7 @@ export default class CubeBrowser extends React.Component<{
         new THREE.LineBasicMaterial({ color: Colors.Green });
     private blueLineMaterial: THREE.LineBasicMaterial =
         new THREE.LineBasicMaterial({ color: Colors.Blue });
+    private sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); // NEW
 
     //Browsing state:
     //Cells:
@@ -173,6 +177,8 @@ export default class CubeBrowser extends React.Component<{
 
         //Set controls to OrbitControls:
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.mouseButtons = {LEFT: THREE.MOUSE.RIGHT, MIDDLE: THREE.MOUSE.MIDDLE, RIGHT: THREE.MOUSE.LEFT};
+        this.controls.update();
 
         //Filling out available space with renderer:
         this.onBrowserResize();
@@ -266,6 +272,7 @@ export default class CubeBrowser extends React.Component<{
     private disposeWhatCanBeDisposed() {
         this.renderer.dispose();
         this.controls.dispose();
+        this.sphereGeometry.dispose(); //NEW
         this.boxGeometry.dispose();
         this.boxTextures.forEach((v: THREE.MeshBasicMaterial, k: string) =>
             v.dispose()
@@ -281,12 +288,14 @@ export default class CubeBrowser extends React.Component<{
         this.redLineMaterial.dispose();
         this.greenLineMaterial.dispose();
         this.blueLineMaterial.dispose();
+        this.sphereMaterial.dispose(); //NEW
         this.cells = [];
         this.xAxis = new Axis();
         this.yAxis = new Axis();
         this.zAxis = new Axis();
         this.boxMeshes = [];
         this.textMeshes = [];
+        this.sphereMeshes = [];
         this.contextMenuCubeObjects = [];
     }
 
@@ -382,11 +391,25 @@ export default class CubeBrowser extends React.Component<{
     /* EVENT HANDLERS: */
     /** Handler for mouse left click. */
     private onMouseClick = (me: MouseEvent) => {
-        if (me.button === 0 || me.button === 1) {
-            //left or middle click
+        if(me.button === 0 || me.button === 1){ //left or middle click
             this.setState({ showContextMenu: false });
         }
-    };
+        this.mouse.x = ( me.clientX / window.innerWidth ) * 2 - 1;
+        this.mouse.y = - ( me.clientY / window.innerHeight ) * 2 + 1;
+        // update the picking ray with the camera and mouse position
+        this.raycaster.setFromCamera( this.mouse, this.camera );
+        // calculate objects intersecting the picking ray
+        let intersects = this.raycaster.intersectObjects( this.textMeshes );
+        if(intersects.length > 0){
+        if(this.xAxis.PickedDimension !== null){
+            if(intersects[0].object.userData.x !== 0 && this.xAxis.AxisType === AxisTypeEnum.Tagset){
+            }else if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
+                const targetNode = this.xAxis.Hierarchies[intersects[0].object.position.x - 1]; 
+                this.props.onDrillDown(this.xAxis.PickedDimension.name, this.xAxis.Id, this.xAxis.AxisType, targetNode);
+            }
+        }
+    }
+}
 
     /** Handler for right click */
     private onRightClick = (me: MouseEvent) => {
@@ -687,6 +710,35 @@ export default class CubeBrowser extends React.Component<{
         return lineMesh;
     };
 
+    /** Adds a sphereGeometry to the position of the Text */
+    private addSphereCallback = (
+        aPosition:Position,
+        aColor:Colors,
+    ) => {
+        let sphereMaterial: THREE.MeshBasicMaterial;
+        switch (aColor) {
+            case Colors.Red:
+                sphereMaterial = this.redMaterial;
+                break;
+            case Colors.Green:
+                sphereMaterial = this.greenMaterial;
+                break;
+            case Colors.Blue:
+                sphereMaterial = this.blueMaterial;
+                break;
+            default:
+                throw "Unknown color in addText!";
+        }
+        let sphere = new THREE.Mesh(this.sphereGeometry, sphereMaterial); //this.
+        sphere.position.x = aPosition.x;
+        sphere.position.y = aPosition.y;
+        sphere.position.z = aPosition.z;
+        this.sphereMeshes.push(sphere);
+        this.scene.add(sphere);
+        console.log("spherecallback was called");
+        return sphere;
+    }
+
     /** Adds {SomeText} to aPosition{x, y, z} with aColor and aSize */
     private addTextCallback = (
         someText: string,
@@ -783,7 +835,7 @@ export default class CubeBrowser extends React.Component<{
             case "node":
                 let rootNode: HierarchyNode = await Fetcher.FetchNode(dimension.id);
                 axis.TitleString = rootNode.tag.name + " (hierarchy)";
-                axis.AddHierarchy(rootNode, this.addTextCallback, this.addLineCallback);
+                axis.AddHierarchy(rootNode, this.addTextCallback, this.addLineCallback, this.addSphereCallback);
                 break;
             case "tagset":
                 let tagset: Tagset = await Fetcher.FetchTagset(dimension.id);
@@ -797,13 +849,14 @@ export default class CubeBrowser extends React.Component<{
                     axis.AddHierarchyLeaf(
                         rootNode2,
                         this.addTextCallback,
-                        this.addLineCallback
+                        this.addLineCallback,
                     );
                 } else {
                     axis.AddHierarchy(
                         rootNode2,
                         this.addTextCallback,
-                        this.addLineCallback
+                        this.addLineCallback,
+                        this.addSphereCallback
                     );
                 }
                 break;

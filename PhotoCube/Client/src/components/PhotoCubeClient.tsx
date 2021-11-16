@@ -11,6 +11,8 @@ import { BrowsingState } from './Middle/CubeBrowser/BrowsingState';
 import PickedDimension from './RightDock/PickedDimension';
 import CubeObject from './Middle/CubeBrowser/CubeObject';
 import { Filter } from './Filter';
+import { createFilter } from './Middle/BottomDock/TagsetFilter';
+import HierarchyNode from './Middle/CubeBrowser/HierarchyNode';
 
 
 interface ClientState {
@@ -47,7 +49,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
         previousBrowsingState={this.CubeBrowserBrowsingState}
         onOpenCubeInCardMode={this.onOpenCubeInCardMode}
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
-        filters={this.state.filters}/>
+        filters={this.state.filters}  onDrillDown={this.onDrillDown}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
       currentBrowser = <GridBrowser isProjected={this.isProjected} projectedFilters={this.projectedFilters} filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Card){
@@ -207,5 +209,12 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     this.isProjected = isProjected;
     this.setState({BrowsingMode: BrowsingModes.Grid});
     this.rightDock.current!.ChangeBrowsingMode(BrowsingModes.Grid);
+  }
+
+  onDrillDown = (oldNodeName: string, oldNodeId: number, oldNodeType: string, newNode: HierarchyNode) => {
+    console.log("Drilling down into " + newNode.tag.name);
+    const newFilter: Filter =  createFilter(newNode.tag.name, newNode.tag.id, "HierarchyNode");
+    const oldFilter: Filter =  createFilter(oldNodeName, oldNodeId, oldNodeType);
+    this.onFilterReplaced(oldFilter, newFilter);
   }
 }
