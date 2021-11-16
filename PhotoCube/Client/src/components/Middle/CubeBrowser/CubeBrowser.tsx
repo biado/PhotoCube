@@ -34,6 +34,7 @@ export default class CubeBrowser extends React.Component<{
         isProjected: boolean,
     ) => void;
     onDrillDown: (oldNodeName: string, oldNodeId: number, oldNodeType: string, hierarchyNode: HierarchyNode) => void,
+    onDimensionChanged: (dimName: string, dimension:PickedDimension) => void,
     filters: Filter[];
 }> {
     /* The state desides what is shown in the interface, and is changesd with a this.setState call. */
@@ -404,8 +405,13 @@ export default class CubeBrowser extends React.Component<{
         if(this.xAxis.PickedDimension !== null){
             if(intersects[0].object.userData.x !== 0 && this.xAxis.AxisType === AxisTypeEnum.Tagset){
             }else if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
-                const targetNode = this.xAxis.Hierarchies[intersects[0].object.position.x - 1]; 
+                let targetNode = this.xAxis.Hierarchies[intersects[0].object.position.x - 1]; 
+                let oldDimension = this.xAxis.PickedDimension;
+                oldDimension.id = targetNode.id;
+                oldDimension.name = targetNode.tag.name;
+                oldDimension.type = "node";
                 this.props.onDrillDown(this.xAxis.PickedDimension.name, this.xAxis.Id, this.xAxis.AxisType, targetNode);
+                this.props.onDimensionChanged("X", oldDimension);
             }
         }
     }

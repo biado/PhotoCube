@@ -49,7 +49,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
         previousBrowsingState={this.CubeBrowserBrowsingState}
         onOpenCubeInCardMode={this.onOpenCubeInCardMode}
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
-        filters={this.state.filters}  onDrillDown={this.onDrillDown}/>
+        filters={this.state.filters}  onDrillDown={this.onDrillDown} onDimensionChanged={this.onDimensionChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
       currentBrowser = <GridBrowser isProjected={this.isProjected} projectedFilters={this.projectedFilters} filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Card){
@@ -213,8 +213,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
 
   onDrillDown = (oldNodeName: string, oldNodeId: number, oldNodeType: string, newNode: HierarchyNode) => {
     console.log("Drilling down into " + newNode.tag.name);
-    const newFilter: Filter =  createFilter(newNode.tag.name, newNode.tag.id, "HierarchyNode");
-    const oldFilter: Filter =  createFilter(oldNodeName, oldNodeId, oldNodeType);
+    let newFilter: Filter =  createFilter(newNode.tag.name, newNode.id, "HierarchyNode");
+    let oldFilter: Filter =  createFilter(oldNodeName, oldNodeId, oldNodeType);
     this.onFilterReplaced(oldFilter, newFilter);
   }
 }
