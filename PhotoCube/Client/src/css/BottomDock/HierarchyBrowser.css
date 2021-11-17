@@ -36,7 +36,7 @@
 }
 
 .hierarchy.node label {
-  background-color: rgb(239, 239, 239);
+  background-color: rgb(197, 188, 162);
   font: 400 13.3333px Arial;
   border: none;
   border-bottom-left-radius: 2px;
@@ -50,7 +50,7 @@
 }
 
 .hierarchy.node label:hover {
-  background-color: rgb(150, 196, 207);
+  background-color: rgb(197, 188, 100);
 }
 
 input[type="radio"] {

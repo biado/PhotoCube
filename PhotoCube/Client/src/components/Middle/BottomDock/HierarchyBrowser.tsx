@@ -59,7 +59,8 @@ const BrowserNodeWithChildren =
     async function getChildren() {
         if (props.showChildren) {
             await fetchChildNodes(props.parent.id).then(response => {
-                setChildren(response);
+                const sorted = response.sort((a:Node,b:Node) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+                setChildren(sorted);
             });
         } 
         showChildren(true);
@@ -75,7 +76,6 @@ const BrowserNodeWithChildren =
             {childrenShown ? 
             <ul className="hierarchy children">
                 {(childNodes !== null && childNodes!.length > 0) ? childNodes!.map((node: Node) => 
-                //  <div>{node.name}</div>)
                     <BrowserNodeWithChildren parent={node} showChildren={false} onSelect={props.onSelect}/>)
                     : <li key={0}><button disabled={true}>No further children</button></li>}
             </ul> : null }
@@ -110,7 +110,7 @@ export const HierarchyBrowser =
     const onSelect = (node: Node) => {
         // updateSelection(node);
         // disableButton(props.activeFilters.some(af => af.Id === node.id));
-        const filter: Filter = createFilter(node.name, node.id, "hierarchy");
+        const filter: Filter = createFilter(node.name, node.id, "node");
         if (!props.activeFilters.some(af => af.id === filter.id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
