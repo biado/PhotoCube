@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using ObjectCubeServer.Models.Contexts;
 
 namespace ObjectCubeServer
@@ -26,8 +27,11 @@ namespace ObjectCubeServer
             
             // enable json input/output for controllers
             services.AddControllers()
-                .AddNewtonsoftJson(
-                    options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                });
+                    
             
             //DI of DbContext
             services.AddDbContextPool<ObjectContext>(option => option.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));

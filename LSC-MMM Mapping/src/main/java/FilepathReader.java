@@ -17,6 +17,7 @@ public class FilepathReader {
     public static String LSCImageTagsOutput;
     public static String UniqueTagHierarchyOutput;
     public static String OutputFolder;
+    public static String ExcludeFile;
 
     static { // initialize static fields
         Properties prop = new Properties();
@@ -39,5 +40,6 @@ public class FilepathReader {
         LSCImageTagsOutput = prop.getProperty("LSCImageTagsOutput");
         UniqueTagHierarchyOutput = prop.getProperty("UniqueTagHierarchyOutput");
         OutputFolder = prop.getProperty("OutputFolder");
+        ExcludeFile = prop.getProperty("OptionalExcludeFile");
     }
 }

@@ -14,6 +14,10 @@ public class DateTimeFormatter {
         this.localDateTime = LocalDateTime.parse(timestamp.replace("_", "T"));
     }
 
+    public String getTimestampString() {
+        return localDateTime.toString().replace("T", " ");
+    }
+
     public String getDayOfWeekString() {
         // Monday...Sunday
         return localDateTime.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
@@ -60,7 +64,7 @@ public class DateTimeFormatter {
     }
 
     public static void main(String[] args) {
-        DateTimeFormatter dtf = new DateTimeFormatter("2015-05-17_23:20");
-        System.out.println(dtf.getDayOfWeekString()); 
+        DateTimeFormatter dtf = new DateTimeFormatter("2015-05-17_23:20:02");
+        System.out.println(dtf.getTimestampString());
     }
 }
