@@ -40,7 +40,9 @@ const SearchResults = (props: {
  * Component for browsing hierarchies and adding filters.
  * Consists of a search field, a search results component and the hierarchy browser.
  */
-export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
+export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => void, 
+                                                            activeFilters: Filter[],
+                                                        }) => {
     const [input, updateInput] = useState<string>("");
     const [options, updateOptions] = useState<Option[]>([]);
     const [selectedNode, updateSelection] = useState<Node|null>(null);

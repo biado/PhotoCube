@@ -8,6 +8,9 @@ import { TagSearcher } from './TagFilter';
 import { TimeFilter } from './TimeFilter';
 import { HierarchyExplorer } from '../Middle/BottomDock/HierarchyFilter';
 import { DimensionBrowser } from '../Middle/BottomDock/DimensionBrowser';
+import PickedDimension from '../RightDock/PickedDimension';
+import Dimensions from '../RightDock/Dimensions';
+import { FilterList } from '../RightDock/FilterList';
 
 /**
  * LeftDock is the left portion of the interface.
@@ -17,11 +20,22 @@ export default class LeftDock extends Component<{
         hideControls: boolean,
         onFiltersChanged : (filters: Filter) => void,
         activeFilters: Filter[],
+        onDimensionChanged:(dimName: string, dimension:PickedDimension) => void,
+        onClearAxis:(axisName: string) => void,
         onFilterReplaced: (oldFilter:Filter, newFilter: Filter) => void,
         onFilterRemoved: (filterId: number) => void,
         onFilterReplacedByType: (oldFilter:Filter, newFilter: Filter) => void,
         onFilterRemovedByType: (filterType: string) => void
     }>{
+
+    onDimensionChanged = (dimName: string, dimension:PickedDimension) => {
+        this.props.onDimensionChanged(dimName, dimension);
+    }
+
+    onClearAxis = (axisName: string) => {
+        this.props.onClearAxis(axisName);
+    }
+
     render() {
         let visibility: string = this.props.hideControls ? " hide" : "";
         return (
@@ -42,14 +56,12 @@ export default class LeftDock extends Component<{
                     <h4 className="Header">Time range filter:</h4>
                     <TimeFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplacedByType={this.props.onFilterReplacedByType} onFilterRemovedByType={this.props.onFilterRemovedByType}/>
                 </div>
-                <div className="hierarchy explorer">
-                    <h4 className="Header">Hierarchy filter:</h4>
-                    <HierarchyExplorer activeFilters={this.props.activeFilters.filter(af => af.type === 'hierarchy')} onFiltersChanged={this.props.onFiltersChanged}/>
-                </div>
-                {/* <div className={visibility}>
+                <Dimensions className={visibility} activeFilters={this.props.activeFilters} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/>
+                <div className={visibility}>
                     <h4 className="Header">Tag filter:</h4>
                     <TagSearcher onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}/>
-                </div> */}
+                </div>
+                <FilterList className ={visibility} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved} />
 	  		</div>
         );
     }

@@ -22,7 +22,7 @@ canvas {
 
 .grid-container {
   display: grid;
-  grid-template-columns: 250px auto 210px;
+  grid-template-columns: 210px auto 280px;
 }
 
 .middle.dock {

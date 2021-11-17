@@ -75,7 +75,7 @@ const BrowserNodeWithChildren =
             {childrenShown ? 
             <ul className="hierarchy children">
                 {(childNodes !== null && childNodes!.length > 0) ? childNodes!.map((node: Node) => 
-                //  <button>{node.name}</button>)
+                //  <div>{node.name}</div>)
                     <BrowserNodeWithChildren parent={node} showChildren={false} onSelect={props.onSelect}/>)
                     : <li key={0}><button disabled={true}>No further children</button></li>}
             </ul> : null }

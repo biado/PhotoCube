@@ -18,14 +18,14 @@ export const BottomDock =
 
     return(
         <div className={isExpanded ? "bottom dock expanded" : "bottom dock " + visibility}>
-            {/* <div className="dimensionbrowser header" onClick={e => expand(!isExpanded)}>
+            <div className="dimensionbrowser header" onClick={e => expand(!isExpanded)}>
                 <div className="dock name">
                     <VscBrowser id="browser-icon" />
                     <h5>Dimension Browser</h5>
                 </div>
                 {isExpanded ? <MdExpandMore className="expand"/> : <MdExpandLess className="expand"/>}
             </div>
-            {isExpanded ? <DimensionBrowser activeFilters={props.activeFilters} onFiltersChanged={props.onFiltersChanged}/> : null} */}
+            {isExpanded ? <DimensionBrowser activeFilters={props.activeFilters} onFiltersChanged={props.onFiltersChanged}/> : null}
         </div>
     )
 };

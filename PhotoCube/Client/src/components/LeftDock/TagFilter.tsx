@@ -112,17 +112,13 @@ export const TagSearcher = (props: { onFiltersChanged: (filter: Filter) => void,
 
     return (
         <div className="TagSearcher">
-            {/* <p>Search tags:</p>
-            <form method="get">
-                <input className="tag search field" type="text" placeholder="e.g. computer" 
-                    onChange={e => onInputGiven(e.target.value)} onKeyPress={(e) => onEnterPressed(e)}/>
-            </form> */}
 
+            <p>Search tags:</p>
             <form method="get">
                 <input className="tag search field" type="text" placeholder="e.g. computer" 
                     onChange={e => onInputGiven(e.target.value)} onKeyPress={(e) => onEnterPressed(e)}/>
-            </form>
             <button disabled={input === ""} className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
+            </form>
             {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }
             {(selectedTag !== null) ? <TagFilter selectedTag={selectedTag} activeFilters={props.activeFilters} onFiltersChanged={props.onFiltersChanged}/> : null }
         </div>

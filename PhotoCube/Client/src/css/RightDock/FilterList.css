@@ -42,3 +42,10 @@
   color: rgb(200, 200, 200);
   align-self: center;
 }
+#hierarchy #clear-icon {
+  color: rgb(0, 0, 0);
+} 
+#hierarchy {
+  background-color: rgb(150, 196, 207);
+  color: rgb(0, 0, 0);
+}
