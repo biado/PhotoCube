@@ -4,6 +4,7 @@ import CubeObject from "../CubeBrowser/CubeObject";
 import { BrowsingModes } from "../../RightDock/BrowsingModeChanger";
 import Fetcher from "../CubeBrowser/Fetcher";
 import { Image } from "../../../interfaces/types";
+import { Filter } from "../../Filter";
 
 /**
  * The GridBrowser allows the user to browse a collection of photos side by side in a grid to get an overview.
@@ -11,19 +12,38 @@ import { Image } from "../../../interfaces/types";
  * this.props.onBrowsingModeChanged is a callback funtion that tells parent component that the browsing mode has been changed.
  */
 interface FuncProps {
+  cubeObjects: CubeObject[];
   onBrowsingModeChanged: (browsingMode: BrowsingModes) => void;
+  filters: Filter[];
+  projectedFilters: Filter[];
+  isProjected: boolean; 
 }
 
 const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
-    fetchAllImages();
+    if (!props.isProjected) {
+      fetchAllImages();
+    } else {
+      fetchWithProjection();
+    }
     document.addEventListener("keydown", (e) => onKeydown(e));
     return () => {
       document.removeEventListener("keydown", (e) => onKeydown(e));
     };
   }, []);
+
+  const fetchWithProjection = async () => {
+    const allFilters = [...props.filters, ...props.projectedFilters]
+    try {
+      const response = await Fetcher.FetchAllImagesWithProjection(allFilters)
+      setImages(response)
+      console.log(response)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const fetchAllImages = async () => {
     try {
@@ -33,6 +53,17 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
       console.error(error);
     }
   };
+
+  const submitImage = async (fileUri: string) => {
+    try {
+      Fetcher.SubmitImage(fileUri).then((r) => {
+        console.log(r);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const onKeydown = (e: KeyboardEvent) => {
     console.log(e.key);
     if (e.key === "Escape") {
@@ -43,13 +74,25 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   return (
     <div className="grid-item">
       <div className="imageContainer">
-        {images.slice(0, 20).map((image) => (
-          <img
-            key={image.id}
-            className="image"
-            src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
-          ></img>
-        ))}
+        {images.length > 100
+          ? images
+              .slice(0, 100)
+              .map((image) => (
+                <img
+                  onDoubleClick={() => submitImage(image.fileURI)}
+                  key={image.id}
+                  className="image"
+                  src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
+                ></img>
+              ))
+          : images.map((image) => (
+              <img
+                onDoubleClick={() => submitImage(image.fileURI)}
+                key={image.id}
+                className="image"
+                src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
+              ></img>
+            ))}
       </div>
     </div>
   );

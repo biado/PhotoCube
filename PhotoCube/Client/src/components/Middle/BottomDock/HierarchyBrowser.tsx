@@ -111,15 +111,17 @@ export const HierarchyBrowser =
         // updateSelection(node);
         // disableButton(props.activeFilters.some(af => af.Id === node.id));
         const filter: Filter = createFilter(node.name, node.id, "hierarchy");
-        if (!props.activeFilters.some(af => af.Id === filter.Id)) {
+        if (!props.activeFilters.some(af => af.id === filter.id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
         }
+        updateSelection(node);
+        disableButton(props.activeFilters.some(af => af.id === node.id));
     }
 
     const onButtonClick = () => {
-        const filter: Filter = createFilter(selectedNode!.name, selectedNode!.id, "hierarchy");
-        if (!props.activeFilters.some(af => af.Id === filter.Id)) {
+        const filter: Filter = createFilter(selectedNode!.name, selectedNode!.id, "node");
+        if (!props.activeFilters.some(af => af.id === filter.id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
         }
@@ -147,7 +149,6 @@ export const HierarchyBrowser =
 
 //utility function
 async function fetchChildNodes(nodeId: number){
-    //console.log("from hierachybrow", nodeId)
     const response = await Fetcher.FetchChildNodes(nodeId);
     let children = [];
         if (response.length > 0) {

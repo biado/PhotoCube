@@ -17,7 +17,7 @@ const TagFilter = (props: {
 
     useEffect(() => {
         updateSelection(props.selectedTag);
-        if (!props.activeFilters.some(af => af.Id === props.selectedTag.id)) {
+        if (!props.activeFilters.some(af => af.id === props.selectedTag.id)) {
             disableButton(false);
         } else {
             disableButton(true);
@@ -26,7 +26,7 @@ const TagFilter = (props: {
 
     const onButtonClick = () => {
         const filter: Filter = createFilter(selectedTag!.name, selectedTag!.id, "tag");
-        if (!props.activeFilters.some(af => af.Id === filter.Id)) {
+        if (!props.activeFilters.some(af => af.id === filter.id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
         }

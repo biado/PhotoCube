@@ -35,6 +35,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
 
   CubeBrowserBrowsingState : BrowsingState|null = null;
   cubeObjects : CubeObject[] = [];
+  projectedFilters : Filter[] = [];
+  isProjected: boolean | any;
 
   render() {
     //Conditional rendering:
@@ -47,7 +49,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
         filters={this.state.filters}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
-      currentBrowser = <GridBrowser /* cubeObjects={this.cubeObjects} */ onBrowsingModeChanged={this.onBrowsingModeChanged}/>
+      currentBrowser = <GridBrowser isProjected={this.isProjected} projectedFilters={this.projectedFilters} filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Card){
       currentBrowser = <CardBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }
@@ -106,7 +108,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
    */
   onFilterRemoved = (filterId : number) => {
     let callback = () => { if(this.CubeBrowser.current){ this.CubeBrowser.current.RecomputeCells(); }}
-    this.setState({filters : this.state.filters.filter(filter => filter.Id !== filterId)}, callback);
+    this.setState({filters : this.state.filters.filter(filter => filter.id !== filterId)}, callback);
   }
 
   /**
@@ -122,7 +124,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   */
   onFilterReplaced = (oldFilter:Filter, newFilter: Filter) => {
     let callback = () => { if (this.CubeBrowser.current) { this.CubeBrowser.current.RecomputeCells(); } }
-    let newFilters: Filter[] = this.state.filters.filter(filter => filter.Id !== oldFilter.Id);
+    let newFilters: Filter[] = this.state.filters.filter(filter => filter.id !== oldFilter.id);
     newFilters.unshift(newFilter);
     this.setState({ filters: newFilters.flat() }, callback);
   }
@@ -200,10 +202,12 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   /**
    * Can be called from sub-components to open CubeObject array in GridMode.
    */
-  onOpenCubeInGridMode = (cubeObjects: CubeObject[]) => {
+  onOpenCubeInGridMode = (cubeObjects: CubeObject[], projectedFilters: Filter[], isProjected: boolean) => {
     console.log("Opening cube in grid mode:");
     this.CubeBrowserBrowsingState = this.CubeBrowser.current!.GetCurrentBrowsingState();
     this.cubeObjects = cubeObjects;
+    this.projectedFilters = projectedFilters;
+    this.isProjected = isProjected;
     this.setState({BrowsingMode: BrowsingModes.Grid});
     this.rightDock.current!.ChangeBrowsingMode(BrowsingModes.Grid);
   }
