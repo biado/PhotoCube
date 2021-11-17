@@ -29,8 +29,6 @@ namespace ObjectCubeServer
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
                 {
-                    // Use the default property (Pascal) casing
-                    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
                     
