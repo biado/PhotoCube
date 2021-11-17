@@ -119,6 +119,22 @@ namespace ObjectCubeServer.Models.HelperClasses
                 Name = name
             };
         }
+        
+        public static TimestampTag NewTimestampTag(TagType tagtype, Tagset tagset, DateTime name)
+        {
+            if (tagset == null) { throw new Exception("Given tagset was null."); }
+            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
+            if (name == null) { throw new Exception("Given name was null."); }
+
+            tagId++;
+            return new TimestampTag()
+            {
+                Id = tagId,
+                TagTypeId = tagtype.Id,
+                TagsetId = tagset.Id,
+                Name = name
+            };
+        }
 
         public static Hierarchy NewHierarchy(Tagset tagset, string hierarchyName)
         {

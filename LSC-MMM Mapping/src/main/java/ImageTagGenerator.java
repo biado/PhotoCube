@@ -1,9 +1,4 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -42,12 +37,14 @@ public class ImageTagGenerator {
     private MetadataFormatter metadataFormatter;
     private FeatureFinder featureFinder;
     private Set<String> filenames;
+    private Set<String> excludedFilenames;
     private Map<String, String> filename_metadataLine_map; // built by matching minute_id in Visual Concept and Metadata files.
 
     private static final String LSCFilename = FilepathReader.LSCFilename;
     private static final String LSCVisualConcept = FilepathReader.LSCVisualConcept; // Still needed, merely to check minute_id
     private static final String LSCmetadata = FilepathReader.LSCMetadata;
     private static final String outputPath = FilepathReader.LSCImageTagsOutput;
+    private static final String excludePath = FilepathReader.ExcludeFile;
 
     public ImageTagGenerator() throws IOException, ParseException {
         this.solutionFilenames = new SolutionListGenerator().getSolutionSet();
@@ -57,9 +54,22 @@ public class ImageTagGenerator {
         this.featureFinder = new FeatureFinder(jshg.getHomonyms());
         this.solutionsInFront = new StringBuilder();
         this.othersAtBack = new StringBuilder();
+        if(excludePath != null) {
+            this.excludedFilenames = new HashSet<>();
+            excludeFilenames();
+        }
         buildFilenameSet();
         buildFilename_MetadataLineMap();
         buildStrings();
+    }
+
+    private void excludeFilenames() throws IOException {
+        System.out.println("Excluding files from " + excludePath);
+        BufferedReader br = new BufferedReader(new FileReader(new File(excludePath)));
+        String line;
+        while ((line = br.readLine()) != null && !line.equals("")) {
+            this.excludedFilenames.add(line);
+        }
     }
 
     private void buildFilename_MetadataLineMap() throws IOException {
@@ -102,7 +112,7 @@ public class ImageTagGenerator {
             sb.append(makeTagsFromJSON(filename)); // semantic tags
             if (filename_metadataLine_map.containsKey(filename)) { // metadata tags
                 String metadataLine = filename_metadataLine_map.get(filename);
-                sb.append(makeTagsFromMetadata(metadataLine));
+                sb.append(makeTagsFromMetadata(metadataLine,filename));
             }
             sb.append("\n");
         }
@@ -113,7 +123,13 @@ public class ImageTagGenerator {
         BufferedReader br = new BufferedReader(new FileReader(new File(LSCFilename)));
         String line;
         while ((line = br.readLine()) != null && !line.equals("")) {
-            filenames.add(makeImagePathFromLSCFilenames(line));
+            String[] pathParts = line.split("/");
+            String filename = pathParts[pathParts.length - 1].replaceAll("\"","");
+            if(excludePath != null && excludedFilenames.contains(filename)) {
+                System.out.println("Excluding: " + filename);
+            } else {
+                filenames.add(makeImagePathFromLSCFilenames(line));
+            }
         }
         br.close();
     }
@@ -174,7 +190,9 @@ public class ImageTagGenerator {
         return newPath.toString();
     }
 
-    private String makeTagsFromMetadata(String metadataLine) throws ParseException { // metadata tags
+    private String makeTagsFromMetadata(String metadataLine, String filename) throws ParseException { // metadata tags
+        String fileTimestamp = extractTimestampFromFilename(filename);
+
         String[] input = metadataLine.split(",");
         String[] formattedMetadataLine = metadataFormatter.formatMetadataLine(input);
         StringBuilder sb = new StringBuilder();
@@ -185,8 +203,7 @@ public class ImageTagGenerator {
         String[] date_time = formattedMetadataLine[2].split("_");
         sb.append(delimiter + "Date" + delimiter + date_time[0]);
         sb.append(delimiter + "Time" + delimiter + date_time[1]);
-
-        addDateTimeRelatedTags(sb, formattedMetadataLine[2]);
+        addDateTimeRelatedTags(sb, formattedMetadataLine[2],fileTimestamp);
 
         // timezone (i=3) only use the city name as the tag (Europe/Dublin -> Timezone,,Dublin)
         String[] region_city = formattedMetadataLine[3].split("/");
@@ -204,8 +221,26 @@ public class ImageTagGenerator {
         return sb.toString();
     }
 
-    private void addDateTimeRelatedTags(StringBuilder sb, String timestamp) {
-        DateTimeFormatter formatter = new DateTimeFormatter(timestamp);
+    private String extractTimestampFromFilename(String filename) {
+        /*filename types in lsc:
+        2015-02-23/b00000000_21i6bq_20150223_070647e.jpg
+        2016-08-11/20160811_131315_000.jpg
+        2018-05-04/B00003452_21I6X0_20180504_072707E.JPG
+         */
+        //TODO replace with regex like "_[0-9]{6}(e|_)"
+        String[] filenameParts = filename.split("\\\\");
+        String[] dateTimeParts = filenameParts[filenameParts.length - 1].split("_");
+        String timeDigits = dateTimeParts[dateTimeParts.length - 1].length() > 7 ? dateTimeParts[dateTimeParts.length - 1] : dateTimeParts[dateTimeParts.length - 2];
+        timeDigits = timeDigits.length() == 6 ? timeDigits : timeDigits.substring(0, 6); // remove extension if necesarry
+        //convert 6 digits to HH:mm:ss string
+        String time = String.format("%02d:%02d:%02d", Integer.parseInt(timeDigits.substring(0, 2)), Integer.parseInt(timeDigits.substring(2, 4)), Integer.parseInt(timeDigits.substring(4, 6)));
+        //add date
+        return filenameParts[0] + " " + time;
+    }
+
+    private void addDateTimeRelatedTags(StringBuilder sb, String localTime, String fileTimestamp) {
+        DateTimeFormatter formatter = new DateTimeFormatter(localTime);
+        sb.append(delimiter + "Timestamp" + delimiter + fileTimestamp);
         sb.append(delimiter + "Day of week (number)" + delimiter + formatter.getDayOfWeekNumber());
         sb.append(delimiter + "Day of week (string)" + delimiter + formatter.getDayOfWeekString());
         sb.append(delimiter + "Day within month" + delimiter + formatter.getDayWithinMonth());

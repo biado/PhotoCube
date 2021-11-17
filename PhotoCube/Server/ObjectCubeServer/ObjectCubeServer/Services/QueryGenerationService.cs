@@ -108,9 +108,9 @@ namespace ObjectCubeServer.Services
                 return BaseQuery;
             }
 
-            var queryFront = new StringBuilder("select distinct O.id as Id, O.file_uri as fileURI, DT.name as D, TT.name as T from (select R1.object_id ");
+            var queryFront = new StringBuilder("select distinct O.id as Id, O.file_uri as fileURI, TS.name as T from (select R1.object_id ");
             var queryMiddle = new StringBuilder(" from (");
-            var queryEnd = new StringBuilder(") X join cubeobjects O on X.object_id = O.id join objecttagrelations R1 on O.id = R1.object_id join date_tags DT on R1.tag_id = DT.id join objecttagrelations R2 on O.id = R2.object_id join time_tags TT on R2.tag_id = TT.id order by DT.name, TT.name;");
+            var queryEnd = new StringBuilder(") X join cubeobjects O on X.object_id = O.id join objecttagrelations R1 on O.id = R1.object_id join objecttagrelations R2 on O.id = R2.object_id join timestamp_tags TS on R2.tag_id = TS.id order by TS.name;");
 
             if (filtersList != null)
             {
@@ -213,6 +213,10 @@ namespace ObjectCubeServer.Services
                     query +=
                         $" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
+                case "timestamprange":
+                    query +=
+                        $" select R.object_id from timestamp_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
             }
 
             return query;
@@ -280,6 +284,10 @@ namespace ObjectCubeServer.Services
                 case "timerange":
                     query +=
                         $" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
+                case "timestamprange":
+                    query +=
+                        $" select R.object_id from timestamp_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
             }
 
