@@ -221,13 +221,16 @@ export default class CubeBrowser extends React.Component<{
             false
         );
         //Right click handler:
+        //change back to context menu to restore rightclick functionality
         this.renderer.domElement.addEventListener(
-            "contextmenu",
+            //"contextmenu",
+            "dblclick",
             this.onRightClick,
             false
         );
         //Mouse click handler:
         this.renderer.domElement.addEventListener(
+            //"contextmenu",
             "click",
             this.onMouseClick,
             false
@@ -247,8 +250,10 @@ export default class CubeBrowser extends React.Component<{
             this.onWebGLContextLost,
             false
         );
+        //change back to context menu to restore rightclick functionality
         this.renderer.domElement.removeEventListener(
-            "contextmenu",
+            //"contextmenu",
+            "dblclick",
             this.onRightClick,
             false
         );
@@ -389,6 +394,7 @@ export default class CubeBrowser extends React.Component<{
     };
 
     /** Handler for right click */
+    //Its actually a doubleclick now. Can be changed back in the eventlistener.
     private onRightClick = (me: MouseEvent) => {
         me.preventDefault();
         // calculate objects intersecting the picking ray:
