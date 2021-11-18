@@ -16,7 +16,7 @@ namespace ObjectCubeServer.Models.DomainClasses.Tag_Types
         override 
         public string GetTagName()
         {
-            return Name.ToString(CultureInfo.InvariantCulture);
+            return Name.ToString("G");
         }
 
         public int CompareTo(object obj)
