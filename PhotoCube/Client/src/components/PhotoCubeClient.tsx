@@ -211,10 +211,10 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     this.rightDock.current!.ChangeBrowsingMode(BrowsingModes.Grid);
   }
 
-  onDrillDown = (oldNodeName: string, oldNodeId: number, oldNodeType: string, newNode: HierarchyNode) => {
-    console.log("Drilling down into " + newNode.tag.name);
-    let newFilter: Filter =  createFilter(newNode.tag.name, newNode.id, "HierarchyNode");
-    let oldFilter: Filter =  createFilter(oldNodeName, oldNodeId, oldNodeType);
+  onDrillDown = (oldName: string, oldId: number, oldType: string, newName: string, newId: number, newType: string) => {
+    console.log("Drilling down into " + newName);
+    let newFilter: Filter =  createFilter(newName, newId, newType);
+    let oldFilter: Filter =  createFilter(oldName, oldId, oldType);
     this.onFilterReplaced(oldFilter, newFilter);
   }
 }

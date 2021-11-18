@@ -33,7 +33,7 @@ export default class CubeBrowser extends React.Component<{
         projectedFilters: Filter[],
         isProjected: boolean,
     ) => void;
-    onDrillDown: (oldNodeName: string, oldNodeId: number, oldNodeType: string, hierarchyNode: HierarchyNode) => void,
+    onDrillDown: (oldName: string, oldId: number, oldType: string, newName: string, newId: number, newType: string) => void,
     onDimensionChanged: (dimName: string, dimension:PickedDimension) => void,
     filters: Filter[];
 }> {
@@ -402,18 +402,42 @@ export default class CubeBrowser extends React.Component<{
         // calculate objects intersecting the picking ray
         let intersects = this.raycaster.intersectObjects( this.textMeshes );
         if(intersects.length > 0){
-        if(this.xAxis.PickedDimension !== null){
-            if(intersects[0].object.userData.x !== 0 && this.xAxis.AxisType === AxisTypeEnum.Tagset){
-            }else if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
+        if(this.xAxis.PickedDimension !== null && intersects[0].object.userData.x !== 0 ){
+                if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
                 let targetNode = this.xAxis.Hierarchies[intersects[0].object.position.x - 1]; 
                 let oldDimension = this.xAxis.PickedDimension;
                 oldDimension.id = targetNode.id;
                 oldDimension.name = targetNode.tag.name;
                 oldDimension.type = "node";
-                this.props.onDrillDown(this.xAxis.PickedDimension.name, this.xAxis.Id, this.xAxis.AxisType, targetNode);
+                this.props.onDrillDown(this.xAxis.PickedDimension.name, this.xAxis.Id, this.xAxis.AxisType, targetNode.tag.name, targetNode.id, "HierarchyNode"  );
                 this.props.onDimensionChanged("X", oldDimension);
+                if (targetNode.children.length === 0)  this.onOpenCubeInGridMode();
             }
         }
+            else if(this.yAxis.PickedDimension !== null && intersects[0].object.userData.y !== 0){
+                if(this.yAxis.AxisType === AxisTypeEnum.Hierarchy){
+                    let targetNode = this.yAxis.Hierarchies[intersects[0].object.position.y - 1]; 
+                    let oldDimension = this.yAxis.PickedDimension;
+                    oldDimension.id = targetNode.id;
+                    oldDimension.name = targetNode.tag.name;
+                    oldDimension.type = "node";
+                    this.props.onDrillDown(this.yAxis.PickedDimension.name, this.yAxis.Id, this.yAxis.AxisType, targetNode.tag.name, targetNode.id, "HierarchyNode"  );
+                    this.props.onDimensionChanged("Y", oldDimension);
+                    if (targetNode.children.length === 0)  this.onOpenCubeInGridMode();
+                }
+            }
+            else if(this.zAxis.PickedDimension !== null && intersects[0].object.userData.z !== 0){
+                    if(this.zAxis.AxisType === AxisTypeEnum.Hierarchy){
+                    let targetNode = this.zAxis.Hierarchies[intersects[0].object.position.z - 1]; 
+                    let oldDimension = this.zAxis.PickedDimension;
+                    oldDimension.id = targetNode.id;
+                    oldDimension.name = targetNode.tag.name;
+                    oldDimension.type = "node";
+                    this.props.onDrillDown(this.zAxis.PickedDimension.name, this.zAxis.Id, this.zAxis.AxisType, targetNode.tag.name, targetNode.id, "HierarchyNode"  );
+                    this.props.onDimensionChanged("Z", oldDimension);
+                    if (targetNode.children.length === 0)  this.onOpenCubeInGridMode();
+                }
+            }
     }
 }
 
