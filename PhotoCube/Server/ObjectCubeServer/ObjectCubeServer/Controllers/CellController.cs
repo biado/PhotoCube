@@ -24,13 +24,14 @@ namespace ObjectCubeServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SingleObjectCell>>> Get(string xAxis, string yAxis, string zAxis, string filters, string all)
+        public async Task<ActionResult<IEnumerable<SingleObjectCell>>> Get(string xAxis, string yAxis, string zAxis, string filters, string all, string timeline)
         {
             bool xDefined = xAxis != null;
             bool yDefined = yAxis != null;
             bool zDefined = zAxis != null;
             bool filtersDefined = filters != null;
             bool allDefined = all != null;
+            bool timelineDefined = timeline != null;
             //Parsing:
             ParsedAxis axisX = xDefined ? JsonConvert.DeserializeObject<ParsedAxis>(xAxis) : new ParsedAxis { Type = "", Id = -1 };
             ParsedAxis axisY = yDefined ? JsonConvert.DeserializeObject<ParsedAxis>(yAxis) : new ParsedAxis { Type = "", Id = -1 };
@@ -43,6 +44,13 @@ namespace ObjectCubeServer.Controllers
             {
                 List<PublicCubeObject> cubeobjects = 
                     await coContext.PublicCubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForObjects(filtersList)).ToListAsync();
+                return Ok(cubeobjects);
+            }
+
+            if (timelineDefined)
+            {
+                List<PublicCubeObject> cubeobjects =
+                    await coContext.PublicCubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForTimeline(filtersList)).ToListAsync();
                 return Ok(cubeobjects);
             }
 
