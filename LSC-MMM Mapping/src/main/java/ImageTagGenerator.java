@@ -228,7 +228,7 @@ public class ImageTagGenerator {
         2018-05-04/B00003452_21I6X0_20180504_072707E.JPG
          */
         //TODO replace with regex like "_[0-9]{6}(e|_)"
-        String[] filenameParts = filename.split("\\\\");
+        String[] filenameParts = filename.split("[\\\\|/]");
         String[] dateTimeParts = filenameParts[filenameParts.length - 1].split("_");
         String timeDigits = dateTimeParts[dateTimeParts.length - 1].length() > 7 ? dateTimeParts[dateTimeParts.length - 1] : dateTimeParts[dateTimeParts.length - 2];
         timeDigits = timeDigits.length() == 6 ? timeDigits : timeDigits.substring(0, 6); // remove extension if necesarry
