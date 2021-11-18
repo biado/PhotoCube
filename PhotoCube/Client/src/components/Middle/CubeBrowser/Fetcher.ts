@@ -196,7 +196,7 @@ export default class Fetcher {
    */
   static async FetchNode(nodeId: number) {
     try {
-      const response = await fetch(Fetcher.baseUrl + "/node/" + nodeId);
+      const response = await fetch(Fetcher.baseUrl + "/node/" + nodeId + "/tree");
       const data = await response.json();
       return data;
     } catch (error) {
