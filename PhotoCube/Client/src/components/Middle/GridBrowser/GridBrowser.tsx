@@ -5,6 +5,7 @@ import { BrowsingModes } from "../../RightDock/BrowsingModeChanger";
 import Fetcher from "../CubeBrowser/Fetcher";
 import { Image } from "../../../interfaces/types";
 import { Filter } from "../../Filter";
+import Modal from "./Modal";
 
 /**
  * The GridBrowser allows the user to browse a collection of photos side by side in a grid to get an overview.
@@ -16,11 +17,15 @@ interface FuncProps {
   onBrowsingModeChanged: (browsingMode: BrowsingModes) => void;
   filters: Filter[];
   projectedFilters: Filter[];
-  isProjected: boolean; 
+  isProjected: boolean;
 }
 
 const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   const [images, setImages] = useState<Image[]>([]);
+
+  const [modal, setModal] = useState<boolean>(false);
+
+  const [imageTags, setImageTags] = useState<string[]>(["foo", "bar"]);
 
   useEffect(() => {
     if (!props.isProjected) {
@@ -35,15 +40,15 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   }, []);
 
   const fetchWithProjection = async () => {
-    const allFilters = [...props.filters, ...props.projectedFilters]
+    const allFilters = [...props.filters, ...props.projectedFilters];
     try {
-      const response = await Fetcher.FetchAllImagesWithProjection(allFilters)
-      setImages(response)
-      console.log(response)
+      const response = await Fetcher.FetchAllImagesWithProjection(allFilters);
+      setImages(response);
+      console.log(response);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const fetchAllImages = async () => {
     try {
@@ -71,28 +76,48 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
     }
   };
 
+  const displayTags = () => {
+    toggleModal()
+  }
+
+  const toggleModal = () => {
+    setModal(!modal);
+  };
+
+  const fetchTags = async (imageId: number) => {
+    try {
+      const response = await Fetcher.FetchTagsWithCubeObjectId(imageId);
+      setImageTags(response)
+    } catch (error) {
+      console.error(error)
+    }
+  };
+
   return (
     <div className="grid-item">
       <div className="imageContainer">
         {images.length > 100
-          ? images
-              .slice(0, 100)
-              .map((image) => (
+          ? images.slice(0, 100).map((image) => (
                 <img
                   onDoubleClick={() => submitImage(image.fileURI)}
+                  onMouseOver={() => fetchTags(image.id)}
+                  onClick={() => displayTags()}
                   key={image.id}
                   className="image"
                   src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
                 ></img>
-              ))
+            ))
           : images.map((image) => (
               <img
                 onDoubleClick={() => submitImage(image.fileURI)}
+                onMouseOver={() => fetchTags(image.id)}
+                onClick={() => displayTags()}
                 key={image.id}
                 className="image"
                 src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
               ></img>
             ))}
+        <Modal show={modal} toggleModal={toggleModal} tags={imageTags}/>
       </div>
     </div>
   );
