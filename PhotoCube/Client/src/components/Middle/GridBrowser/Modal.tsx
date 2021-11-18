@@ -9,18 +9,38 @@ import { TagsetDropdown } from "../BottomDock/TagsetFilter";
 
 interface FuncProps {
   show: boolean;
-  toggleModal: () => void
-  tags: string[]
+  toggleModal: () => void;
+  opTimelineBrowser: () => void;
+  tags: string[];
+  imageId: number;
+  fileUri: string
 }
+
+const submitImage = async (fileUri: string) => {
+  try {
+    console.log(fileUri)
+    Fetcher.SubmitImage(fileUri).then((r) => {
+    console.log(r);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 const Modal: React.FC<FuncProps> = (props: FuncProps) => {
   return (
     <div>
       {props.show ? (
         <div className="modalContainer" onClick={() => props.toggleModal()}>
-          <div className="modal">{props.tags.map((t) => (
+          <div className="modal">
+            {props.tags.map((t) => (
               <h3>{t}</h3>
-          ))}</div>
+            ))}
+            <footer className="modal_footer">
+              <button className="modal-close" onClick={() => props.opTimelineBrowser()}>Open timelinebrowser</button>
+              <button className="submit" onClick={() => submitImage(props.fileUri)}>Submit</button>
+            </footer>
+          </div>
         </div>
       ) : null}
     </div>

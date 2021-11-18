@@ -22,3 +22,15 @@
     backdrop-filter: blur(5px);
     box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.2);
 }
+
+.modal_footer{
+    padding: 2rem 0;
+      padding-bottom: 0;
+}
+
+.modal_footer button {
+    float: right;
+    padding: 0.5rem;
+
+    border-radius: 8px;
+}

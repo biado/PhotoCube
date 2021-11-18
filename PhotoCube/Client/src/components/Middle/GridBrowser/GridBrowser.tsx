@@ -25,7 +25,13 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
 
   const [modal, setModal] = useState<boolean>(false);
 
-  const [imageTags, setImageTags] = useState<string[]>(["foo", "bar"]);
+  const [imageTags, setImageTags] = useState<string[]>([]);
+
+  const [imageId, setImageId] = useState<number>(0);
+
+  const [imageFileUri, setImageFileUri] = useState<string>("");
+
+  //const [imageDate, setImagedate] = useState<string>("");
 
   useEffect(() => {
     if (!props.isProjected) {
@@ -38,6 +44,10 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
       document.removeEventListener("keydown", (e) => onKeydown(e));
     };
   }, []);
+
+/*   useEffect(() => {
+    datetester()
+  }, [imageTags]) */
 
   const fetchWithProjection = async () => {
     const allFilters = [...props.filters, ...props.projectedFilters];
@@ -59,16 +69,6 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
     }
   };
 
-  const submitImage = async (fileUri: string) => {
-    try {
-      Fetcher.SubmitImage(fileUri).then((r) => {
-        console.log(r);
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const onKeydown = (e: KeyboardEvent) => {
     console.log(e.key);
     if (e.key === "Escape") {
@@ -76,9 +76,12 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
     }
   };
 
-  const displayTags = () => {
-    toggleModal()
-  }
+  const displayTagsInModal = (imageId: number, fileuri: string) => {
+    setImageFileUri(fileuri);
+    setImageId(imageId);
+    fetchTags(imageId);
+    toggleModal();
+  };
 
   const toggleModal = () => {
     setModal(!modal);
@@ -87,37 +90,68 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
   const fetchTags = async (imageId: number) => {
     try {
       const response = await Fetcher.FetchTagsWithCubeObjectId(imageId);
-      setImageTags(response)
+      //console.log(response);
+      setImageTags(response);
+      
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
+  };
+
+/*   function isValidDate(d: any) {
+    const goodDate = /^([1-9]|([012][0-9])|(3[01]))-([0]{0,1}[1-9]|1[012])-\d\d\d\d [012]{0,1}[0-9]:[0-9][0-9]:[0-9][0-9]$/
+    return goodDate.test(d)
+  } */
+
+/*   function datetester() {
+    imageTags.forEach((i) => {
+      console.log(i)
+      console.log(isValidDate(i))
+      if (isValidDate(i)) {
+        setImagedate(i)
+      } 
+    })
+    console.log("THEDATE", imageDate)
+  } */
+
+  const opTimelineBrowser = async () => {
+    console.log(imageId)
+    try {
+      const response = await Fetcher.FetchFromTimestamp(imageId);
+      setImages(response);
+    } catch (error) {}
   };
 
   return (
     <div className="grid-item">
       <div className="imageContainer">
-        {images.length > 100
-          ? images.slice(0, 100).map((image) => (
-                <img
-                  onDoubleClick={() => submitImage(image.fileURI)}
-                  onMouseOver={() => fetchTags(image.id)}
-                  onClick={() => displayTags()}
-                  key={image.id}
-                  className="image"
-                  src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
-                ></img>
+        {images.length > 1000
+          ? images.slice(0, 1000).map((image) => (
+              <img
+                onClick={() => displayTagsInModal(image.id, image.fileURI)}
+                key={image.id}
+                //title="foobar"
+                className="image"
+                src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
+              ></img>
             ))
           : images.map((image) => (
               <img
-                onDoubleClick={() => submitImage(image.fileURI)}
-                onMouseOver={() => fetchTags(image.id)}
-                onClick={() => displayTags()}
+                onClick={() => displayTagsInModal(image.id, image.fileURI)}
                 key={image.id}
+                //title="foobar"
                 className="image"
                 src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
               ></img>
             ))}
-        <Modal show={modal} toggleModal={toggleModal} tags={imageTags}/>
+        <Modal
+          show={modal}
+          toggleModal={toggleModal}
+          tags={imageTags}
+          imageId={imageId}
+          fileUri={imageFileUri}
+          opTimelineBrowser={opTimelineBrowser}
+        />
       </div>
     </div>
   );
