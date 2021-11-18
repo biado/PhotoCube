@@ -397,10 +397,11 @@ export default class CubeBrowser extends React.Component<{
         }
         this.mouse.x = ( me.clientX / window.innerWidth ) * 2 - 1;
         this.mouse.y = - ( me.clientY / window.innerHeight ) * 2 + 1;
+        console.log()
         // update the picking ray with the camera and mouse position
         this.raycaster.setFromCamera( this.mouse, this.camera );
         // calculate objects intersecting the picking ray
-        let intersects = this.raycaster.intersectObjects( this.textMeshes );
+        let intersects = this.raycaster.intersectObjects( this.sphereMeshes );
         if(intersects.length > 0){
         if(this.xAxis.PickedDimension !== null && intersects[0].object.userData.x !== 0 ){
                 if(this.xAxis.AxisType === AxisTypeEnum.Hierarchy){
@@ -560,42 +561,56 @@ export default class CubeBrowser extends React.Component<{
         this.raycaster.setFromCamera(this.mouse, this.camera);
         // calculate objects intersecting the picking ray
         let intersects = this.raycaster.intersectObjects(this.boxMeshes);
-        if (intersects.length > 0) {
+        let sphereIntersects = this.raycaster.intersectObjects(this.sphereMeshes);
+        if (intersects.length > 0 || sphereIntersects.length > 0) {
             let xDefined: boolean = this.xAxis.TitleString !== "X";
             let yDefined: boolean = this.yAxis.TitleString !== "Y";
             let zDefined: boolean = this.zAxis.TitleString !== "Z";
-            let infoText: string =
-                "Number of photos: " + intersects[0].object.userData.size;
+            let infoText: string = "";
+            if (intersects.length > 0) infoText = "Number of photos: " + intersects[0].object.userData.size;
+            else infoText = "Click to Drill Down";
             if (xDefined) {
+                let intersectedObjectPosition;
+                if (sphereIntersects.length > 0) {intersectedObjectPosition = sphereIntersects[0].object.position.x;}
+                else {
+                    {intersectedObjectPosition = parseInt(intersects[0].object.userData.x);
+                }
+            }
                 if (
-                    intersects[0].object.userData.x !== 0 &&
+                    intersectedObjectPosition !== 0 &&
                     this.xAxis.AxisType === AxisTypeEnum.Tagset
                 ) {
                     infoText +=
                         ",  X: " +
                         (this.xAxis.TitleString +
                             ": " +
-                            this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1]
+                            this.xAxis.Tags[intersectedObjectPosition - 1]
                                 .name);
                 } else if (this.xAxis.AxisType === AxisTypeEnum.Hierarchy) {
                     infoText +=
                         ",  X: " +
                         (this.xAxis.TitleString +
                             ": " +
-                            this.xAxis.Hierarchies[
-                                parseInt(intersects[0].object.userData.x) - 1
+                            this.xAxis.Hierarchies[intersectedObjectPosition - 1
                             ].tag.name);
                 } else if (this.xAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
                     infoText +=
                         ",  X: " +
                         this.xAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.x) - 1
+                            intersectedObjectPosition - 1
                         ].tag.name;
                 }
             }
+        
             if (yDefined) {
+                let intersectedObjectPosition;
+                if (sphereIntersects.length > 0) {intersectedObjectPosition = sphereIntersects[0].object.position.y;}
+                else {
+                    {intersectedObjectPosition = parseInt(intersects[0].object.userData.y);
+                }
+            }
                 if (
-                    intersects[0].object.userData.y !== 0 &&
+                    intersectedObjectPosition !== 0 &&
                     this.yAxis.AxisType === AxisTypeEnum.Tagset
                 ) {
                     infoText +=
@@ -610,19 +625,25 @@ export default class CubeBrowser extends React.Component<{
                         (this.yAxis.TitleString +
                             ": " +
                             this.yAxis.Hierarchies[
-                                parseInt(intersects[0].object.userData.y) - 1
+                                intersectedObjectPosition - 1
                             ].tag.name);
                 } else if (this.yAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
                     infoText +=
                         ",  Y: " +
                         this.yAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.y) - 1
+                            intersectedObjectPosition - 1
                         ].tag.name;
                 }
             }
             if (zDefined) {
+                let intersectedObjectPosition;
+                if (sphereIntersects.length > 0) {intersectedObjectPosition = sphereIntersects[0].object.position.z;}
+                else {
+                    {intersectedObjectPosition = parseInt(intersects[0].object.userData.z);
+                }
+            }
                 if (
-                    intersects[0].object.userData.z !== 0 &&
+                    intersectedObjectPosition !== 0 &&
                     this.zAxis.AxisType === AxisTypeEnum.Tagset
                 ) {
                     infoText +=
@@ -637,21 +658,26 @@ export default class CubeBrowser extends React.Component<{
                         (this.zAxis.TitleString +
                             ": " +
                             this.zAxis.Hierarchies[
-                                parseInt(intersects[0].object.userData.z) - 1
+                                intersectedObjectPosition - 1
                             ].tag.name);
                 } else if (this.zAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
                     infoText +=
                         ",  Z: " +
                         this.zAxis.Hierarchies[
-                            parseInt(intersects[0].object.userData.z) - 1
+                            intersectedObjectPosition - 1
                         ].tag.name;
                 }
             }
+        
             this.setState({ infoText: infoText });
-        } else {
-            this.setState({ infoText: "Hover with mouse on a cube to see info" });
         }
-    };
+         else {
+            this.setState({ infoText: "Hover with mouse on a cube to see info" });
+        } 
+}
+    
+
+     
 
     /** Handler for keyboard presses. */
     private onKeyPress = (event: KeyboardEvent) => {
