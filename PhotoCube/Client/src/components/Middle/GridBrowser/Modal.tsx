@@ -34,7 +34,7 @@ const Modal: React.FC<FuncProps> = (props: FuncProps) => {
         <div className="modalContainer" onClick={() => props.toggleModal()}>
           <div className="modal">
             {props.tags.map((t) => (
-              <h3>{t}</h3>
+              <h5 className="text">{t}</h5>
             ))}
             <footer className="modal_footer">
               <button className="modal-close" onClick={() => props.opTimelineBrowser()}>Open timelinebrowser</button>
