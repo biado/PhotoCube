@@ -32,6 +32,7 @@ export default class CubeBrowser extends React.Component<{
         cubeObjects: CubeObject[],
         projectedFilters: Filter[],
         isProjected: boolean,
+        cleanFilters: Filter[]
     ) => void;
     filters: Filter[];
 }> {
@@ -630,10 +631,18 @@ export default class CubeBrowser extends React.Component<{
      * Handler to rightclick - Open cube in grid mode.
      */
     private onOpenCubeInGridMode() {
+        const cleanFilters: Filter[] = this.props.filters.filter(
+            (f) =>
+                f.id !== this.xAxis.Id &&
+                f.id !== this.yAxis.Id &&
+                f.id !== this.zAxis.Id
+        );
+
         this.props.onOpenCubeInGridMode(
             this.contextMenuCubeObjects,
             this.state.projectedFilters,
             this.state.isProjected,
+            cleanFilters,
         );
     }
 

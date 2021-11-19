@@ -55,6 +55,7 @@ export default class Fetcher {
   static async FetchAllImagesWithProjection(filters: Filter[]) {
     let queryString: string = this.baseUrl + "/cell/?";
     queryString += "&filters=" + this.parseFilters(filters!) + "&all=[]";
+    console.log(queryString)
     try {
       const response = await fetch(queryString);
       const data = await response.json();

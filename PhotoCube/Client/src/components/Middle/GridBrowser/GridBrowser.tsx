@@ -18,6 +18,7 @@ interface FuncProps {
   filters: Filter[];
   projectedFilters: Filter[];
   isProjected: boolean;
+  cleanFilters: Filter[];
 }
 
 const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
@@ -49,8 +50,19 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
     datetester()
   }, [imageTags]) */
 
+  const cleanFilters = () => {
+    
+  } 
+
   const fetchWithProjection = async () => {
-    const allFilters = [...props.filters, ...props.projectedFilters];
+    /* const directFilters: Filter[] = props.filters.filter(
+      (f) =>
+          f.id !== this.xAxis.Id &&
+          f.id !== this.yAxis.Id &&
+          f.id !== this.zAxis.Id
+  ); */
+    const allFilters = [...props.cleanFilters, ...props.projectedFilters];
+    console.log(allFilters)
     try {
       const response = await Fetcher.FetchAllImagesWithProjection(allFilters);
       setImages(response);

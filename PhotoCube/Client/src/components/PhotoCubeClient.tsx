@@ -37,6 +37,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   cubeObjects : CubeObject[] = [];
   projectedFilters : Filter[] = [];
   isProjected: boolean | any;
+  cleanFilters: Filter[] = []
 
   render() {
     //Conditional rendering:
@@ -49,7 +50,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
         filters={this.state.filters}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
-      currentBrowser = <GridBrowser isProjected={this.isProjected} projectedFilters={this.projectedFilters} filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
+      currentBrowser = <GridBrowser cleanFilters={this.cleanFilters} isProjected={this.isProjected} projectedFilters={this.projectedFilters} filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Card){
       currentBrowser = <CardBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }
@@ -199,12 +200,13 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   /**
    * Can be called from sub-components to open CubeObject array in GridMode.
    */
-  onOpenCubeInGridMode = (cubeObjects: CubeObject[], projectedFilters: Filter[], isProjected: boolean) => {
+  onOpenCubeInGridMode = (cubeObjects: CubeObject[], projectedFilters: Filter[], isProjected: boolean, cleanFilters: Filter[]) => {
     console.log("Opening cube in grid mode:");
     this.CubeBrowserBrowsingState = this.CubeBrowser.current!.GetCurrentBrowsingState();
     this.cubeObjects = cubeObjects;
     this.projectedFilters = projectedFilters;
     this.isProjected = isProjected;
+    this.cleanFilters = cleanFilters;
     this.setState({BrowsingMode: BrowsingModes.Grid});
     this.rightDock.current!.ChangeBrowsingMode(BrowsingModes.Grid);
   }
