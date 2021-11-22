@@ -45,22 +45,23 @@ namespace ObjectCubeServer.Controllers
             return Ok(tagsetWithId);
         }
 
-        // GET: api/tagset/name=Year
+        // GET: api/tagset/Year
         /// <summary>
         /// Returns all tags in a tagset as a list, where Tagset.name == tagsetName.
         /// </summary>
         /// <param tagsetName="tagsetName"></param>
-        [HttpGet("name={tagsetName}")]
-        public async Task<ActionResult<IEnumerable<PublicTag>>> GetAllTagsByTagsetName(string tagsetName)
+        [HttpGet("{name}")]
+        public async Task<ActionResult<IEnumerable<PublicTag>>> GetAllTagsByTagsetName(string name)
         {
             var tagset = await coContext.Tagsets
                 .Include(ts => ts.Tags)
-                .FirstOrDefaultAsync(ts => ts.Name.ToLower() == tagsetName.ToLower());
+                    .ThenInclude(tag => tag.TagType)
+                .FirstOrDefaultAsync(ts => ts.Name.ToLower() == name.ToLower());
             List<Tag>  tagsFound = tagset?.Tags;
 
             if (tagsFound == null) return NotFound();
             
-            var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName())).ToList();
+            var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName(),tag.TagsetId,tag.TagType.Description)).ToList();
             
             return Ok(result);
         }

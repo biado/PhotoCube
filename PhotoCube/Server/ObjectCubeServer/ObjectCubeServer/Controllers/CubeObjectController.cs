@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.DomainClasses.Tag_Types;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -41,6 +43,25 @@ namespace ObjectCubeServer.Controllers
                 return NotFound();
             }
             return Ok(cubeObjectFound);
+        }
+        // GET : api/CubeObject/5/tags
+        [HttpGet("{id:int}/tags")]
+        public async Task<ActionResult<IEnumerable<Tag>>> GetTags(int id)
+        {
+            var cubeObjectFound = await coContext.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
+
+            if (cubeObjectFound == null)
+            {
+                return NotFound();
+            }
+            
+            var tags = await coContext.ObjectTagRelations
+                .Include(otr => otr.Tag.TagType)
+                .Where(otr => otr.ObjectId == id)
+                .Select(otr => new PublicTag(otr.TagId,  otr.Tag.GetTagName(),otr.Tag.TagsetId,otr.Tag.TagType.Description))
+                .ToListAsync();
+
+            return Ok(tags);
         }
 
         // GET: api/CubeObject/fromTagId/1 (currently not in use)
