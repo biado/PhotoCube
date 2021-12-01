@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
 
 namespace ObjectCubeServer.Models.DomainClasses.Tag_Types
 {

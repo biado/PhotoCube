@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +38,7 @@ namespace ObjectCubeServer.Controllers
             Tagset tagsetWithId = await coContext.Tagsets
                 .Where(ts => ts.Id == id)
                 .Include(ts => ts.Tags)
+                    .ThenInclude(t => t.TagType)
                 .Include(ts => ts.Hierarchies)
                 .FirstOrDefaultAsync();
             

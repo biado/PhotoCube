@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -70,8 +69,8 @@ namespace ObjectCubeServer.Controllers
                     .Include(n => n.Children)
                         .ThenInclude(cn => cn.Tag)
                     .FirstOrDefault();
-                
-                childNodeWithTagAndChildren?.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+
+                childNodeWithTagAndChildren?.Children.OrderBy(n => n.Tag.GetTagName());
                 childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }

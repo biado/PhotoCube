@@ -2,11 +2,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * ImageTagGenerator generates imageTags.csv file from LSC data set.
@@ -119,7 +115,7 @@ public class ImageTagGenerator {
     }
 
     private void buildFilenameSet() throws IOException {
-        this.filenames = new HashSet<>();
+        this.filenames = new LinkedHashSet<>();
         BufferedReader br = new BufferedReader(new FileReader(new File(LSCFilename)));
         String line;
         while ((line = br.readLine()) != null && !line.equals("")) {

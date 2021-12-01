@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
-using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers

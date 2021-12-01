@@ -20,7 +20,7 @@ namespace ObjectCubeServer.Models.DomainClasses.Tag_Types
 
         public int CompareTo(object obj)
         {
-            return Name.CompareTo(((AlphanumericalTag)obj).Name);
+            return string.Compare(Name, ((AlphanumericalTag)obj).Name, StringComparison.Ordinal);
         }
     }
 }

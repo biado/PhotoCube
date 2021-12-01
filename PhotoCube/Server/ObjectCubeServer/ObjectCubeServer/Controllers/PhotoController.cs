@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
@@ -20,7 +18,7 @@ namespace ObjectCubeServer.Controllers
         }
 
         // GET: api/Photo/5
-        [HttpGet("{id}", Name = "GetPhoto")]
+        [HttpGet("{id:int}", Name = "GetPhoto")]
         public async Task<ActionResult<string>> Get(int id)
         {
             string fileURI;

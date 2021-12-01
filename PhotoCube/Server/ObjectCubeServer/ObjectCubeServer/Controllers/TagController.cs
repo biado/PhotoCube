@@ -58,7 +58,7 @@ namespace ObjectCubeServer.Controllers
         {
             List<Tag> tagsFound = await coContext.Tags
                 .Include(tag =>tag.TagType)
-                .Where(t => t.GetTagName().ToLower().StartsWith(name.ToLower()))
+                .Where(t => ((AlphanumericalTag)t).Name.ToLower().StartsWith(name.ToLower()))
                 .ToListAsync();
             
             if (tagsFound == null) return NotFound();

@@ -39,9 +39,8 @@ namespace ObjectCubeServer.Controllers
         [HttpGet("{id:int}", Name = "GetThumbnail")]
         public async Task<ActionResult<string>> Get(int id)
         {
-            string thumbnailURI;
             CubeObject cubeObject = await coContext.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
-            thumbnailURI = cubeObject.ThumbnailURI;
+            var thumbnailURI = cubeObject.ThumbnailURI;
             
             if (thumbnailURI == null)
             {
