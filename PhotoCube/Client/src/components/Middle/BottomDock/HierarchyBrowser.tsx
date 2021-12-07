@@ -57,7 +57,7 @@ const BrowserNodeWithChildren =
     }, [props.parent.id])
 
     async function getChildren() {
-        if (props.showChildren) {
+        if (props.showChildren || childNodes === null) {
             await fetchChildNodes(props.parent.id).then(response => {
                 const sorted = response.sort((a:Node,b:Node) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
                 setChildren(sorted);
