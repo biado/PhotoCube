@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +12,12 @@ namespace ObjectCubeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CellController : ControllerBase
+    public class TimelineController : ControllerBase
     {
         private readonly QueryGenerationService queryGenerationService = new();
         private readonly ObjectContext coContext;
 
-        public CellController(ObjectContext coContext)
+        public TimelineController(ObjectContext coContext)
         {
             this.coContext = coContext;
         }
@@ -30,12 +29,11 @@ namespace ObjectCubeServer.Controllers
             //Parsing:
             List<ParsedFilter>? filtersList =
                 filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
-            
-            List<PublicCubeObject> cubeobjects = 
-                await coContext.PublicCubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForObjects(filtersList)).ToListAsync();
+
+            List<PublicCubeObject> cubeobjects =
+                await coContext.PublicCubeObjects
+                    .FromSqlRaw(queryGenerationService.generateSQLQueryForTimeline(filtersList)).ToListAsync();
             return Ok(cubeobjects);
         }
-        
-    
     }
 }

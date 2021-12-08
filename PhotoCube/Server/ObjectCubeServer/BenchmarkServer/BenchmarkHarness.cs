@@ -20,16 +20,16 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetCubeObjectPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
             {
-                await restClient.GetCubeObject();
+                await restClient.GetCubeObjects();
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetCubeObjectByIdtPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -38,39 +38,12 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetCubeObjectFromTagIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
             {
-                await restClient.GetCubeObjectFromTagId();
-            }
-        }
-        
-        [Benchmark]
-        public async Task GetCubeObjectFrom2TagIdsPayloadAsync()
-        {
-            for(int i = 0; i < iterationCount; i++)
-            {
-                await restClient.GetCubeObjectFrom2TagIds();
-            }
-        }
-        
-        [Benchmark]
-        public async Task GetCubeObjectFrom3TagIdsPayloadAsync()
-        {
-            for(int i = 0; i < iterationCount; i++)
-            {
-                await restClient.GetCubeObjectFrom3TagIds();
-            }
-        }
-        
-        [Benchmark]
-        public async Task GetCubeObjectFromTagIdWithOTRPayloadAsync()
-        {
-            for(int i = 0; i < iterationCount; i++)
-            {
-                await restClient.GetCubeObjectFromTagIdWithOTR();
+                await restClient.GetCubeObjectTags();
             }
         }
         
@@ -83,7 +56,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetHierarchyByIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -92,7 +65,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetNodesPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -101,7 +74,7 @@ namespace BenchmarkServer
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public async Task GetNodeByIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -110,7 +83,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetNodeParentByIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -119,16 +92,16 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetNodechildrenByIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
             {
-                await restClient.GetNodechildrenById();
+                await restClient.GetNodeChildrenById();
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetPhotoByIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -137,7 +110,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetTagsPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -146,7 +119,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetTagByIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -155,7 +128,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetTagsetPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -164,7 +137,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetTagsetByIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -173,7 +146,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetThumbnailPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)
@@ -182,7 +155,7 @@ namespace BenchmarkServer
             }
         }
         
-        [Benchmark]
+        //[Benchmark]
         public async Task GetThumbnailByIdPayloadAsync()
         {
             for(int i = 0; i < iterationCount; i++)

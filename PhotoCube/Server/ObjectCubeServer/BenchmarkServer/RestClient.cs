@@ -22,21 +22,19 @@ namespace BenchmarkServer
         {
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            
+            var id = r.Next(1, maxNodeId);
+            var id2 = r.Next(1, maxNodeId);
 
-            var yAxisType = "node";
-            var yAxisId = r.Next(1, maxNodeId);
-            var zAxisType = "tagset";
-            var zAxisId = r.Next(1, maxTagsetId);
-
-            await _client.GetStringAsync($"https://localhost:5001/api/Cell?yAxis.Type={yAxisType}&yAxis.Id={yAxisId}&zAxis.Type={zAxisType}&zAxis.Id={zAxisId}");
+            await _client.GetStringAsync($"https://localhost:5001/api/cell/?&filters=[{{\"type\":\"node\",\"ids\":[{id}]}},{{\"type\":\"node\",\"ids\":[{id2}]}}]");
         }
         
-        public async Task GetCubeObject()
+        public async Task GetCubeObjects()
         {
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             
-            await _client.GetStringAsync($"https://localhost:5001//api/CubeObject");
+            await _client.GetStringAsync($"https://localhost:5001/api/CubeObject");
         }
         
         public async Task GetCubeObjectById()
@@ -49,49 +47,18 @@ namespace BenchmarkServer
             await _client.GetStringAsync($"https://localhost:5001/api/CubeObject/{id}");
         }
         
-        public async Task GetCubeObjectFromTagId()
+        public async Task GetCubeObjectTags()
         {
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var tagId = r.Next(1, maxTagId);
+            var id = r.Next(1,maxCubeObjectId);
             
-            await _client.GetStringAsync($"https://localhost:5001/api/CubeObject/FromTagId/{tagId}");
+            await _client.GetStringAsync($"https://localhost:5001/api/CubeObject/{id}/tags");
         }
         
-        public async Task GetCubeObjectFrom2TagIds()
-        {
-            _client.DefaultRequestHeaders.Accept.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        
 
-            var tagId = r.Next(1, maxTagId);
-            var tagId2 = r.Next(1, maxTagId);
-            
-            await _client.GetStringAsync($"https://localhost:5001/api/CubeObject/From2TagIds/{tagId}/{tagId2}");
-        }
-        
-        public async Task GetCubeObjectFrom3TagIds()
-        {
-            _client.DefaultRequestHeaders.Accept.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            var tagId = r.Next(1, maxTagId);
-            var tagId2 = r.Next(1, maxTagId);
-            var tagId3 = r.Next(1, maxTagId);
-            
-            await _client.GetStringAsync($"https://localhost:5001/api/CubeObject/From2TagIds/{tagId}/{tagId2}/{tagId3}");
-        }
-        
-        public async Task GetCubeObjectFromTagIdWithOTR()
-        {
-            _client.DefaultRequestHeaders.Accept.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            var tagId = r.Next(1, maxTagId);
-            
-            await _client.GetStringAsync($"https://localhost:5001/api/CubeObject/FromTagIdWithOTR/{tagId}");
-        }
-        
         public async Task GetHierarchy()
         {
             _client.DefaultRequestHeaders.Accept.Clear();
@@ -126,6 +93,8 @@ namespace BenchmarkServer
             await _client.GetStringAsync($"https://localhost:5001/api/Node/{id}");
         }
         
+        //TODO /api/Node/{tagname}
+        
         public async Task GetNodeParentById()
         {
             _client.DefaultRequestHeaders.Accept.Clear();
@@ -136,7 +105,7 @@ namespace BenchmarkServer
             await _client.GetStringAsync($"https://localhost:5001/api/Node/{nodeId}/parent");
         }
         
-        public async Task GetNodechildrenById()
+        public async Task GetNodeChildrenById()
         {
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -174,6 +143,8 @@ namespace BenchmarkServer
             await _client.GetStringAsync($"https://localhost:5001/api/Tag/{id}");
         }
         
+        // TODO /api/Tag/{name}
+        
         public async Task GetTagset()
         {
             _client.DefaultRequestHeaders.Accept.Clear();
@@ -181,7 +152,7 @@ namespace BenchmarkServer
 
             await _client.GetStringAsync($"https://localhost:5001/api/Tagset");
         }
-        
+
         public async Task GetTagsetById()
         {
             _client.DefaultRequestHeaders.Accept.Clear();
@@ -191,6 +162,8 @@ namespace BenchmarkServer
             
             await _client.GetStringAsync($"https://localhost:5001/api/Tagset/{id}");
         }
+        
+        //TODO /api/Tagset/{name}
         
         public async Task GetThumbnail()
         {
@@ -208,6 +181,16 @@ namespace BenchmarkServer
             var id = r.Next(1, maxCubeObjectId);
             
             await _client.GetStringAsync($"https://localhost:5001/api/Thumbnail/{id}");
+        }
+        
+        public async Task GetTimeline() {
+            _client.DefaultRequestHeaders.Accept.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            
+            var id = r.Next(1, maxNodeId);
+            var id2 = r.Next(1, maxNodeId);
+
+            await _client.GetStringAsync($"https://localhost:5001/api/timeline/?&filters=[{{\"type\":\"node\",\"ids\":[{id}]}},{{\"type\":\"node\",\"ids\":[{id2}]}}]");
         }
     }
 }

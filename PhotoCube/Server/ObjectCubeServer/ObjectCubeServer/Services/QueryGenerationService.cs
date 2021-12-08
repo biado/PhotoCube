@@ -1,4 +1,5 @@
-﻿using ObjectCubeServer.Models.DomainClasses;
+﻿#nullable enable
+using ObjectCubeServer.Models.DomainClasses;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -97,7 +98,7 @@ namespace ObjectCubeServer.Services
 
         internal string generateSQLQueryForObjects(IList<ParsedFilter>? filtersList)
         {
-            numberOfAdditionalFilters = filtersList == null ? 0 : filtersList.Count;
+            numberOfAdditionalFilters = filtersList?.Count ?? 0;
             totalNumberOfFilters = numberOfAdditionalFilters;
             numberOfFilters = 0;
 
@@ -129,13 +130,12 @@ namespace ObjectCubeServer.Services
             }
 
             string SQLQuery = queryFront.Append(queryMiddle.Append(queryEnd)).ToString();
-            Console.WriteLine(SQLQuery);
             return SQLQuery;
         }
 
         internal string generateSQLQueryForTimeline(IList<ParsedFilter>? filtersList)
         {
-            numberOfAdditionalFilters = filtersList == null ? 0 : filtersList.Count;
+            numberOfAdditionalFilters = filtersList?.Count ?? 0;
             totalNumberOfFilters = numberOfAdditionalFilters;
             numberOfFilters = 0;
 
@@ -159,7 +159,6 @@ namespace ObjectCubeServer.Services
             }
 
             string SQLQuery = queryFront.Append(queryMiddle.Append(queryEnd)).ToString();
-            Console.WriteLine(SQLQuery);
             return SQLQuery;
         }
 
@@ -183,7 +182,7 @@ namespace ObjectCubeServer.Services
         private string generateFilterQueryPerType(ParsedFilter filter)
         {
             string query = "";
-            switch (filter.type)
+            switch (filter.Type)
             {
                 case "node":
                     if (filter.Ids.Count == 1)
@@ -255,7 +254,7 @@ namespace ObjectCubeServer.Services
         private string generateFilterQueryPerTypeObjects(ParsedFilter filter)
         {
             string query = "";
-            switch (filter.type)
+            switch (filter.Type)
             {
                 case "node":
                     if (filter.Ids.Count == 1)

@@ -67,12 +67,12 @@ namespace ObjectCubeServer.Controllers
         }
 
         // GET: api/Node/wood
-        [HttpGet("{tag}", Name = "GetNodeByName")]
-        public async Task<ActionResult<IEnumerable<PublicNode>>> GetNodeByName(string tag)
+        [HttpGet("{tagname}", Name = "GetNodeByName")]
+        public async Task<ActionResult<IEnumerable<PublicNode>>> GetNodeByName(string tagname)
         {
             List<Node> nodesFound = await coContext.Nodes
                     .Include(n => n.Tag)
-                    .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tag.ToLower()))
+                    .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tagname.ToLower()))
                     .ToListAsync();
             
             if (nodesFound == null) return NotFound();
@@ -82,7 +82,7 @@ namespace ObjectCubeServer.Controllers
             {
                 var publicNode = new PublicNode(node.Id, node.Tag.GetTagName())
                 {
-                    ParentNode = await GetParentNode(node)
+                    ParentNode = await GetParentNodeFromChild(node)
                 };
                 result.Add(publicNode);
             }
@@ -90,12 +90,12 @@ namespace ObjectCubeServer.Controllers
         }
 
         // GET: api/Node/123/Parent
-        [HttpGet("{nodeId:int}/parent")]
-        public async Task<ActionResult<PublicNode>> GetParentNode(int nodeId)
+        [HttpGet("{id:int}/parent")]
+        public async Task<ActionResult<PublicNode>> GetParentNode(int id)
         {
             Node childNode = await coContext.Nodes
-                    .FirstOrDefaultAsync(n => n.Id == nodeId);
-            PublicNode parentNode = await GetParentNode(childNode);
+                    .FirstOrDefaultAsync(n => n.Id == id);
+            PublicNode parentNode = await GetParentNodeFromChild(childNode);
 
             if (parentNode == null) return NotFound();
             
@@ -103,11 +103,11 @@ namespace ObjectCubeServer.Controllers
         }
 
         // GET: api/Node/123/Children
-        [HttpGet("{nodeId}/children")]
-        public async Task<ActionResult<IEnumerable<PublicNode>>> GetChildNodes(int nodeId)
+        [HttpGet("{id:int}/children")]
+        public async Task<ActionResult<IEnumerable<PublicNode>>> GetChildNodes(int id)
         {
             IEnumerable<PublicNode> childNodes = await coContext.Nodes.Include(n => n.Children)
-                .Where(n => n.Id == nodeId)
+                .Where(n => n.Id == id)
                 .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, cn.Tag.GetTagName())))
                 .FirstOrDefaultAsync();
 
@@ -128,7 +128,7 @@ namespace ObjectCubeServer.Controllers
             return parentId;
         }
 
-        private async Task<PublicNode> GetParentNode(Node child)
+        private async Task<PublicNode> GetParentNodeFromChild(Node child)
         {
             PublicNode parentNode = await coContext.Nodes
                 .Where(n => n.Children.Contains(child))

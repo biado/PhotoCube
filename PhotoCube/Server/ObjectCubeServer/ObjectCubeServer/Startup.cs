@@ -25,7 +25,7 @@ namespace ObjectCubeServer
             services.AddMvc(option => option.EnableEndpointRouting = false );
             
             // enable json input/output for controllers
-            services.AddControllers()
+            services.AddControllers(x => x.AllowEmptyInputInBodyModelBinding = true)
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;

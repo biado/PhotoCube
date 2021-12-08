@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObjectCubeServer", "ObjectCubeServer\ObjectCubeServer.csproj", "{AEDEBE7D-341E-47A7-89AC-3DCB9D4DBF0C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppForInteractingWithDatabase", "ConsoleAppForInteractingWithDatabase\ConsoleAppForInteractingWithDatabase.csproj", "{B882F652-8F1E-49AC-909A-B22DB24EC8A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObjectCubeLoader", "ObjectCubeLoader\ObjectCubeLoader.csproj", "{B882F652-8F1E-49AC-909A-B22DB24EC8A9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectCubeServerTests", "ObjectCubeServerTests\ObjectCubeServerTests.csproj", "{6C3522AF-F509-4607-9BB2-9D548BCA8CB8}"
 EndProject

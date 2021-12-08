@@ -7,7 +7,7 @@ using ObjectCubeServer.Models.Contexts;
 namespace ObjectCubeServer.Models.DomainClasses
 {
     /// <summary>
-    /// Used in CellController to receive a JSON object repressenting an axis:
+    /// Used in StateController to receive a JSON object repressenting an axis:
     /// Eg: {"AxisType":"Hierarchy","Id":1}
     /// </summary>
     public class ParsedAxis
@@ -75,7 +75,7 @@ namespace ObjectCubeServer.Models.DomainClasses
             var tagset = context.Tagsets
                 .Include(ts => ts.Tags)
                 .FirstOrDefault(ts => ts.Id == Id);
-            // Exclude tag that has same name as tagset (temporary fix - ideally need to fix the InsertSQLGenerator)
+            // Exclude tag that has same name as tagset TODO (temporary fix - ideally need to fix the InsertSQLGenerator)
             var tags = tagset?.Tags.Where(t => !t.GetTagName().Equals(tagset.Name)).OrderBy(t => t.GetTagName()).ToList();
             return tags;
         }
