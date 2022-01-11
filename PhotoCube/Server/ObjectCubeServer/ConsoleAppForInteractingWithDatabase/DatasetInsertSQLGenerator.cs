@@ -26,7 +26,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private Stopwatch stopwatch;
         private int batchSize = 10000;
         private string SQLPath;
-        private static string delimiter = ",,";
+        private static string delimiter = "||";
         private NameValueCollection sAll = ConfigurationManager.AppSettings;
 
         private Dictionary<string, CubeObject> cubeObjects = new Dictionary<string, CubeObject>();
@@ -115,13 +115,8 @@ namespace ConsoleAppForInteractingWithDatabase
                         if (line.Contains("thumbnail")){
                             thumbnail = split[36];
                         } else {
-                            if (split.Length == 35){
-                                thumbnail = split[18]+".jpg";
-                            }
-                            else {
-                                int colorindex = Array.IndexOf(split, "color") + 1; 
-                                thumbnail = split[colorindex]+".jpg";
-                            }
+                            int colorindex = Array.IndexOf(split, "color") + 1; 
+                            thumbnail = split[colorindex]+".jpg";
                         }
                         //string thumbnailURI = Path.Combine("Thumbnails", thumbnail);
 
@@ -527,7 +522,7 @@ namespace ConsoleAppForInteractingWithDatabase
             }
             else
             {
-                File.AppendAllText(SQLPath,"SELECT NOW();\n\\set AUTOCOMMIT off\nCOMMIT;\n");
+                File.AppendAllText(SQLPath,"SELECT NOW();\n\\set AUTOCOMMIT off\nBEGIN;\n");
             }
 
             //Insert all CubeObjects
@@ -544,6 +539,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 } else if (insertCount % 100 == 0)
                 {
                     File.AppendAllText(SQLPath,"COMMIT;\n");
+                    File.AppendAllText(SQLPath,"BEGIN;\n");
                 }
             }
 
@@ -555,6 +551,7 @@ namespace ConsoleAppForInteractingWithDatabase
             else
             {
                 File.AppendAllText(SQLPath, "COMMIT;\n");
+                File.AppendAllText(SQLPath,"BEGIN;\n");
             }
             
 
@@ -631,6 +628,7 @@ namespace ConsoleAppForInteractingWithDatabase
                     } else if (insertCount % 100 == 0)
                     {
                         File.AppendAllText(SQLPath,"COMMIT;\n");
+                        File.AppendAllText(SQLPath,"BEGIN;\n");
                     }
                 }
             }
@@ -656,6 +654,7 @@ namespace ConsoleAppForInteractingWithDatabase
                     } else if (insertCount % 100 == 0)
                     {
                         File.AppendAllText(SQLPath,"COMMIT;\n");
+                        File.AppendAllText(SQLPath,"BEGIN;\n");
                     }
                 }
             }
@@ -667,6 +666,7 @@ namespace ConsoleAppForInteractingWithDatabase
             else
             {
                 File.AppendAllText(SQLPath, "COMMIT;\n");
+                File.AppendAllText(SQLPath, "BEGIN;\n");
             }
 
             //Insert all Hierarchies
@@ -685,6 +685,7 @@ namespace ConsoleAppForInteractingWithDatabase
             else
             {
                 File.AppendAllText(SQLPath, "COMMIT;\n");
+                File.AppendAllText(SQLPath, "BEGIN;\n");
             }
 
             //Insert all Nodes first without setting parent node to avoid violating FK constraint
@@ -700,7 +701,8 @@ namespace ConsoleAppForInteractingWithDatabase
                     File.AppendAllText(SQLPath, "GO\n");
                 } else if (insertCount % 100 == 0)
                 {
-                    File.AppendAllText(SQLPath,"COMMIT;\n");
+                    File.AppendAllText(SQLPath, "COMMIT;\n");
+                    File.AppendAllText(SQLPath, "COMMIT;\n");
                 }
             }
 

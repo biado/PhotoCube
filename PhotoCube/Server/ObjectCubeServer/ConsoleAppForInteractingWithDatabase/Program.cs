@@ -24,7 +24,7 @@ namespace ConsoleAppForInteractingWithDatabase
             // 
             // 191524 = Total number of LSC images, based on lsc2020.txt file.
 
-            string resultPath = sAll.Get("resultPath");
+            string resultPath = sAll.Get("MtbResultPath");
             string experimentResult = "DB Name,Number of Images,Elapsed Time\n";
 
             for (int i = 0; i < N.Length; i++)
