@@ -144,7 +144,7 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
                 key={image.id}
                 //title="foobar"
                 className="image"
-                src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
+                src={"http://bjth.itu.dk:5002/" + image.fileURI}
               ></img>
             ))
           : images.map((image) => (
@@ -153,7 +153,7 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
                 key={image.id}
                 //title="foobar"
                 className="image"
-                src={process.env.REACT_APP_IMAGE_SERVER + image.fileURI}
+                src={"http://bjth.itu.dk:5002/" + image.fileURI}
               ></img>
             ))}
         <Modal

@@ -42,6 +42,7 @@ export default class DayOfWeekFilter extends React.Component<{
     private async renderDaysOfWeek() {
         const response = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
         const DOW: Tag[] = response;
+        //console.log(DOW);
         DOW.sort((a,b) => parseInt(a.name) - parseInt(b.name));
         this.setState({daysOfWeek: DOW})
     }

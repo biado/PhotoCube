@@ -1,0 +1,2 @@
+REACT_APP_IMAGE_SERVER=http://bjth.itu.dk:5002/
+REACT_APP_BASE_URL=https://localhost:5001/api

@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PhotoCube", "PhotoCube", "{0610AB4A-9647-44DD-8979-5551A7D41CE7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{10DCE9FD-9CAA-4A22-B425-B85993492B62}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ObjectCubeServer", "ObjectCubeServer", "{4C18BC93-EC38-4EE3-9864-2E9FC635C079}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectCubeServer", "PhotoCube\Server\ObjectCubeServer\ObjectCubeServer\ObjectCubeServer.csproj", "{F880ED35-A06A-4CD2-93CA-936B045A8F18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppForInteractingWithDatabase", "PhotoCube\Server\ObjectCubeServer\ConsoleAppForInteractingWithDatabase\ConsoleAppForInteractingWithDatabase.csproj", "{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Debug|x64.Build.0 = Debug|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Debug|x86.Build.0 = Debug|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Release|x64.ActiveCfg = Release|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Release|x64.Build.0 = Release|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Release|x86.ActiveCfg = Release|Any CPU
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18}.Release|x86.Build.0 = Release|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Debug|x64.Build.0 = Debug|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Debug|x86.Build.0 = Debug|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Release|x64.ActiveCfg = Release|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Release|x64.Build.0 = Release|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Release|x86.ActiveCfg = Release|Any CPU
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{10DCE9FD-9CAA-4A22-B425-B85993492B62} = {0610AB4A-9647-44DD-8979-5551A7D41CE7}
+		{4C18BC93-EC38-4EE3-9864-2E9FC635C079} = {10DCE9FD-9CAA-4A22-B425-B85993492B62}
+		{F880ED35-A06A-4CD2-93CA-936B045A8F18} = {4C18BC93-EC38-4EE3-9864-2E9FC635C079}
+		{C1FD4F34-22E3-468F-9F8F-965E10C3BB2F} = {4C18BC93-EC38-4EE3-9864-2E9FC635C079}
+	EndGlobalSection
+EndGlobal

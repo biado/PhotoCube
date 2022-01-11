@@ -46,27 +46,29 @@ namespace ConsoleAppForInteractingWithDatabase
         private Dictionary<string, string> datatypes;
         private JSNode root;
 
+        private int missingfiles;
+
         public DatasetInsertSQLGenerator(int numOfImages)
         {
             this.numOfImages = numOfImages;
-            this.pathToDataset = sAll.Get("pathToLscData");
-            this.resultPath = sAll.Get("resultPath");
-            this.SQLPath = sAll.Get("SQLPath");
+            this.pathToDataset = sAll.Get("pathToMtbData");
+            this.resultPath = sAll.Get("MtbResultPath");
+            this.SQLPath = sAll.Get("MtbSQLPath");
 
-            this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
-            this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
+            this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("MtbTagFilePath"));
+            this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("MtbErrorfilePath"));
             this.mssqlFormat = Convert.ToBoolean(sAll.Get("mssqlFormat"));
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
             datatypes = MapDataTypestoTagTypes();
-            root = new JsonHierarchyParser().root;
+            //root = new JsonHierarchyParser().root;
 
             this.stopwatch = new Stopwatch();
             stopwatch.Start();
             BuildCubeObjects();
             BuildTagTypes();
             BuildTagsetsAndTags();
-            BuildHierarchiesAndNodes();
+            //BuildHierarchiesAndNodes();
             WriteInsertStatementsToFile();
         }
 
@@ -76,6 +78,7 @@ namespace ConsoleAppForInteractingWithDatabase
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}",
                 ts.Hours, ts.Minutes, ts.Seconds);
             string log = string.Join(",", entities, row, elapsedTime) + "\n";
+            //Console.WriteLine(resultPath);
             File.AppendAllText(resultPath, log);
         }
 
@@ -97,21 +100,36 @@ namespace ConsoleAppForInteractingWithDatabase
                         Console.WriteLine("CubeObject line: " + fileCount);
 
                         //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
-                        string filename = line.Split(delimiter)[0];
+                        string[] split = line.Split(delimiter);
+                        string filename = split[0];
 
                         // If Image is already in Map(Assuming no two file has the same name):
                         if (cubeObjects.ContainsKey(filename))
                         {
                             //Don't add it again.
                             Console.WriteLine("Image " + filename + " is already in the database");
+                            missingfiles++;
                         }
 
-                        string thumbnailURI = Path.Combine("Thumbnails", filename);
+                        String thumbnail = "";
+                        if (line.Contains("thumbnail")){
+                            thumbnail = split[36];
+                        } else {
+                            if (split.Length == 35){
+                                thumbnail = split[18]+".jpg";
+                            }
+                            else {
+                                int colorindex = Array.IndexOf(split, "color") + 1; 
+                                thumbnail = split[colorindex]+".jpg";
+                            }
+                        }
+                        //string thumbnailURI = Path.Combine("Thumbnails", thumbnail);
 
                         CubeObject cubeObject = DomainClassFactory.NewCubeObject(
                             filename,
                             FileType.Photo,
-                            thumbnailURI);
+                            thumbnail);
+                            //thumbnailURI);
                         cubeObjects[filename] = cubeObject;
 
                         if (fileCount % batchSize == 0)
@@ -202,6 +220,9 @@ namespace ConsoleAppForInteractingWithDatabase
 
         private Tag CreateNewTag(string description, Tagset tagset, string tagName)
         {
+            Console.WriteLine(description);
+            Console.WriteLine(tagset);
+            Console.WriteLine(tagName);
             TagType tagType = tagtypes[description];
             switch (description)
             {
@@ -231,7 +252,6 @@ namespace ConsoleAppForInteractingWithDatabase
         private void BuildTagsetsAndTags()
         {
             Console.WriteLine("Building TagsSets and Tags.");
-
             try
             {
                 int lineCount = 1;
@@ -243,9 +263,12 @@ namespace ConsoleAppForInteractingWithDatabase
                     {
                         Console.WriteLine("Tagset & Tag line: " + lineCount);
 
+                        //Console.WriteLine(line);
                         //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
                         string[] split = line.Split(delimiter);
                         string fileName = split[0];
+                        
+                        //Console.WriteLine(fileName);
 
                         CubeObject cubeObject = cubeObjects[fileName];
 
@@ -488,6 +511,8 @@ namespace ConsoleAppForInteractingWithDatabase
 
         private void WriteInsertStatementsToFile()
         {
+            Console.WriteLine(SQLPath);
+            Console.WriteLine("duplicate sptify uri's "+missingfiles);
             // insert into [tableName]
             // (column1, column2, ..)
             // values
@@ -550,6 +575,7 @@ namespace ConsoleAppForInteractingWithDatabase
             //Insert all TagTypes
             foreach (var tt in tagtypes.Values)
             {
+                //Console.WriteLine(tt.Id);
                 string insertStatement = "INSERT INTO tag_types(id, description) VALUES(" + tt.Id + ",'" +
                                          tt.Description + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);

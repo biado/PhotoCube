@@ -58,7 +58,7 @@ export default class Cell{
         this.z = aPosition.z;
         this.CubeObjects = cubeObjectData;
         if(cubeObjectData.length > 0){
-            this.threeObject = addCubeCallback(process.env.REACT_APP_IMAGE_SERVER + this.CubeObjects[0].fileURI, {x: this.x, y: this.y, z:this.z});
+            this.threeObject = addCubeCallback("http://bjth.itu.dk:5002/" + this.CubeObjects[0].fileURI, {x: this.x, y: this.y, z:this.z});
             this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.count, cubeObjects: this.CubeObjects };
             //this.ToggleSwitchingImagesEveryXms(10000);
         }

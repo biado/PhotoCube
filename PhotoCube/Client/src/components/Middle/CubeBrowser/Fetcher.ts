@@ -8,7 +8,7 @@ import { Filter } from "../../Filter";
  * Method calls are reused, and if the server address changes, we only need the change the baseUrl.
  */
 export default class Fetcher {
-  static baseUrl = process.env.REACT_APP_BASE_URL;
+  static baseUrl = "https://localhost:5001/api";
   static latestQuery = "";
   /**
    * Fetches Cells from the PhotoCube Server. See CellController.cs in server implementation.

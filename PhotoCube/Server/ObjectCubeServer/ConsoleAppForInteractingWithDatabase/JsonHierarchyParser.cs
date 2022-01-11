@@ -45,7 +45,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
         private void buildRoot()
         {
-            string LscJsonHierarchyPath = sAll.Get("LscJsonHierarchyPath");
+            string LscJsonHierarchyPath = sAll.Get("MtbJsonHierarchyPath");
             using (StreamReader reader = new StreamReader(LscJsonHierarchyPath))
             {
                 string json = reader.ReadToEnd();
