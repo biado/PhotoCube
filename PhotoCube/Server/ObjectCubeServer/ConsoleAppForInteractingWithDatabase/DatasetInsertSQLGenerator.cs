@@ -196,7 +196,23 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"Month (string)", "alphanumerical"},
                 {"Year", "numerical"},
                 {"Hour", "numerical"},
-                {"Minute", "numerical"}
+                {"Minute", "numerical"},
+
+                {"sp_track_name", "alphanumerical"},
+                {"sp_track_duration", "numerical"},
+                {"sp_track_popularity", "numerical"},
+                {"sp_album_name", "alphanumerical"},
+                {"sp_artist_infos", "alphanumerical"},
+                {"x", "numerical"},
+                {"y", "numerical"},
+                {"z", "numerical"},
+                {"color", "alphanumerical"},
+                {"happiness_percentage", "numerical"},
+                {"sadness_percentage", "numerical"},
+                {"anger_percentage", "numerical"},
+                {"fear_percentage", "numerical"},
+                {"emotion_code", "numerical"},
+                {"genre", "alphanumerical"},
             };
         }
 
@@ -215,16 +231,13 @@ namespace ConsoleAppForInteractingWithDatabase
 
         private Tag CreateNewTag(string description, Tagset tagset, string tagName)
         {
-            Console.WriteLine(description);
-            Console.WriteLine(tagset);
-            Console.WriteLine(tagName);
             TagType tagType = tagtypes[description];
             switch (description)
             {
                 case "alphanumerical":
                     return DomainClassFactory.NewAlphanumericalTag(tagType, tagset, tagName);
                 case "numerical":
-                    return DomainClassFactory.NewNumericalTag(tagType, tagset, int.Parse(tagName));
+                    return DomainClassFactory.NewNumericalTag(tagType, tagset, (int)(float.Parse(tagName))); //parse float to int
                 case "timestamp":
                     DateTime timestamp = DateTime.ParseExact(tagName, "yyyy-MM-dd HH:mm:ss",
                         CultureInfo.InvariantCulture);
@@ -339,7 +352,6 @@ namespace ConsoleAppForInteractingWithDatabase
                                             OTRelations[tag.Id] = otr;
                                         }
                                     }
-
                                     objectTagRelations[fileName] = OTRelations;
                                 }
                             }

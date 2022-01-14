@@ -87,7 +87,6 @@ namespace ObjectCubeServer.Models.HelperClasses
                 Name = name
             };
         }
-
         public static TimeTag NewTimeTag(TagType tagtype, Tagset tagset, TimeSpan name)
         {
             if (tagset == null) { throw new Exception("Given tagset was null."); }
