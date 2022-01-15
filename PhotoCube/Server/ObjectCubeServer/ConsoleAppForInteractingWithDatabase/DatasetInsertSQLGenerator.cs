@@ -182,36 +182,36 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"Time", "time"},
                 {"Date", "date"},
                 {"Timezone", "alphanumerical"},
-                {"Elevation", "numerical"},
-                {"Speed", "numerical"},
-                {"Heart", "numerical"},
-                {"Calories", "numerical"},
+                {"Elevation", "integer"},
+                {"Speed", "integer"},
+                {"Heart", "integer"},
+                {"Calories", "integer"},
                 {"Activity type", "alphanumerical"},
-                {"Steps", "numerical"},
-                {"Day of week (number)", "numerical"},
+                {"Steps", "integer"},
+                {"Day of week (number)", "integer"},
                 {"Day of week (string)", "alphanumerical"},
-                {"Day within month", "numerical"},
-                {"Day within year", "numerical"},
-                {"Month (number)", "numerical"},
+                {"Day within month", "integer"},
+                {"Day within year", "integer"},
+                {"Month (number)", "integer"},
                 {"Month (string)", "alphanumerical"},
-                {"Year", "numerical"},
-                {"Hour", "numerical"},
-                {"Minute", "numerical"},
+                {"Year", "integer"},
+                {"Hour", "integer"},
+                {"Minute", "integer"},
 
                 {"sp_track_name", "alphanumerical"},
-                {"sp_track_duration", "numerical"},
-                {"sp_track_popularity", "numerical"},
+                {"sp_track_duration", "integer"},
+                {"sp_track_popularity", "integer"},
                 {"sp_album_name", "alphanumerical"},
                 {"sp_artist_infos", "alphanumerical"},
-                {"x", "numerical"},
-                {"y", "numerical"},
-                {"z", "numerical"},
+                {"x", "integer"},
+                {"y", "integer"},
+                {"z", "integer"},
                 {"color", "alphanumerical"},
-                {"happiness_percentage", "numerical"},
-                {"sadness_percentage", "numerical"},
-                {"anger_percentage", "numerical"},
-                {"fear_percentage", "numerical"},
-                {"emotion_code", "numerical"},
+                {"happiness_percentage", "float"},
+                {"sadness_percentage", "float"},
+                {"anger_percentage", "float"},
+                {"fear_percentage", "float"},
+                {"emotion_code", "integer"},
                 {"genre", "alphanumerical"},
             };
         }
@@ -236,8 +236,10 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 case "alphanumerical":
                     return DomainClassFactory.NewAlphanumericalTag(tagType, tagset, tagName);
-                case "numerical":
-                    return DomainClassFactory.NewNumericalTag(tagType, tagset, (int)(float.Parse(tagName))); //parse float to int
+                case "integer":
+                    return DomainClassFactory.NewIntegerTag(tagType, tagset, int.Parse(tagName) ); //parse float to int
+                case "float":
+                    return DomainClassFactory.NewFloatTag(tagType, tagset, float.Parse(tagName));
                 case "timestamp":
                     DateTime timestamp = DateTime.ParseExact(tagName, "yyyy-MM-dd HH:mm:ss",
                         CultureInfo.InvariantCulture);
@@ -612,9 +614,13 @@ namespace ConsoleAppForInteractingWithDatabase
                             insertStatement += "INSERT INTO alphanumerical_tags(id, name, tagset_id) VALUES(" + at.Id +
                                                ",'" + at.Name.Replace("'", "''") + "'," + at.TagsetId + "); \n";
                             break;
-                        case NumericalTag nt:
-                            insertStatement += "INSERT INTO numerical_tags(id, name, tagset_id) VALUES(" + nt.Id + "," +
-                                               nt.Name + "," + nt.TagsetId + "); \n";
+                        case IntegerTag it:
+                            insertStatement += "INSERT INTO integer_tags(id, name, tagset_id) VALUES(" + it.Id + "," +
+                                               it.Name + "," + it.TagsetId + "); \n";
+                            break;
+                        case FloatTag ft:
+                            insertStatement += "INSERT INTO float_tags(id, name, tagset_id) VALUES(" + ft.Id + "," +
+                                               ft.Name + "," + ft.TagsetId + "); \n";
                             break;
                         case TimestampTag tst:
                             String timestamp = tst.Name.ToString("yyyy-MM-dd HH:mm:ss").Replace('.',':');

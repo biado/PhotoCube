@@ -124,10 +124,15 @@ namespace ObjectCubeServer.Models.Contexts
                 .WithMany()
                 .HasForeignKey(tt => tt.TagsetIdReplicate);
 
-            modelBuilder.Entity<NumericalTag>()
+            modelBuilder.Entity<IntegerTag>()
                 .HasOne<Tagset>()
                 .WithMany()
-                .HasForeignKey(nt => nt.TagsetIdReplicate);
+                .HasForeignKey(it => it.TagsetIdReplicate);
+
+            modelBuilder.Entity<FloatTag>()
+                .HasOne<Tagset>()
+                .WithMany()
+                .HasForeignKey(ft => ft.TagsetIdReplicate);
 
             //Enforce that a typed tag is unqiue within a tagset
             modelBuilder.Entity<AlphanumericalTag>()
@@ -146,8 +151,12 @@ namespace ObjectCubeServer.Models.Contexts
                 .HasIndex(tt => new { tt.TagsetIdReplicate, tt.Name })
                 .IsUnique();
 
-            modelBuilder.Entity<NumericalTag>()
-                .HasIndex(nt => new { nt.TagsetIdReplicate, nt.Name })
+            modelBuilder.Entity<IntegerTag>()
+                .HasIndex(it => new { it.TagsetIdReplicate, it.Name })
+                .IsUnique();
+
+            modelBuilder.Entity<FloatTag>()
+                .HasIndex(ft => new { ft.TagsetIdReplicate, ft.Name })
                 .IsUnique();
 
             //Calling on model creating:
