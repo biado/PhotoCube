@@ -14,6 +14,8 @@ import Modal from "./Modal";
  */
 interface FuncProps {
   cubeObjects: CubeObject[];
+  onSelectTrack: (spotifyURI: String) => void;
+  onFileCountChanged: (fileCount: number) => void;
   onBrowsingModeChanged: (browsingMode: BrowsingModes) => void;
   filters: Filter[];
   projectedFilters: Filter[];
@@ -67,6 +69,8 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
       const response = await Fetcher.FetchAllImagesWithProjection(allFilters);
       setImages(response);
       console.log(response);
+      countItems(response)
+
     } catch (error) {
       console.error(error);
     }
@@ -76,10 +80,20 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
     try {
       const response = await Fetcher.FetchAllImages();
       setImages(response);
+      countItems(response)
+
     } catch (error) {
       console.error(error);
     }
   };
+
+  const countItems = (list: []) => {
+    let unique: Set<string> = new Set();
+    list.forEach((item:Image) =>
+        unique.add(item.fileURI)
+    );
+    props.onFileCountChanged(unique.size);
+  }
 
   const onKeydown = (e: KeyboardEvent) => {
     console.log(e.key);
@@ -140,20 +154,22 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
         {images.length > 1000
           ? images.slice(0, 1000).map((image) => (
               <img
-                onClick={() => displayTagsInModal(image.id, image.fileURI)}
+                onClick={() => props.onSelectTrack(image.fileURI)} //play in sp_widget
+                onDoubleClick={() => displayTagsInModal(image.id, image.thumbnailURI)}
                 key={image.id}
                 //title="foobar"
                 className="image"
-                src={"http://bjth.itu.dk:5002/" + image.fileURI}
-              ></img>
+                src={image.thumbnailURI.includes("/") ? image.thumbnailURI : "http://bjth.itu.dk:5002/images/colors/" + image.thumbnailURI}
+                ></img>
             ))
           : images.map((image) => (
               <img
-                onClick={() => displayTagsInModal(image.id, image.fileURI)}
+                onClick={() => props.onSelectTrack(image.fileURI)} //play in sp_widget
+                onDoubleClick={() => displayTagsInModal(image.id, image.thumbnailURI)}
                 key={image.id}
                 //title="foobar"
                 className="image"
-                src={"http://bjth.itu.dk:5002/" + image.fileURI}
+                src={image.thumbnailURI.includes("/") ? image.thumbnailURI : "http://bjth.itu.dk:5002/images/colors/" + image.thumbnailURI}
               ></img>
             ))}
         <Modal

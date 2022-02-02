@@ -59,8 +59,9 @@ namespace ObjectCubeServer.Controllers
             List<Tag>  tagsFound = tagset?.Tags;
 
             if (tagsFound == null) return NotFound();
-            
-            var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName())).ToList();
+
+            var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName(), tag.TagsetId)).ToList();            
+            //var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName())).ToList();
             
             return Ok(result);
         }

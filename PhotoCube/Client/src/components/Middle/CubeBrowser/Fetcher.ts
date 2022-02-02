@@ -8,7 +8,8 @@ import { Filter } from "../../Filter";
  * Method calls are reused, and if the server address changes, we only need the change the baseUrl.
  */
 export default class Fetcher {
-  static baseUrl = "https://localhost:5001/api";
+  //static baseUrl = "https://localhost:5001/api";
+  static baseUrl = "http://localhost:5000/api";
   static latestQuery = "";
   /**
    * Fetches Cells from the PhotoCube Server. See CellController.cs in server implementation.
@@ -89,6 +90,9 @@ export default class Fetcher {
           let name: string = filter.name;
           let ranges = name.split("-");
           result.push({ type: "timerange", ids: [3], ranges: [ranges] });
+          break;
+        case "slider":
+          result.push({ type: "numrange", ids: [filter.id], ranges: [[0,filter.name]] });
           break;
         default:
           result.push({ type: "tag", ids: [filter.id] });
@@ -206,6 +210,7 @@ export default class Fetcher {
       const response = await fetch(
         Fetcher.baseUrl + "/tagset/name=" + tagsetName
       );
+      //alert(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
       const data = await response.json();
       return data;
     } catch (error) {
@@ -321,7 +326,7 @@ export default class Fetcher {
         Fetcher.baseUrl + "/tag?cubeObjectId=" + cubeObjectId
       );
       const data = await response.json();
-      //console.log("image tag data", data);
+      console.log("image tag data", data);
       return data;
     } catch (error) {
       console.error(error);

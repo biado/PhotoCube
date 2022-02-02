@@ -5,4 +5,5 @@
  export interface Tag {
     id: number,
     name: string
+    tagset: number // to identify which tagset slider is working on
 }

@@ -31,7 +31,7 @@ namespace ObjectCubeServer.Models.DomainClasses
         // To change the domain model cubeObject to public model cubeObject
         public PublicCubeObject GetPublicCubeObject()
         {
-            return new PublicCubeObject(this.Id, this.FileURI);
+            return new PublicCubeObject(this.Id, this.FileURI, this.ThumbnailURI);
         }
     }
 }

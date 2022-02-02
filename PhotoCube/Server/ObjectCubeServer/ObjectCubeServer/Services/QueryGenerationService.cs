@@ -20,11 +20,11 @@ namespace ObjectCubeServer.Services
 
             if (totalNumberOfFilters == 0)
             {
-                const string baseQuery = "select X.idx as x, X.idy as y, X.idz as z, X.object_id as id, O.file_uri as fileURI, X.cnt as count from(select 1 as idx, 1 as idy, 1 as idz, max(R1.id) as object_id, count(*) as cnt from cubeobjects R1 group by idx, idy, idz) X join cubeobjects O on X.object_id = O.id;";
+                const string baseQuery = "select X.idx as x, X.idy as y, X.idz as z, X.object_id as id, O.file_uri as fileURI, O.thumbnail_uri as thumbnailURI, X.cnt as count from(select 1 as idx, 1 as idy, 1 as idz, max(R1.id) as object_id, count(*) as cnt from cubeobjects R1 group by idx, idy, idz) X join cubeobjects O on X.object_id = O.id;";
                 return baseQuery;
             }
             
-            var queryFront = new StringBuilder("select X.idx as x, X.idy as y, X.idz as z, X.object_id as id, O.file_uri as fileURI, X.cnt as count from (select ");
+            var queryFront = new StringBuilder("select X.idx as x, X.idy as y, X.idz as z, X.object_id as id, O.file_uri as fileURI, O.thumbnail_uri as thumbnailURI, X.cnt as count from (select ");
             var queryMiddle =  new StringBuilder(" from (");
             var queryEnd =  new StringBuilder(" group by idx, idy, idz");
             //string queryendsep = "";
@@ -92,6 +92,7 @@ namespace ObjectCubeServer.Services
             }
 
             string SQLQuery = queryFront.Append(queryMiddle.Append(queryEnd)).ToString();
+            Console.WriteLine(SQLQuery);
             return SQLQuery;
         }
 
@@ -104,11 +105,11 @@ namespace ObjectCubeServer.Services
             if (totalNumberOfFilters == 0)
             {
                 // No ordering here, would be very expensive!
-                string BaseQuery = "select O.id as Id, O.file_uri as fileURI from cubeobjects O;";
+                string BaseQuery = "select O.id as Id, O.file_uri as fileURI, O.thumbnail_uri as thumbnailURI from cubeobjects O;";
                 return BaseQuery;
             }
 
-            var queryFront = new StringBuilder("select distinct O.id as Id, O.file_uri as fileURI, TS.name as T from (select R1.object_id ");
+            var queryFront = new StringBuilder("select distinct O.id as Id, O.file_uri as fileURI, O.thumbnail_uri as thumbnailURI, TS.name as T from (select R1.object_id ");
             var queryMiddle = new StringBuilder(" from (");
             var queryEnd = new StringBuilder(") X join cubeobjects O on X.object_id = O.id join objecttagrelations R2 on O.id = R2.object_id join timestamp_tags TS on R2.tag_id = TS.id order by TS.name;");
 
@@ -142,11 +143,11 @@ namespace ObjectCubeServer.Services
             if (totalNumberOfFilters != 1)
             {
                 // No ordering here, would be very expensive!
-                string BaseQuery = "select O.id as Id, O.file_uri as fileURI from cubeobjects O;";
+                string BaseQuery = "select O.id as Id, O.file_uri as fileURI, O.thumbnail_uri as thumbnailURI from cubeobjects O;";
                 return BaseQuery;
             }
 
-            var queryFront = new StringBuilder("select O.id as Id, O.file_uri as fileURI, TS1.name as T ");
+            var queryFront = new StringBuilder("select O.id as Id, O.file_uri as fileURI, O.thumbnail_uri as thumbnailURI, TS1.name as T ");
             var queryMiddle = new StringBuilder("from cubeobjects O join objecttagrelations R1 on O.id = R1.object_id join timestamp_tags TS1 on R1.tag_id = TS1.id join timestamp_tags TS2 on TS1.name between TS2.name - interval '30 minutes' and TS2.name + interval '30 minutes' join objecttagrelations R2 on TS2.id = R2.tag_id where R2.object_id = ");
             var queryEnd = new StringBuilder(" order by TS1.name;");
 
@@ -225,7 +226,7 @@ namespace ObjectCubeServer.Services
                     break;
 
                 case "numrange":
-                    query +=
+                    query += 
                         $" select R.object_id from numerical_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "")}) R{numberOfFilters}";
                     break;
 
@@ -297,7 +298,7 @@ namespace ObjectCubeServer.Services
                     break;
 
                 case "numrange":
-                    query +=
+                    query += 
                         $" select R.object_id from numerical_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "")}) R{numberOfFilters}";
                     break;
 
@@ -319,6 +320,7 @@ namespace ObjectCubeServer.Services
                     query +=
                         $" select R.object_id from timestamp_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
+                
             }
 
             return query;
@@ -352,6 +354,7 @@ namespace ObjectCubeServer.Services
             }
 
             rangeList.Append(')');
+            
             return rangeList.ToString();
         }
     }

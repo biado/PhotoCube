@@ -11,11 +11,13 @@ import { BrowsingState } from './Middle/CubeBrowser/BrowsingState';
 import PickedDimension from './RightDock/PickedDimension';
 import CubeObject from './Middle/CubeBrowser/CubeObject';
 import { Filter } from './Filter';
+import { Console } from 'console';
 
 
 interface ClientState {
   BrowsingMode : BrowsingModes.Card | BrowsingModes.Cube | BrowsingModes.Grid,
   filters: Filter[]
+  spotifyURI : String | null
 }
 
 /**
@@ -30,7 +32,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   //State of PhotoCubeClient used to render different browsing modes.
   state: ClientState = {
     BrowsingMode: BrowsingModes.Cube, //Check selected value in BrowsingModeChanger, or pass down prop.
-    filters: [] //Needs to be part of state to rerender CubeBrowser when changed
+    filters: [], //Needs to be part of state to rerender CubeBrowser when changed
+    spotifyURI: null
   }
 
   CubeBrowserBrowsingState : BrowsingState|null = null;
@@ -40,19 +43,31 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   cleanFilters: Filter[] = []
 
   render() {
+
     //Conditional rendering:
     let currentBrowser = null;
     if(this.state.BrowsingMode == BrowsingModes.Cube){
       currentBrowser = <CubeBrowser ref={this.CubeBrowser} 
+        onSelectTrack={spotifyURI => this.setState({spotifyURI:spotifyURI})}
         onFileCountChanged={this.onFileCountChanged} 
         previousBrowsingState={this.CubeBrowserBrowsingState}
         onOpenCubeInCardMode={this.onOpenCubeInCardMode}
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
         filters={this.state.filters}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
-      currentBrowser = <GridBrowser cleanFilters={this.cleanFilters} isProjected={this.isProjected} projectedFilters={this.projectedFilters} filters={this.state.filters} cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
+      currentBrowser = <GridBrowser cleanFilters={this.cleanFilters} 
+        onSelectTrack={spotifyURI => this.setState({spotifyURI:spotifyURI})}
+        onFileCountChanged={this.onFileCountChanged} //
+        isProjected={this.isProjected} 
+        projectedFilters={this.projectedFilters} 
+        filters={this.state.filters} 
+        cubeObjects={this.cubeObjects} 
+        onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }else if(this.state.BrowsingMode == BrowsingModes.Card){
-      currentBrowser = <CardBrowser cubeObjects={this.cubeObjects} onBrowsingModeChanged={this.onBrowsingModeChanged}/>
+      currentBrowser = <CardBrowser 
+        onSelectTrack={spotifyURI => this.setState({spotifyURI:spotifyURI})}
+        cubeObjects={this.cubeObjects}
+        onBrowsingModeChanged={this.onBrowsingModeChanged}/>
     }
 
     //Page returned:
@@ -60,12 +75,14 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
         <div className="App grid-container">
           <LeftDock 
           hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
+          //hideControls={false} 
           onFiltersChanged={this.onFiltersChanged}
           activeFilters={this.state.filters}
           onFilterReplaced={this.onFilterReplaced}
           onFilterRemoved={this.onFilterRemoved}
           onFilterReplacedByType={this.onFilterReplacedByType}
           onFilterRemovedByType={this.onFilterRemovedByType}
+          spotifyURI={this.state.spotifyURI}
           />
            <div className="middle dock">
             {currentBrowser}
@@ -74,7 +91,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
               activeFilters={this.state.filters} 
               onFiltersChanged={this.onFiltersChanged}/>
           </div>
-          <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
+          <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube}
+            hideCount={this.state.BrowsingMode == BrowsingModes.Card}
             ref={this.rightDock}
             onDimensionChanged={this.onDimensionChanged} 
             onBrowsingModeChanged={this.onBrowsingModeChanged}
@@ -158,17 +176,19 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
         this.CubeBrowser.current.ClearXAxis();
         this.CubeBrowser.current.RecomputeCells();
       }
-      break;
+        break;
       case "Y": if(this.CubeBrowser.current) {
         this.CubeBrowser.current.ClearYAxis(); 
         this.CubeBrowser.current.RecomputeCells();
       }
-      break;
+        break;
       case "Z": if(this.CubeBrowser.current) {
         this.CubeBrowser.current.ClearZAxis();
         this.CubeBrowser.current.RecomputeCells();
       }
-      break;
+        break;
+      default: 
+        break;
     }
   }
 
@@ -181,7 +201,9 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     if(this.state.BrowsingMode == BrowsingModes.Cube){ //Going from cube to other:
       //Saving current browsingstate:
       this.CubeBrowserBrowsingState = this.CubeBrowser.current!.GetCurrentBrowsingState();
+
       this.cubeObjects = this.CubeBrowser.current!.GetUniqueCubeObjects()
+
     }
     this.setState({BrowsingMode: browsingMode});
   }

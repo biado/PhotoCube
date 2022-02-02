@@ -3,9 +3,12 @@ import '../../css/LeftDock/LeftDock.css';
 import '../../css/PhotoCubeClient.css';
 import { Filter } from '../Filter';
 import { DateTagDropdown } from './DateFilter';
-import DayOfWeekFilter from './DayOfWeekFilter';
+//import DayOfWeekFilter from './DayOfWeekFilter';
 import { TagSearcher } from './TagFilter';
-import { TimeFilter } from './TimeFilter';
+//import { TimeFilter } from './TimeFilter';
+//import { Slider } from './Slider';
+import { SpotifyWidget } from './SpotifyWidget'
+import { Slider } from './Slider';
 
 /**
  * LeftDock is the left portion of the interface.
@@ -19,32 +22,43 @@ export default class LeftDock extends Component<{
         onFilterRemoved: (filterId: number) => void,
         onFilterReplacedByType: (oldFilter:Filter, newFilter: Filter) => void,
         onFilterRemovedByType: (filterType: string) => void
+        spotifyURI: String | null
     }>{
     render() {
         let visibility: string = this.props.hideControls ? " hide" : "";
         return (
             <div id={"LeftDock"} >
                 <div className={visibility}>
-                    <h4 className="Header">Day of week filter:</h4>
-                    <DayOfWeekFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved}></DayOfWeekFilter>
+                    {/*<h4 className="Header">Day of week filter:</h4>
+                    <DayOfWeekFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved}></DayOfWeekFilter>*/}
                 </div>
                 <div className={visibility}>
                     <h4 className="Header">Date filter:</h4>
-                    <div className="date dropdowns">
-                        <DateTagDropdown tagsetName={"Day within month"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
-                        <DateTagDropdown tagsetName={"Month (number)"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
+                     <div className="date dropdowns">
+                        {/*<DateTagDropdown tagsetName={"Day within month"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
+                        <DateTagDropdown tagsetName={"Month (number)"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>*/}
                         <DateTagDropdown tagsetName={"Year"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
-                    </div>
                 </div>
-                <div className={visibility}>
-                    <h4 className="Header">Time range filter:</h4>
-                    <TimeFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplacedByType={this.props.onFilterReplacedByType} onFilterRemovedByType={this.props.onFilterRemovedByType}/>
                 </div>
                 <div className={visibility}>
                     <h4 className="Header">Tag filter:</h4>
                     <TagSearcher onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters}/>
                 </div>
-	  		</div>
+               <div className={visibility}>
+                    <h4 className="Header">Slider:</h4>
+                    {/*<Slider tagsetName={"sp_track_duration"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>*/}
+                    <Slider tagsetName={"happiness_percentage"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
+                    <Slider tagsetName={"sadness_percentage"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
+                    <Slider tagsetName={"anger_percentage"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
+                    <Slider tagsetName={"fear_percentage"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
+                </div> 
+                <h1 className="Header"></h1>
+                <div className={""}>
+                    <h4 className="Header">Spotify widget:</h4>
+                    <h5>Click to select track</h5>
+                    <SpotifyWidget spotifyURI={this.props.spotifyURI}/>
+                </div>
+            </div>
         );
     }
 }

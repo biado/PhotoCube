@@ -73,13 +73,13 @@ namespace ObjectCubeServer.Models.HelperClasses
             };
         }
 
-        public static IntegerTag NewIntegerTag(TagType tagtype, Tagset tagset, int name)
+        public static NumericalTag NewNumericalTag(TagType tagtype, Tagset tagset, int name)
         {
             if (tagset == null) { throw new Exception("Given tagset was null."); }
             if (tagtype == null) { throw new Exception("Given tagtype was null."); }
 
             tagId++;
-            return new IntegerTag()
+            return new NumericalTag()
             {
                 Id = tagId,
                 TagTypeId = tagtype.Id,
@@ -87,20 +87,7 @@ namespace ObjectCubeServer.Models.HelperClasses
                 Name = name
             };
         }
-        public static FloatTag NewFloatTag(TagType tagtype, Tagset tagset, float name)
-        {
-            if (tagset == null) { throw new Exception("Given tagset was null."); }
-            if (tagtype == null) { throw new Exception("Given tagtype was null."); }
 
-            tagId++;
-            return new FloatTag()
-            {
-                Id = tagId,
-                TagTypeId = tagtype.Id,
-                TagsetId = tagset.Id,
-                Name = name
-            };
-        }
         public static TimeTag NewTimeTag(TagType tagtype, Tagset tagset, TimeSpan name)
         {
             if (tagset == null) { throw new Exception("Given tagset was null."); }

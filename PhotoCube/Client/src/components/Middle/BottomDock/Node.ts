@@ -4,6 +4,6 @@
  */
  export interface Node {
     id: number,
-    name: string,
+    name: string, //| number, //both alpha- and numerical tags
     parentNode: Node|null
 }

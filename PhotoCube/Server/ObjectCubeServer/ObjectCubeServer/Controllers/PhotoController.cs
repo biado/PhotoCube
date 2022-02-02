@@ -25,7 +25,7 @@ namespace ObjectCubeServer.Controllers
         {
             string fileURI;
             CubeObject cubeObject = await coContext.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
-            fileURI = cubeObject?.FileURI;
+            fileURI = cubeObject?.ThumbnailURI;
             if(fileURI == null)
             {
                 return NotFound();

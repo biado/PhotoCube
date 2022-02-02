@@ -1,13 +1,13 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ObjectCubeServer.Models.DomainClasses.Tag_Types
 {
-    [Table("float_tags")]
-    public class FloatTag : Tag, IComparable
+    [Table("numerical_tags")]
+    public class NumericalTag : Tag, IComparable
     {
         [Column("name")]
-        public float Name { get; set; }
+        public int Name { get; set; }
 
         [Column("tagset_id")]
         public int TagsetIdReplicate { get; set; }
@@ -20,7 +20,7 @@ namespace ObjectCubeServer.Models.DomainClasses.Tag_Types
 
         public int CompareTo(object obj)
         {
-            return Name.CompareTo(((FloatTag)obj).Name);
+            return Name.CompareTo(((NumericalTag)obj).Name);
         }
     }
 }

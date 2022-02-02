@@ -8,6 +8,7 @@ using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
 using ObjectCubeServer.Models.PublicClasses;
 using ObjectCubeServer.Services;
+using System;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -39,6 +40,12 @@ namespace ObjectCubeServer.Controllers
             List<ParsedFilter> filtersList =
                 filtersDefined ? JsonConvert.DeserializeObject<List<ParsedFilter>>(filters) : null;
             //Potential refactor: Parsed filter inheritance & make factory class to parse and instantiate filters without losing information
+            if (filtersList != null){
+                foreach(ParsedFilter elem in filtersList){
+                    Console.WriteLine(elem.type);
+                    Console.WriteLine(String.Concat(",", elem.Ids));
+                }
+            }
 
             if (allDefined)
             {
@@ -112,7 +119,7 @@ namespace ObjectCubeServer.Controllers
             List<SingleObjectCell> singlecells = await
                 coContext.SingleObjectCells.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.Type, axisX.Id, axisY.Type, axisY.Id, axisZ.Type, axisZ.Id, filtersList)).ToListAsync();
             result = singlecells.Select(c =>
-                new PublicCell(axisX.Ids[c.x], axisY.Ids[c.y], axisZ.Ids[c.z], c.count, c.id, c.fileURI)).ToList();
+                new PublicCell(axisX.Ids[c.x], axisY.Ids[c.y], axisZ.Ids[c.z], c.count, c.id, c.fileURI, c.thumbnailURI)).ToList();
 
             //If cells have no cubeObjects, remove them:
             //cells.RemoveAll(c => !c.CubeObjects.Any());

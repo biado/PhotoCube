@@ -111,8 +111,8 @@ export const HierarchyBrowser =
         disableButton(props.activeFilters.some(af => af.id === node.id));
     }
 
-    const onButtonClick = () => {
-        const filter: Filter = createFilter(selectedNode!.name, selectedNode!.id, "node");
+    const onButtonClick = () => { //""+ parse int to string
+        const filter: Filter = createFilter(""+selectedNode!.name, selectedNode!.id, "node");
         if (!props.activeFilters.some(af => af.id === filter.id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
@@ -143,8 +143,9 @@ export const HierarchyBrowser =
 async function fetchChildNodes(nodeId: number){
     const response = await Fetcher.FetchChildNodes(nodeId);
     let children = [];
-        if (response.length > 0) {
-            children = response.map((node: Node) => { return { id: node.id, name: node.name}});
+        if (response.length > 0) { //""+ parse int to string
+            children = response.map((node: Node) => { return { id: node.id, name: ""+node.name}});
         }
+
     return children;
 }

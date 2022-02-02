@@ -12,6 +12,7 @@ import { env } from "process";
 export default class CardBrowser extends React.Component<{
   cubeObjects: CubeObject[];
   onBrowsingModeChanged: (browsingMode: BrowsingModes) => void;
+  onSelectTrack: (spotifyURI: String) => void;
 }> {
   state = {
     photoIndex: 0,
@@ -23,22 +24,31 @@ export default class CardBrowser extends React.Component<{
   };
 
   render() {
+    console.log(this.state.imagesInCell.length)
     if (this.state.imagesInCell.length > 0) {
+      
       let fileName: string = "";
       if (this.state.imagesInCell[this.state.photoIndex]["fileURI"]) {
         fileName = this.state.imagesInCell[this.state.photoIndex]["fileURI"]!;
       }
+      let thumbnail: string = "";
+      if (this.state.imagesInCell[this.state.photoIndex]["thumbnailURI"]) {
+        thumbnail = this.state.imagesInCell[this.state.photoIndex]["thumbnailURI"]!;
+      }
+      // if (thumbnail.includes(".jpg")){ //color
+      //   thumbnail = "http://bjth.itu.dk:5002/images/colors/"+thumbnail
+      // }
       return (
         <div className="grid-item cardBrowserContainer">
           <div>
             <p>
-              {"Showing photo: " +
+              {"Showing track: " +
                 (this.state.photoIndex + 1) +
                 " out of " +
                 this.state.imagesInCell.length}
             </p>
             <br />
-            <p>Filename: {fileName}</p>
+            <p>Spotify URI: {fileName}</p>
             <br />
             <div className="taglist container">
               <p>Tags:</p>
@@ -58,10 +68,10 @@ export default class CardBrowser extends React.Component<{
                 this.state.photoVisibility
               }
               onLoad={(e) => this.onImageLoad(e)}
-              src={
-                process.env.REACT_APP_IMAGE_SERVER +
-                this.state.imagesInCell[this.state.photoIndex]["fileURI"]
-              }
+              //src={thumbnail}
+              src={thumbnail.includes("/") ? thumbnail : "http://bjth.itu.dk:5002/images/colors/" + thumbnail}
+              onClick={() => this.props.onSelectTrack(fileName)} //play in sp_widget
+              //onClick={() => this.selectTrack(fileName)}
             ></img>
           </div>
         </div>
@@ -115,6 +125,10 @@ export default class CardBrowser extends React.Component<{
 
   componentDidMount() {
     document.addEventListener("keydown", (e) => this.onKeydown(e));
+    
+    //document.addEventListener("onClick", (e) => this.onMouseClick(this.props.onSelectTack(this.state.imagesInCell[this.state.photoIndex]["fileURI"])))
+    //document.addEventListener("onClick", (e) => this.onMouseClick(e))
+
     this.updateTagsAndFectImages();
   }
 
@@ -159,6 +173,22 @@ export default class CardBrowser extends React.Component<{
       }
     } else if (e.key === "Escape") {
       this.props.onBrowsingModeChanged(BrowsingModes.Cube);
+    }
+  }
+
+  private selectTrack = (filename: String) => {
+    //console.log(filename); 
+    this.props.onSelectTrack(filename)
+  }
+
+  private onMouseClick = (e: MouseEvent) => {
+    if (e.button === 0 || e.button === 1) {
+        if (this.state.imagesInCell.length > 0) {
+            console.log(this.state.imagesInCell[this.state.photoIndex]["fileURI"])
+            let spotifyUri = this.state.imagesInCell[this.state.photoIndex]["fileURI"]
+            this.props.onSelectTrack(spotifyUri)
+            //window.open("https://open.spotify.com/track/"+spotifyUri)
+        } 
     }
   }
 }

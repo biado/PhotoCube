@@ -79,7 +79,8 @@ namespace ObjectCubeServer.Controllers
                     .ToListAsync();
             
             if (tagsFound == null) return NotFound();
-            var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name)).ToList();
+            var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name, tag.TagsetId)).ToList();
+            //var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name)).ToList();
             
             return Ok(result);
         }

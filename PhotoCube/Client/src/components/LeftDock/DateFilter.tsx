@@ -9,8 +9,11 @@ import '../../css/LeftDock/DateFilter.css';
  * Component for browsing and adding date filters.
  * Currently used for adding tags from Year, Month (number) and Day within month tagsets.
  */
+
  export const DateTagDropdown = (props: {
-     tagsetName: string, onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[],
+     tagsetName: string, 
+     onFiltersChanged: (filter: Filter) => void, 
+     activeFilters: Filter[],
      onFilterReplaced: (oldFilter:Filter, newFilter: Filter) => void,
      onFilterRemoved : (filterId: number) => void }) => {
 
@@ -25,7 +28,9 @@ import '../../css/LeftDock/DateFilter.css';
 
     async function FetchTagsByTagsetName () {
         const response = await Fetcher.FetchTagsByTagsetName(props.tagsetName);
-        const tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name }});
+        //console.log(response);
+        //const tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name}});
+        const tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name, tagset: t.tagset}});
         //sort tags
         tags.sort((a,b) => parseInt(a.name) - parseInt(b.name));
         //format days and months
@@ -83,7 +88,8 @@ import '../../css/LeftDock/DateFilter.css';
 export const formatTags = (months: Tag[]) => {
     return months.map((tag: Tag) => {
         if (tag.name.length === 1) {
-            return { name: "0".concat(tag.name), id: tag.id };
+            //return { name: "0".concat(tag.name), id: tag.id};
+            return { name: "0".concat(tag.name), id: tag.id, tagset:tag.tagset};
         } else {
             return tag;
         }

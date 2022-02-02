@@ -25,6 +25,7 @@ const OrbitControls = require("three-orbitcontrols");
  */
 export default class CubeBrowser extends React.Component<{
     //Props contract:
+    onSelectTrack: (spotifyURI: String) => void;
     onFileCountChanged: (fileCount: number) => void;
     previousBrowsingState: BrowsingState | null;
     onOpenCubeInCardMode: (cubeObjects: CubeObject[]) => void;
@@ -389,8 +390,28 @@ export default class CubeBrowser extends React.Component<{
     /** Handler for mouse left click. */
     private onMouseClick = (me: MouseEvent) => {
         if (me.button === 0 || me.button === 1) {
+
             //left or middle click
             this.setState({ showContextMenu: false });
+
+            this.mouse.x = (me.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(me.clientY / window.innerHeight) * 2 + 1;
+            // update the picking ray with the camera and mouse position
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            // calculate objects intersecting the picking ray
+            let intersects = this.raycaster.intersectObjects(this.boxMeshes);
+            if (intersects.length > 0) {
+                console.log(intersects[0].object.userData.cubeObjects[0])
+                let spotifyUri = intersects[0].object.userData.cubeObjects[0].fileURI
+                //play first song in cude
+                this.props.onSelectTrack(spotifyUri)
+                //window.open("https://open.spotify.com/track/"+spotifyUri)
+
+            } 
+            // else {
+            //     alert("no cube to click here")
+            // }
+
         }
     };
 
@@ -519,7 +540,7 @@ export default class CubeBrowser extends React.Component<{
             let yDefined: boolean = this.yAxis.TitleString !== "Y";
             let zDefined: boolean = this.zAxis.TitleString !== "Z";
             let infoText: string =
-                "Number of photos: " + intersects[0].object.userData.size;
+                "Number of tracks: " + intersects[0].object.userData.size;
             if (xDefined) {
                 if (
                     intersects[0].object.userData.x !== 0 &&
@@ -763,6 +784,7 @@ export default class CubeBrowser extends React.Component<{
         boxMesh.position.x = aPosition.x;
         boxMesh.position.y = aPosition.y;
         boxMesh.position.z = aPosition.z;
+        
         //Add to scene:
         this.scene.add(boxMesh);
         //Add to list of cube objects in order to detect raycaster collisions later:
@@ -791,6 +813,7 @@ export default class CubeBrowser extends React.Component<{
                 this.zAxis.RemoveObjectsFromScene(this.scene);
                 axis.AxisDirection = AxisDirection.Z;
                 break;
+            //default: break;
         }
         axis.PickedDimension = dimension;
 
@@ -822,6 +845,7 @@ export default class CubeBrowser extends React.Component<{
                     );
                 }
                 break;
+            //default: break;
         }
 
         switch (dimName) {
@@ -834,6 +858,7 @@ export default class CubeBrowser extends React.Component<{
             case "Z":
                 this.zAxis = axis;
                 break;
+            //default: break;
         }
 
         //This await is important, don't remove it.
@@ -1033,13 +1058,13 @@ export default class CubeBrowser extends React.Component<{
         this.cells = newCells;
 
         console.log("Done computing cells");
-
         //Update filecount:
         let uniquePhotos: Set<string> = new Set();
         this.cells.forEach((cell: Cell) =>
             cell.CubeObjects.forEach((co) => uniquePhotos.add(co.fileURI))
         );
         this.props.onFileCountChanged(uniquePhotos.size);
+        //intersects[0].object.userData.size
     }
 
     /**

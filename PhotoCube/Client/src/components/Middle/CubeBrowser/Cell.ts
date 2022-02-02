@@ -58,7 +58,16 @@ export default class Cell{
         this.z = aPosition.z;
         this.CubeObjects = cubeObjectData;
         if(cubeObjectData.length > 0){
-            this.threeObject = addCubeCallback("http://bjth.itu.dk:5002/" + this.CubeObjects[0].fileURI, {x: this.x, y: this.y, z:this.z});
+            let spotifyURI: string = this.CubeObjects[0].fileURI
+            let imgsrc: string = this.CubeObjects[0].thumbnailURI
+            if (!imgsrc.includes("/")) { 
+                imgsrc = "http://bjth.itu.dk:5002/images/colors/"+imgsrc //color
+                //imgsrc = "http://bjth.itu.dk:5002/images/releases/"+imgsrc //DRalbumCover
+            } 
+            // else { //color
+            //     imgsrc = "http://bjth.itu.dk:5002/images/colors/"+imgsrc
+            // }
+            this.threeObject = addCubeCallback(imgsrc, {x: this.x, y: this.y, z:this.z});
             this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.count, cubeObjects: this.CubeObjects };
             //this.ToggleSwitchingImagesEveryXms(10000);
         }
@@ -71,8 +80,8 @@ export default class Cell{
         if(this.threeObject != null) this.scene.remove(this.threeObject);
     }
 
-    /* //Not in use:
-    ToggleSwitchingImagesEveryXms(miliseconds: number){
+    //Not in use:
+    /* ToggleSwitchingImagesEveryXms(miliseconds: number){
         setInterval(() => {
             this.imageIndex++;
             let nextImage = this.imageIndex % this.CubeObjects.length;
@@ -82,6 +91,6 @@ export default class Cell{
             });
             //Do something each 'miliseconds' seconds  
         }, miliseconds);
-    }
-    */
+    } */
+   
 }

@@ -17,8 +17,9 @@ namespace ObjectCubeServer.Models.DomainClasses
         public int count { get; set; }
         public int id { get; set; }
         public string fileURI { get; set; }
+        public string thumbnailURI { get; set; }
 
-        public SingleObjectCell(int x, int y, int z, int count, int id, string fileURI)
+        public SingleObjectCell(int x, int y, int z, int count, int id, string fileURI, string thumbnailURI)
         {
             this.x = x;
             this.y = y;
@@ -26,6 +27,7 @@ namespace ObjectCubeServer.Models.DomainClasses
             this.count = count;
             this.id = id;
             this.fileURI = fileURI;
+            this.thumbnailURI = thumbnailURI;
         }
     }
 }

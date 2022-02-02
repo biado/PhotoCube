@@ -17,6 +17,7 @@ export default class RightDock extends React.Component<{
         onBrowsingModeChanged:(browsingmode: BrowsingModes) => void,
         onClearAxis:(axisName: string) => void,
         hideControls: boolean,
+        hideCount: boolean,
         activeFilters: Filter[],
         onFilterRemoved: (filterId: number) => void
     }>{
@@ -26,9 +27,10 @@ export default class RightDock extends React.Component<{
 
     render(){
         let visibility: string = this.props.hideControls ? "hide" : "";
+        let countVisibility: string = this.props.hideCount ? "hide" : "";
         return(
             <div id="RightDock">
-                <FileCount className={visibility} ref={this.fileCount}/>
+                <FileCount className={countVisibility} ref={this.fileCount}/>
                 <BrowsingModeChanger ref={this.browsingModeChanger} onBrowsingModeChanged={this.props.onBrowsingModeChanged} />
                 <Dimensions className={visibility} activeFilters={this.props.activeFilters} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/>
                 <FilterList className ={visibility} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved} />

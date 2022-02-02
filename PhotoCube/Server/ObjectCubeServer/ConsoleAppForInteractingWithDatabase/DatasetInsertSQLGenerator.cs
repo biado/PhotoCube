@@ -61,14 +61,14 @@ namespace ConsoleAppForInteractingWithDatabase
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
             datatypes = MapDataTypestoTagTypes();
-            //root = new JsonHierarchyParser().root;
+            root = new JsonHierarchyParser().root;
 
             this.stopwatch = new Stopwatch();
             stopwatch.Start();
             BuildCubeObjects();
             BuildTagTypes();
             BuildTagsetsAndTags();
-            //BuildHierarchiesAndNodes();
+            BuildHierarchiesAndNodes();
             WriteInsertStatementsToFile();
         }
 
@@ -113,7 +113,8 @@ namespace ConsoleAppForInteractingWithDatabase
 
                         String thumbnail = "";
                         if (line.Contains("thumbnail")){
-                            thumbnail = split[36];
+                            int thumbindex = Array.IndexOf(split, "thumbnail") + 1; 
+                            thumbnail = split[thumbindex];
                         } else {
                             int colorindex = Array.IndexOf(split, "color") + 1; 
                             thumbnail = split[colorindex]+".jpg";
@@ -183,36 +184,54 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"Date", "date"},
                 {"Timezone", "alphanumerical"},
                 {"Elevation", "integer"},
-                {"Speed", "integer"},
-                {"Heart", "integer"},
-                {"Calories", "integer"},
+                {"Speed", "numerical"},
+                {"Heart", "numerical"},
+                {"Calories", "numerical"},
                 {"Activity type", "alphanumerical"},
-                {"Steps", "integer"},
-                {"Day of week (number)", "integer"},
+                {"Steps", "numerical"},
+                {"Day of week (number)", "numerical"},
                 {"Day of week (string)", "alphanumerical"},
-                {"Day within month", "integer"},
-                {"Day within year", "integer"},
-                {"Month (number)", "integer"},
+                {"Day within month", "numerical"},
+                {"Day within year", "numerical"},
+                {"Month (number)", "numerical"},
                 {"Month (string)", "alphanumerical"},
-                {"Year", "integer"},
-                {"Hour", "integer"},
-                {"Minute", "integer"},
+                {"Year", "numerical"},
+                {"Hour", "numerical"},
+                {"Minute", "numerical"},
 
                 {"sp_track_name", "alphanumerical"},
-                {"sp_track_duration", "integer"},
-                {"sp_track_popularity", "integer"},
+                {"sp_track_duration", "numerical"},
+                {"sp_track_popularity", "numerical"},
                 {"sp_album_name", "alphanumerical"},
                 {"sp_artist_infos", "alphanumerical"},
-                {"x", "integer"},
-                {"y", "integer"},
-                {"z", "integer"},
+                {"x", "numerical"},
+                {"y", "numerical"},
+                {"z", "numerical"},
                 {"color", "alphanumerical"},
-                {"happiness_percentage", "float"},
-                {"sadness_percentage", "float"},
-                {"anger_percentage", "float"},
-                {"fear_percentage", "float"},
-                {"emotion_code", "integer"},
+                {"happiness_percentage", "numerical"},
+                {"sadness_percentage", "numerical"},
+                {"anger_percentage", "numerical"},
+                {"fear_percentage", "numerical"},
+                {"emotion_code", "numerical"},
                 {"genre", "alphanumerical"},
+                {"semantic_tag", "alphanumerical"}, //ImgNet classifier
+                {"timestamp", "timestamp"}, //Björn suggest select current time
+                {"year", "alphanumerical"},
+
+                {"thumbnail", "alphanumerical"},
+                {"release_id", "numerical"},
+                {"release_title", "alphanumerical"},
+                {"artist_id", "numerical"},
+                {"artist","alphanumerical"},
+                {"artist_gender", "alphanumerical"},
+                {"artist_country", "alphanumerical"},
+                {"release_year", "numerical"},
+                {"release_label", "alphanumerical"},
+                {"release_media", "alphanumerical"},
+                {"release_format", "alphanumerical"},
+                {"image_id", "numerical"},
+                {"image_sort_no", "numerical"},
+                {"image_path", "alphanumerical"},
             };
         }
 
@@ -236,10 +255,8 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 case "alphanumerical":
                     return DomainClassFactory.NewAlphanumericalTag(tagType, tagset, tagName);
-                case "integer":
-                    return DomainClassFactory.NewIntegerTag(tagType, tagset, int.Parse(tagName) ); //parse float to int
-                case "float":
-                    return DomainClassFactory.NewFloatTag(tagType, tagset, float.Parse(tagName));
+                case "numerical":
+                    return DomainClassFactory.NewNumericalTag(tagType, tagset, int.Parse(tagName) );
                 case "timestamp":
                     DateTime timestamp = DateTime.ParseExact(tagName, "yyyy-MM-dd HH:mm:ss",
                         CultureInfo.InvariantCulture);
@@ -614,13 +631,9 @@ namespace ConsoleAppForInteractingWithDatabase
                             insertStatement += "INSERT INTO alphanumerical_tags(id, name, tagset_id) VALUES(" + at.Id +
                                                ",'" + at.Name.Replace("'", "''") + "'," + at.TagsetId + "); \n";
                             break;
-                        case IntegerTag it:
-                            insertStatement += "INSERT INTO integer_tags(id, name, tagset_id) VALUES(" + it.Id + "," +
+                        case NumericalTag it:
+                            insertStatement += "INSERT INTO numerical_tags(id, name, tagset_id) VALUES(" + it.Id + "," +
                                                it.Name + "," + it.TagsetId + "); \n";
-                            break;
-                        case FloatTag ft:
-                            insertStatement += "INSERT INTO float_tags(id, name, tagset_id) VALUES(" + ft.Id + "," +
-                                               ft.Name + "," + ft.TagsetId + "); \n";
                             break;
                         case TimestampTag tst:
                             String timestamp = tst.Name.ToString("yyyy-MM-dd HH:mm:ss").Replace('.',':');
@@ -720,7 +733,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 } else if (insertCount % 100 == 0)
                 {
                     File.AppendAllText(SQLPath, "COMMIT;\n");
-                    File.AppendAllText(SQLPath, "COMMIT;\n");
+                    File.AppendAllText(SQLPath, "Begin;\n");
                 }
             }
 

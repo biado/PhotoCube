@@ -4,5 +4,7 @@
  export interface Filter{
     type: string,
     id: number, 
-    name: string
+    name: string,
+    //tagset: number | null //
+    //operation_type:
 }
