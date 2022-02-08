@@ -148,6 +148,14 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
     } catch (error) {}
   };
 
+  const findImgSrc = (imgsrc: string) => {
+    return imgsrc.length == 24 ? "https://i.scdn.co/image/ab67616d00001e02" + imgsrc : "https://i.scdn.co/image/" + imgsrc
+    // let imageResource : string = "";
+    // if(imgsrc.length == 24) {imageResource = "https://i.scdn.co/image/ab67616d00001e02" + imgsrc }
+    // if(imgsrc.length > 24) {imageResource = "https://i.scdn.co/image/" + imgsrc }
+    // return imageResource;
+  }
+
   return (
     <div className="grid-item">
       <div className="imageContainer">
@@ -159,7 +167,9 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
                 key={image.id}
                 //title="foobar"
                 className="image"
-                src={image.thumbnailURI.includes("/") ? image.thumbnailURI : "http://bjth.itu.dk:5002/images/colors/" + image.thumbnailURI}
+                //src={findImgSrc(image.thumbnailURI)} //using 300x300 sp_album_cover
+                src={image.thumbnailURI.length == 24 ? "https://i.scdn.co/image/ab67616d00001e02" + image.thumbnailURI : "https://i.scdn.co/image/" + image.thumbnailURI}
+                //src={image.thumbnailURI.length < 24 ? fetch("../../../images/colors/"+image.color) : findImgSrc(image.thumbnailURI)}
                 ></img>
             ))
           : images.map((image) => (
@@ -169,7 +179,7 @@ const GridBrowser: React.FC<FuncProps> = (props: FuncProps) => {
                 key={image.id}
                 //title="foobar"
                 className="image"
-                src={image.thumbnailURI.includes("/") ? image.thumbnailURI : "http://bjth.itu.dk:5002/images/colors/" + image.thumbnailURI}
+                src={image.thumbnailURI.length == 24 ? "https://i.scdn.co/image/ab67616d00001e02" + image.thumbnailURI : "https://i.scdn.co/image/" + image.thumbnailURI}
               ></img>
             ))}
         <Modal

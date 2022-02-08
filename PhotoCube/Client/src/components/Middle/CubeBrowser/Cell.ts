@@ -60,17 +60,18 @@ export default class Cell{
         if(cubeObjectData.length > 0){
             let spotifyURI: string = this.CubeObjects[0].fileURI
             let imgsrc: string = this.CubeObjects[0].thumbnailURI
-            if (!imgsrc.includes("/")) { 
-                imgsrc = "http://bjth.itu.dk:5002/images/colors/"+imgsrc //color
-                //imgsrc = "http://bjth.itu.dk:5002/images/releases/"+imgsrc //DRalbumCover
-            } 
-            // else { //color
-            //     imgsrc = "http://bjth.itu.dk:5002/images/colors/"+imgsrc
-            // }
+            //let imgsrc: string = "https://i.scdn.co/image/ab67616d00004851"+this.CubeObjects[0].thumbnailURI
+            if (imgsrc.length==24) { 
+                imgsrc = "https://i.scdn.co/image/ab67616d00004851"+imgsrc // using 64x64 sp_thumbnail
+            } else if (imgsrc.length>24) {
+                imgsrc = "https://i.scdn.co/image/"+imgsrc // odd path
+            } else if (imgsrc.length<24) {
+                imgsrc = "../../../images/colors/"+this.cubeObjects[0].color // missing thumbnail - using color
+            }
             this.threeObject = addCubeCallback(imgsrc, {x: this.x, y: this.y, z:this.z});
             this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.count, cubeObjects: this.CubeObjects };
             //this.ToggleSwitchingImagesEveryXms(10000);
-        }
+        } 
         else{
             this.threeObject = null;
         }

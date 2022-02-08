@@ -35,7 +35,7 @@ export default class LeftDock extends Component<{
                     <SpotifyWidget spotifyURI={this.props.spotifyURI}/>
                 </div>
                 <div className={visibility}>
-                    <h4 className="Header">Date filter:</h4>
+                    <h4 className="Header">Release date filter:</h4>
                      <div className="date dropdowns">
                         <DateTagDropdown tagsetName={"day"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
                         <DateTagDropdown tagsetName={"month"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>

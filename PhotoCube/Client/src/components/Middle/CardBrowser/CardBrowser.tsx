@@ -33,7 +33,16 @@ export default class CardBrowser extends React.Component<{
       }
       let thumbnail: string = "";
       if (this.state.imagesInCell[this.state.photoIndex]["thumbnailURI"]) {
-        thumbnail = this.state.imagesInCell[this.state.photoIndex]["thumbnailURI"]!;
+        let resource : string = this.state.imagesInCell[this.state.photoIndex]["thumbnailURI"]
+        if (resource.length == 24) {  // using 640x640 sp_album_cover
+          thumbnail = "https://i.scdn.co/image/ab67616d0000b273"+resource;
+        }
+        if (resource.length > 24) { // odd path
+          thumbnail = "https://i.scdn.co/image/"+resource;
+        }
+        if (resource.length < 24) { //missing - use color instead
+          thumbnail = "../../../images/colors/"+this.state.imagesInCell[this.state.photoIndex]["color"]
+        }
       }
       // if (thumbnail.includes(".jpg")){ //color
       //   thumbnail = "http://bjth.itu.dk:5002/images/colors/"+thumbnail
@@ -68,8 +77,8 @@ export default class CardBrowser extends React.Component<{
                 this.state.photoVisibility
               }
               onLoad={(e) => this.onImageLoad(e)}
-              //src={thumbnail}
-              src={thumbnail.includes("/") ? thumbnail : "http://bjth.itu.dk:5002/images/colors/" + thumbnail}
+              src={thumbnail}
+              //src={thumbnail.includes("/") ? thumbnail : "http://bjth.itu.dk:5002/images/colors/" + thumbnail}
               onClick={() => this.props.onSelectTrack(fileName)} //play in sp_widget
               //onClick={() => this.selectTrack(fileName)}
             ></img>

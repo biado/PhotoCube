@@ -6,4 +6,5 @@ export default interface CubeObject{
     id: number,
     fileURI: string,
     thumbnailURI: string;
+    color: string;
 }

@@ -18,8 +18,10 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             Console.WriteLine("Started up!");
 
+
             int[] N = new int[] { 436064 }; 
-            // 436064 = total MTB
+            // 436064 = total MTB with dups
+            // 410007 = unique MTB spotify URI's
             // 355510 = total DR
             // 
             // 191524 = Total number of LSC images, based on lsc2020.txt file.

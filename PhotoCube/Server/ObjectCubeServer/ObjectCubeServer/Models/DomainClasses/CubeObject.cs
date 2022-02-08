@@ -26,15 +26,15 @@ namespace ObjectCubeServer.Models.DomainClasses
         [Column("thumbnail_uri")]
         public string ThumbnailURI { get; set; }
 
-        //[Column("color")]
-        //public string color { get; set; }
+        [Column("color")]
+        public string Color { get; set; }
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }
 
         // To change the domain model cubeObject to public model cubeObject
         public PublicCubeObject GetPublicCubeObject()
         {
-            //return new PublicCubeObject(this.Id, this.FileURI, this.ThumbnailURI, this.color);
-            return new PublicCubeObject(this.Id, this.FileURI, this.ThumbnailURI);
+            return new PublicCubeObject(this.Id, this.FileURI, this.ThumbnailURI, this.Color);
+            //return new PublicCubeObject(this.Id, this.FileURI, this.ThumbnailURI);
         }
     }
 }

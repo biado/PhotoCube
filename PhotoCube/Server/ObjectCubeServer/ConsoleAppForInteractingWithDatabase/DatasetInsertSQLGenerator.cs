@@ -47,6 +47,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private JSNode root;
 
         private int missingfiles;
+        private int missingThumbnail;
 
         public DatasetInsertSQLGenerator(int numOfImages)
         {
@@ -116,7 +117,8 @@ namespace ConsoleAppForInteractingWithDatabase
                             int thumbindex = Array.IndexOf(split, "thumbnail") + 1; 
                             thumbnail = split[thumbindex];
                         } else {
-                            //what? null place holder, empty string
+                            thumbnail = "missing"; //what? null place holder, empty string
+                            missingThumbnail ++;    
                         }
                         int colorindex = Array.IndexOf(split, "color") + 1; 
                         string color = split[colorindex]+".jpg";
@@ -125,8 +127,8 @@ namespace ConsoleAppForInteractingWithDatabase
                         CubeObject cubeObject = DomainClassFactory.NewCubeObject(
                             filename,
                             FileType.Photo,
-                            thumbnail
-                            //color
+                            thumbnail,
+                            color
                             );
                             //thumbnailURI);
                         cubeObjects[filename] = cubeObject;
@@ -544,6 +546,7 @@ namespace ConsoleAppForInteractingWithDatabase
         {
             Console.WriteLine(SQLPath);
             Console.WriteLine("duplicate sptify uri's "+missingfiles);
+            Console.WriteLine("missing thumbnails "+missingThumbnail);
             // insert into [tableName]
             // (column1, column2, ..)
             // values
@@ -564,9 +567,9 @@ namespace ConsoleAppForInteractingWithDatabase
             //Insert all CubeObjects
             foreach (var co in cubeObjects.Values)
             {
-                string insertStatement = "INSERT INTO cubeobjects(id, file_uri, file_type, thumbnail_uri) VALUES(" +
+                string insertStatement = "INSERT INTO cubeobjects(id, file_uri, file_type, thumbnail_uri, color) VALUES(" +
                                          co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI +
-                                         "'); \n";
+                                         "','" + co.Color + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
                 insertCount++;
                 if (insertCount % 100 == 0 && mssqlFormat)
