@@ -56,7 +56,7 @@ const addFilter = (option: Tag) => {
   console.log("filter",filter)
   console.log("af", props.activeFilters)
   //console.log(!props.activeFilters.some(af => af.id === filter.id && af.name === filter.name))
-    if (!props.activeFilters.some(af => af.id === filter.id && af.name === filter.name)) { //check on both name and id - becase tagset_id is stored as is
+    if (!props.activeFilters.some(af => af.id === filter.id && af.name === filter.name)) { //check on both name and id - becase tagset_id is stored as id
       //remove past filter
       //props.activeFilters.
       if (selectedFilter!=null){
@@ -80,9 +80,10 @@ const changeValue = (value: number) => {
 }
 
   return (
-      <div >
+      <div>
         <h5>{props.tagsetName}</h5>
-        <input onChange={event => changeValue(parseInt(event.target.value))} type="range" min={min} max={max} value={currValue}/>
+        {/*<input onMouseUp={ event => changeValue(event.currentTarget.valueAsNumber)} type="range" min={min} max={max} value={currValue}/>*/}
+        <input onChange={event => changeValue(event.target.valueAsNumber)} type="range" min={min} max={max} value={currValue}/>
         <p>{currValue}</p>
       </div>
   );

@@ -116,15 +116,18 @@ namespace ConsoleAppForInteractingWithDatabase
                             int thumbindex = Array.IndexOf(split, "thumbnail") + 1; 
                             thumbnail = split[thumbindex];
                         } else {
-                            int colorindex = Array.IndexOf(split, "color") + 1; 
-                            thumbnail = split[colorindex]+".jpg";
+                            //what? null place holder, empty string
                         }
+                        int colorindex = Array.IndexOf(split, "color") + 1; 
+                        string color = split[colorindex]+".jpg";
                         //string thumbnailURI = Path.Combine("Thumbnails", thumbnail);
 
                         CubeObject cubeObject = DomainClassFactory.NewCubeObject(
                             filename,
                             FileType.Photo,
-                            thumbnail);
+                            thumbnail
+                            //color
+                            );
                             //thumbnailURI);
                         cubeObjects[filename] = cubeObject;
 
@@ -215,10 +218,12 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"emotion_code", "numerical"},
                 {"genre", "alphanumerical"},
                 {"semantic_tag", "alphanumerical"}, //ImgNet classifier
-                {"timestamp", "timestamp"}, //Björn suggest select current time
-                {"year", "alphanumerical"},
-
+                {"timestamp", "timestamp"}, //Björn suggest select current time as default
+                {"year", "alphanumerical"}, //from mtb timestamp
+                {"month", "alphanumerical"}, //from mtb timestamp -> parse number to name of month
+                {"day", "alphanumerical"}, //from mtb timestamp
                 {"thumbnail", "alphanumerical"},
+                
                 {"release_id", "numerical"},
                 {"release_title", "alphanumerical"},
                 {"artist_id", "numerical"},

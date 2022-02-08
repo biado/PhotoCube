@@ -14,11 +14,15 @@ namespace ObjectCubeServer.Models.PublicClasses
 
         public string ThumbnailURI {get; set;}
 
+        //public string color {get; set;}
+
         public PublicCubeObject(int id, string fileURI, string thumbnailURI)
+        //public PublicCubeObject(int id, string fileURI, string thumbnailURI, string color)
         {
             Id = id;
             FileURI = fileURI;
             ThumbnailURI = thumbnailURI;
+            //this.color = color;
         }
     }
 }

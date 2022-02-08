@@ -17,11 +17,13 @@ export default class DayOfWeekFilter extends React.Component<{
 }>{
     state = {
         daysOfWeek: [],
-        dayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        //dayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        dayNames: ["h", "s", "a", "f"] //["happy", "sad ", "anger ", "fear"]
     }
 
     render() {
         return (
+            //<div className="emotion_code">
             <div className="dow filter">
                 <ul>
                     {this.state.daysOfWeek.map((dow: Tag) => 
@@ -40,9 +42,11 @@ export default class DayOfWeekFilter extends React.Component<{
      * Fetches tags in Day of Week tagset from the server, and presents them with a checkbox.
      */
      private async renderDaysOfWeek() {
-        const response = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
+        //const response = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
+        const response = await Fetcher.FetchTagsByTagsetName("emotion_code")
+
         const DOW: Tag[] = response;
-        //console.log(DOW);
+        console.log(DOW);
         DOW.sort((a,b) => parseInt(a.name) - parseInt(b.name));
         this.setState({daysOfWeek: DOW})
     }
@@ -58,7 +62,8 @@ export default class DayOfWeekFilter extends React.Component<{
             onChange={e => this.onChange(e)} />;
         let result = <div className="dow checkbox">
                 {inputElement}
-                <p>{this.state.dayNames[parseInt(dowTag.name)-1].substring(0,1)}</p>
+                <p>{this.state.dayNames[parseInt(dowTag.name)]}</p>
+                {/*<p>{this.state.dayNames[parseInt(dowTag.name)-1].substring(0,1)}</p>*/}
             </div>
         return result;
     }
@@ -71,6 +76,7 @@ export default class DayOfWeekFilter extends React.Component<{
      private onChange(e: React.ChangeEvent<HTMLInputElement>) {
         if (e.target.checked) {
             const filter: Filter = createFilter(e.target.name, parseInt(e.target.value), "day of week");
+            //const filter: Filter = createFilter(e.target.name, parseInt(e.target.value), "emotion_code");
             //Add filter
             if (!this.props.activeFilters.some(af => af.name === e.target.name)) {
                 this.props.onFiltersChanged(filter);

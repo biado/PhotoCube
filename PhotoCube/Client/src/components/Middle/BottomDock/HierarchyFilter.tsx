@@ -62,6 +62,8 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
     async function onSearch(e: React.MouseEvent<HTMLButtonElement, MouseEvent>){
         e.preventDefault();
         const response = await Fetcher.FetchNodeByName(input);
+        //const response = await Fetcher.FetchHierarchies();
+        console.log(response)
         const options = response.map((node: Node) => ({
             NodeId: node.id,
             NodeName: node.name,

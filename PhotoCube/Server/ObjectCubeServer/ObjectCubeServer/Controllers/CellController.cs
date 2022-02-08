@@ -120,6 +120,7 @@ namespace ObjectCubeServer.Controllers
                 coContext.SingleObjectCells.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.Type, axisX.Id, axisY.Type, axisY.Id, axisZ.Type, axisZ.Id, filtersList)).ToListAsync();
             result = singlecells.Select(c =>
                 new PublicCell(axisX.Ids[c.x], axisY.Ids[c.y], axisZ.Ids[c.z], c.count, c.id, c.fileURI, c.thumbnailURI)).ToList();
+                //new PublicCell(axisX.Ids[c.x], axisY.Ids[c.y], axisZ.Ids[c.z], c.count, c.id, c.fileURI, c.thumbnailURI, c.color)).ToList();
 
             //If cells have no cubeObjects, remove them:
             //cells.RemoveAll(c => !c.CubeObjects.Any());

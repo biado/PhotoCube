@@ -4,6 +4,7 @@ import { createFilter } from '../Middle/BottomDock/TagsetFilter';
 import Fetcher from '../Middle/CubeBrowser/Fetcher';
 import { Tag } from './Tag';
 import '../../css/LeftDock/DateFilter.css';
+import { set } from 'mobx';
 
 /**
  * Component for browsing and adding date filters.
@@ -31,12 +32,25 @@ import '../../css/LeftDock/DateFilter.css';
         //console.log(response);
         //const tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name}});
         const tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name, tagset: t.tagset}});
+
         //sort tags
-        tags.sort((a,b) => parseInt(a.name) - parseInt(b.name));
+        tags.sort((a,b) => a.name.localeCompare(b.name)); //sorting alphanumerical tags
+        //tags.sort((a,b) => parseInt(a.name) - parseInt(b.name));
+
         //format days and months
-        const formattedTags = formatTags(tags);
-        //set dropdown options
-        setDropdownOptions(formattedTags);
+        //const formattedTags = formatTags(filtertags);
+        if(props.tagsetName=="month"){
+            const formattedMonths = formatMonths(tags);
+            setDropdownOptions(formattedMonths)
+        } 
+        if(props.tagsetName=="year"){
+            //const filtertags = tags.filter((t:Tag) => t.name.length!=5) //remove decade
+            const formattedYears = tags.filter((t:Tag) => t.name.charAt(t.name.length-1)!='s' && t.name!='year') //remove decades: 1900s, 1910s ...
+            setDropdownOptions(formattedYears)
+        }else{
+            //set dropdown options
+            setDropdownOptions(tags);
+        }
     }
 
     const addFilter = (option: Tag) => {
@@ -84,7 +98,7 @@ import '../../css/LeftDock/DateFilter.css';
     )
 }
 
-//utility function 
+//utility function , not in use for MTB
 export const formatTags = (months: Tag[]) => {
     return months.map((tag: Tag) => {
         if (tag.name.length === 1) {
@@ -96,3 +110,11 @@ export const formatTags = (months: Tag[]) => {
     })
 }
 
+export const formatMonths = (months: Tag[]) => {
+    const monthsRef = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December", "missing"];
+    months.sort(function(a, b) {
+        return monthsRef.indexOf(a.name)- monthsRef.indexOf(b.name);
+    })
+    return months
+}

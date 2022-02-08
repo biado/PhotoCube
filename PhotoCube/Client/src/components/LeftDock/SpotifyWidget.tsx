@@ -1,6 +1,6 @@
 import React from "react";
 /**
- * 
+ * component for playing music.
  */
 export const SpotifyWidget : any = (props:{spotifyURI:String | null}) => {
         return (

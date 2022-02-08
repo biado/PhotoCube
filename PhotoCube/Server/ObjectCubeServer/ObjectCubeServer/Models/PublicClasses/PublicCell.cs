@@ -24,13 +24,16 @@ namespace ObjectCubeServer.Models.PublicClasses
             CubeObjects = cubeObjects;
         }
 
+
         public PublicCell(int x, int y, int z, int count, int id, string fileURI, string thumbnail)
+        //public PublicCell(int x, int y, int z, int count, int id, string fileURI, string thumbnail, string color)
         {
             this.x = x;
             this.y = y;
             this.z = z;
             this.count = count;
             CubeObjects = new List<PublicCubeObject> {new(id, fileURI, thumbnail)};
+            //CubeObjects = new List<PublicCubeObject> {new(id, fileURI, thumbnail, color)};
         }
     }
 }

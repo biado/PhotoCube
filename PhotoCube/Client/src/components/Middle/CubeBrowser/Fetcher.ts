@@ -92,7 +92,7 @@ export default class Fetcher {
           result.push({ type: "timerange", ids: [3], ranges: [ranges] });
           break;
         case "slider":
-          result.push({ type: "numrange", ids: [filter.id], ranges: [[0,filter.name]] });
+          result.push({ type: "numrange", ids: [filter.id], ranges: [[filter.name, 100]] }); //greater than or equal
           break;
         default:
           result.push({ type: "tag", ids: [filter.id] });
@@ -210,7 +210,7 @@ export default class Fetcher {
       const response = await fetch(
         Fetcher.baseUrl + "/tagset/name=" + tagsetName
       );
-      //alert(Fetcher.baseUrl + "/tagset/name=" + tagsetName)
+      //alert(Fetcher.baseUrl + "/tagset/name=" + tagsetName) 
       const data = await response.json();
       return data;
     } catch (error) {
