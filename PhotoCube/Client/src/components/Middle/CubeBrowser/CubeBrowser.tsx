@@ -866,6 +866,38 @@ export default class CubeBrowser extends React.Component<{
     }
 
     /**
+     * Fetch cells based on which axis are defined:
+     * @param xDefined 
+     * @param yDefined 
+     * @param zDefined 
+     * @param filters 
+     * @returns a promise of new Cells based on axis defined
+     */
+    private async fetchCells(xDefined:boolean, yDefined:boolean, zDefined:boolean, filters:Filter[]) : Promise<Cell[]>{
+        let newCells: Cell[] = [];
+
+        let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
+            xDefined ? this.xAxis : null,
+            yDefined ? this.yAxis : null,
+            zDefined ? this.zAxis : null,
+            filters
+        );
+        ICells.forEach((c: ICell) =>
+            newCells.push(
+                new Cell(
+                    this.scene,
+                    this.textureLoader,
+                    this.addCubeCallback,
+                    { x: c.x, y: c.y, z: c.z },
+                    c.cubeObjects,
+                    c.count
+                )
+            )
+        );
+        return newCells;
+    }
+
+    /**
      * Removes current cells from the scene.
      * Clears the current cells and fetches new cells from the server:
      */
@@ -889,167 +921,7 @@ export default class CubeBrowser extends React.Component<{
 
         let newCells: Cell[] = [];
         try {
-            if (xDefined && yDefined && zDefined) {
-                //X and Y and Z
-                //Render all three axis
-                let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
-                    this.xAxis,
-                    this.yAxis,
-                    this.zAxis,
-                    filters
-                );
-                ICells.forEach((c: ICell) =>
-                    newCells.push(
-                        new Cell(
-                            this.scene,
-                            this.textureLoader,
-                            this.addCubeCallback,
-                            { x: c.x, y: c.y, z: c.z },
-                            c.cubeObjects,
-                            c.count
-                        )
-                    )
-                );
-            } else if (xDefined && yDefined) {
-                //X and Y
-                let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
-                    this.xAxis,
-                    this.yAxis,
-                    null,
-                    filters
-                );
-                ICells.forEach((c: ICell) =>
-                    newCells.push(
-                        new Cell(
-                            this.scene,
-                            this.textureLoader,
-                            this.addCubeCallback,
-                            { x: c.x, y: c.y, z: c.z },
-                            c.cubeObjects,
-                            c.count
-                        )
-                    )
-                );
-            } else if (xDefined && zDefined) {
-                //X and Z
-                let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
-                    this.xAxis,
-                    null,
-                    this.zAxis,
-                    filters
-                );
-                ICells.forEach((c: ICell) =>
-                    newCells.push(
-                        new Cell(
-                            this.scene,
-                            this.textureLoader,
-                            this.addCubeCallback,
-                            { x: c.x, y: c.y, z: c.z },
-                            c.cubeObjects,
-                            c.count
-                        )
-                    )
-                );
-            } else if (yDefined && zDefined) {
-                //Y and Z
-                let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
-                    null,
-                    this.yAxis,
-                    this.zAxis,
-                    filters
-                );
-                ICells.forEach((c: ICell) =>
-                    newCells.push(
-                        new Cell(
-                            this.scene,
-                            this.textureLoader,
-                            this.addCubeCallback,
-                            { x: c.x, y: c.y, z: c.z },
-                            c.cubeObjects,
-                            c.count
-                        )
-                    )
-                );
-            } else if (xDefined) {
-                //X
-                let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
-                    this.xAxis,
-                    null,
-                    null,
-                    filters
-                );
-                ICells.forEach((c: ICell) =>
-                    newCells.push(
-                        new Cell(
-                            this.scene,
-                            this.textureLoader,
-                            this.addCubeCallback,
-                            { x: c.x, y: c.y, z: c.z },
-                            c.cubeObjects,
-                            c.count
-                        )
-                    )
-                );
-            } else if (yDefined) {
-                //Y
-                let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
-                    null,
-                    this.yAxis,
-                    null,
-                    filters
-                );
-                ICells.forEach((c: ICell) =>
-                    newCells.push(
-                        new Cell(
-                            this.scene,
-                            this.textureLoader,
-                            this.addCubeCallback,
-                            { x: c.x, y: c.y, z: c.z },
-                            c.cubeObjects,
-                            c.count
-                        )
-                    )
-                );
-            } else if (zDefined) {
-                //Z
-                let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
-                    null,
-                    null,
-                    this.zAxis,
-                    filters
-                );
-                ICells.forEach((c: ICell) =>
-                    newCells.push(
-                        new Cell(
-                            this.scene,
-                            this.textureLoader,
-                            this.addCubeCallback,
-                            { x: c.x, y: c.y, z: c.z },
-                            c.cubeObjects,
-                            c.count
-                        )
-                    )
-                );
-            } else if (!xDefined && !yDefined && !zDefined) {
-                let ICells: ICell[] = await Fetcher.FetchCellsFromAxis(
-                    null,
-                    null,
-                    null,
-                    filters
-                );
-                ICells.forEach((c: ICell) =>
-                    newCells.push(
-                        new Cell(
-                            this.scene,
-                            this.textureLoader,
-                            this.addCubeCallback,
-                            { x: c.x, y: c.y, z: c.z },
-                            c.cubeObjects,
-                            c.count
-                        )
-                    )
-                );
-            }
+            newCells = await this.fetchCells(xDefined, yDefined, zDefined, filters)
         } catch (error) {
             console.error(error);
         }
