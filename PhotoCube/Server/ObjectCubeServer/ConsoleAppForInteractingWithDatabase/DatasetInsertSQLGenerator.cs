@@ -205,7 +205,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"Minute", "numerical"},
 
                 {"sp_track_name", "alphanumerical"},
-                {"sp_track_duration", "numerical"},
+                {"sp_track_duration", "numerical"}, //in seconds
                 {"sp_track_popularity", "numerical"},
                 {"sp_album_name", "alphanumerical"},
                 {"sp_artist_infos", "alphanumerical"},

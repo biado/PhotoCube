@@ -1054,7 +1054,6 @@ export default class CubeBrowser extends React.Component<{
             console.error(error);
         }
         //Fetch cells based on which axis are defined:
-
         this.cells = newCells;
 
         console.log("Done computing cells");
@@ -1063,7 +1062,7 @@ export default class CubeBrowser extends React.Component<{
         this.cells.forEach((cell: Cell) =>
             cell.CubeObjects.forEach((co) => uniquePhotos.add(co.fileURI))
         );
-        console.log(this.cells.length)
+        console.log(uniquePhotos.size)
         this.props.onFileCountChanged(uniquePhotos.size);
         //intersects[0].object.userData.size
     }

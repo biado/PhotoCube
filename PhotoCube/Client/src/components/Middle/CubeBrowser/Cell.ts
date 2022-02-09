@@ -66,7 +66,7 @@ export default class Cell{
             } else if (imgsrc.length>24) {
                 imgsrc = "https://i.scdn.co/image/"+imgsrc // odd path
             } else if (imgsrc.length<24) {
-                imgsrc = "../../../images/colors/"+this.cubeObjects[0].color // missing thumbnail - using color
+                imgsrc = "file:///home/ek/Documents/Thesis/PhotoCube/PhotoCube/Client/src/images/colors/"+this.CubeObjects[0].color // missing thumbnail - using color
             }
             this.threeObject = addCubeCallback(imgsrc, {x: this.x, y: this.y, z:this.z});
             this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.count, cubeObjects: this.CubeObjects };
