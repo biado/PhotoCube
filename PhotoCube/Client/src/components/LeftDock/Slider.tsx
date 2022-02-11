@@ -2,16 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Filter } from '../Filter';
 import Fetcher from '../Middle/CubeBrowser/Fetcher';
 import { Tag } from './Tag';
-import { createFilter } from '../Middle/BottomDock/TagsetFilter';
+import { Operation } from "./Operation";
+//import { createFilter } from '../Middle/BottomDock/TagsetFilter';
 import '../../css/LeftDock/DayOfWeekFilter.css';
 import { AiFillSliders } from "react-icons/ai";
-import { idText } from "typescript";
+import { EnumType, idText } from "typescript";
 
 /**
  * 
  */
  export const Slider : any = (props:{
-  tagsetName: string
+  tagsetName: string,
+  rangeDirection: Operation,
   onFiltersChanged: (filter: Filter) => void, 
   activeFilters: Filter[],
   onFilterReplaced: (oldFilter:Filter, newFilter: Filter) => void,
@@ -41,7 +43,7 @@ async function FetchTagsByTagsetName () {
     updateMax(parseInt(tags[lastValue].name))
 
     // if(selectedFilter==null){
-    //   addFilter(tags[currValue]) //use default value as filter
+    //   addFilter(tags[currValue]) //*use default value as filter?
     // }
 
     //console.log(parseInt(tags[0].name))
@@ -51,40 +53,95 @@ async function FetchTagsByTagsetName () {
 
 const addFilter = (option: Tag) => {
   console.log(option)
-  //const filter: Filter = createFilter(option.name, option.id, "slider");
-  const filter: Filter = createFilter(option.name, option.tagset, "slider");
+  var filter : Filter = createFilter(-1, "null", "-1", "-1");
+
+  switch(props.rangeDirection as Operation){
+    case Operation.GreaterThanOrEqual:
+      filter = createFilter(option.tagset, "slider", option.name, max.toString());
+      break;
+    case Operation.LessThanOrEqual:
+      filter = createFilter(option.tagset, "slider", min.toString(), option.name);
+      break;
+    default : 
+      console.log("Update operation enum")
+      break; 
+  }
+
   console.log("filter",filter)
   console.log("af", props.activeFilters)
-  //console.log(!props.activeFilters.some(af => af.id === filter.id && af.name === filter.name))
-    if (!props.activeFilters.some(af => af.id === filter.id && af.name === filter.name)) { //check on both name and id - becase tagset_id is stored as id
-      //remove past filter
-      //props.activeFilters.
-      if (selectedFilter!=null){
-        props.onFilterReplaced(selectedFilter, filter)
-      } else {
-        props.onFiltersChanged(filter);
-      }
-      updateSelection(filter)
-      // less than or equal
+
+  if (selectedFilter!=null){
+    props.onFilterReplaced(selectedFilter, filter)
+  } else {
+    props.onFiltersChanged(filter);
   }
+  updateSelection(filter)
 }
 
-const changeValue = (value: number) => {
-  updateValue(value)
+const applyFilter = (value: number) => {
+  console.log(value)
   for (let index = 0; index < allTags.length; index++) {
     const element = allTags[index];
     if (parseInt(element.name) == value){
-      addFilter(element)
+      addFilter(element);
+      break
     }
+    if (parseInt(element.name) > value){ // no exacct match, eg track_duration
+      const t : Tag= {'id':element.tagset, 'name':value.toString(), 'tagset':element.tagset}
+      addFilter(t); // Tag t doesnt exist in db
+      break
+    }
+  }
+}
+
+const onClear = () => {
+  if (selectedFilter !== null) {
+      props.onFilterRemoved(selectedFilter.id);
+      updateSelection(null);
+      updateValue(50)
   }
 }
 
   return (
       <div>
-        <h5>{props.tagsetName}</h5>
-        {/*<input onMouseUp={ event => changeValue(event.currentTarget.valueAsNumber)} type="range" min={min} max={max} value={currValue}/>*/}
-        <input onChange={event => changeValue(event.target.valueAsNumber)} type="range" min={min} max={max} value={currValue}/>
-        <p>{currValue}</p>
+        {props.tagsetName==="sp_track_duration" ? <span/>:<h5>{props.tagsetName}</h5>}
+        <input onChange={event => updateValue(event.currentTarget.valueAsNumber)} 
+        onMouseUp={ event => applyFilter(event.currentTarget.valueAsNumber)}  
+        type="range" min={min} max={max} value={currValue}/>
+        <p>{props.tagsetName==="sp_track_duration" ? secToMin(currValue) : currValue}</p>
+        <button onClick={() => onClear()}> Clear </button>
       </div>
   );
 } 
+
+/**
+ * Slider specific filter creation with lower and upper bound
+ * @param tagSet 
+ * @param type 
+ * @param lower 
+ * @param upper 
+ * @returns returns new created filter
+ */
+const createFilter = (tagSet: number, type: string, lower: string, upper: string ) : Filter => {
+  const filter: Filter = {
+      id: tagSet,
+      type: type,
+      name: lower, //Filter assumes name is a string
+      max: upper,
+  }
+  return filter;
+}
+
+/**
+ * formats seconds to min:sec
+ * @param sec 
+ * @returns 
+ */
+const secToMin = (sec: number) : string => {
+  const secRemainder : number = sec % 60;
+  const oneDigit : boolean = secRemainder < 10
+  const min : number = Math.floor(sec / 60)
+  var minAndSec: string = '';
+  oneDigit? minAndSec=`${min}:0${secRemainder}` : minAndSec=`${min}:${secRemainder}`
+  return minAndSec
+}

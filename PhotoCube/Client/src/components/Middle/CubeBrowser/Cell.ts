@@ -43,7 +43,8 @@ export default class Cell{
     constructor(
         scene:THREE.Scene, 
         textureLoader:THREE.TextureLoader, 
-        addCubeCallback: (imageUrl: string, aPosition: Position) => THREE.Mesh, aPosition:Position, 
+        addCubeCallback: (imageUrl: string, aPosition: Position) => THREE.Mesh, 
+        aPosition:Position, 
         cubeObjectData: CubeObject[],
         countOfImages: number
         ){

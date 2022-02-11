@@ -11,6 +11,7 @@ import '../../css/LeftDock/DayOfWeekFilter.css';
  * IMPORTANT: Tag filters applied from this section will result in OR search.
  */
 export default class DayOfWeekFilter extends React.Component<{
+    visibleSlider: (emotion: number) => void,
     onFiltersChanged: (filters: Filter) => void,
     activeFilters: Filter[],
     onFilterRemoved: (filterId: number) => void
@@ -23,7 +24,6 @@ export default class DayOfWeekFilter extends React.Component<{
 
     render() {
         return (
-            //<div className="emotion_code">
             <div className="dow filter">
                 <ul>
                     {this.state.daysOfWeek.map((dow: Tag) => 
@@ -39,7 +39,7 @@ export default class DayOfWeekFilter extends React.Component<{
     }
 
     /**
-     * Fetches tags in Day of Week tagset from the server, and presents them with a checkbox.
+     * Fetches tags in emotion_code tagset from the server, and presents them with a checkbox.
      */
      private async renderDaysOfWeek() {
         //const response = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
@@ -76,16 +76,18 @@ export default class DayOfWeekFilter extends React.Component<{
      private onChange(e: React.ChangeEvent<HTMLInputElement>) {
         if (e.target.checked) {
             const filter: Filter = createFilter(e.target.name, parseInt(e.target.value), "day of week");
-            //const filter: Filter = createFilter(e.target.name, parseInt(e.target.value), "emotion_code");
+            console.log(filter)
             //Add filter
             if (!this.props.activeFilters.some(af => af.name === e.target.name)) {
                 this.props.onFiltersChanged(filter);
+                this.props.visibleSlider(parseInt(e.target.name))
             }
         } else {
             //Remove filter
             const filterId = parseInt(e.target.value);
             if (this.props.activeFilters.some(af => af.id === filterId)) {
                 this.props.onFilterRemoved(filterId);
+                this.props.visibleSlider(parseInt(e.target.name))
             }
         }
     }
