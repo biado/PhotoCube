@@ -38,6 +38,8 @@ export default class Cell{
     CubeObjects: CubeObject[];
     threeObject: THREE.Mesh | null;
 
+    useColor:boolean; //use color thumbnail for big browsing states
+
     imageIndex: number = 0;
 
     constructor(
@@ -46,7 +48,8 @@ export default class Cell{
         addCubeCallback: (imageUrl: string, aPosition: Position) => THREE.Mesh, 
         aPosition:Position, 
         cubeObjectData: CubeObject[],
-        countOfImages: number
+        countOfImages: number,
+        useColor: boolean
         ){
 
         this.count = countOfImages;
@@ -58,16 +61,21 @@ export default class Cell{
         this.y = aPosition.y;
         this.z = aPosition.z;
         this.CubeObjects = cubeObjectData;
+        this.useColor = useColor;
         if(cubeObjectData.length > 0){
             let spotifyURI: string = this.CubeObjects[0].fileURI
-            let imgsrc: string = this.CubeObjects[0].thumbnailURI
-            //let imgsrc: string = "https://i.scdn.co/image/ab67616d00004851"+this.CubeObjects[0].thumbnailURI
-            if (imgsrc.length==24) { 
-                imgsrc = "https://i.scdn.co/image/ab67616d00004851"+imgsrc // using 64x64 sp_thumbnail
-            } else if (imgsrc.length>24) {
-                imgsrc = "https://i.scdn.co/image/"+imgsrc // odd path
-            } else if (imgsrc.length<24) {
-                imgsrc = "file:///home/ek/Documents/Thesis/PhotoCube/PhotoCube/Client/src/images/colors/"+this.CubeObjects[0].color // missing thumbnail - using color
+            let imgsrc :string = "";
+            if(useColor){
+                imgsrc = "/colors/"+this.CubeObjects[0].color
+            }else{
+                imgsrc = this.CubeObjects[0].thumbnailURI
+                if (imgsrc.length==24) {
+                    imgsrc = "https://i.scdn.co/image/ab67616d00004851"+imgsrc // using 64x64 sp_thumbnail
+                } else if (imgsrc.length>24) {
+                    imgsrc = "https://i.scdn.co/image/"+imgsrc // odd path
+                } else if (imgsrc.length<24) {
+                    imgsrc = "/colors/"+this.CubeObjects[0].color // missing thumbnail - using color
+                }
             }
             this.threeObject = addCubeCallback(imgsrc, {x: this.x, y: this.y, z:this.z});
             this.threeObject.userData = { x: this.x, y: this.y, z:this.z, size: this.count, cubeObjects: this.CubeObjects };

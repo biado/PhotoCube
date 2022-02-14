@@ -882,6 +882,8 @@ export default class CubeBrowser extends React.Component<{
             zDefined ? this.zAxis : null,
             filters
         );
+        let useColor : boolean = ICells.length > 1500
+
         ICells.forEach((c: ICell) =>
             newCells.push(
                 new Cell(
@@ -890,7 +892,8 @@ export default class CubeBrowser extends React.Component<{
                     this.addCubeCallback,
                     { x: c.x, y: c.y, z: c.z },
                     c.cubeObjects,
-                    c.count
+                    c.count,
+                    useColor
                 )
             )
         );
