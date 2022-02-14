@@ -18,3 +18,9 @@
   color: rgb(200, 200, 200);
   background-color: rgb(40, 40, 40);
 }
+
+.spotify_widget{
+  position: sticky; /**/
+  top: 0px;
+  background-color: black;
+}

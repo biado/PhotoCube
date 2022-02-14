@@ -41,7 +41,7 @@ export default class LeftDock extends Component<{
         let visibility: string = this.props.hideControls ? " hide" : "";
         return (
             <div id={"LeftDock"} >
-                <div className={""}>
+                <div className={"spotify_widget"}>
                     <h4 className="Header">Spotify widget:</h4>
                     <SpotifyWidget spotifyURI={this.props.spotifyURI}/>
                 </div>

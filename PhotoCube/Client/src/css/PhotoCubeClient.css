@@ -22,11 +22,11 @@ canvas {
 
 .grid-container {
   display: grid;
-  grid-template-columns: 210px auto 210px;
+  grid-template-columns: 220px auto 210px;
 }
 
 .middle.dock {
-  height: 100vh;
+  height: max(100vh, max-content);
   display: flex;
   flex-direction: column;
   position: relative;
