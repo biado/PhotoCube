@@ -34,8 +34,9 @@ import { EnumType, idText } from "typescript";
 async function FetchTagsByTagsetName () {
     const response = await Fetcher.FetchTagsByTagsetName(props.tagsetName);
     //console.log(response);
-    const tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name, tagset: t.tagset}});
+    var tags: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name, tagset: t.tagset}});
     //sort tags
+    tags = tags.filter((t:Tag) => !t.name.includes('sp_track') && !t.name.includes(':')) //filter out hierarchy structure
     tags.sort((a,b) => parseInt(a.name) - parseInt(b.name));
     updateTags(tags) //set state
     updateMin(parseInt(tags[0].name))
