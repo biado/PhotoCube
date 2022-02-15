@@ -55,6 +55,7 @@ export default class Fetcher {
   static async FetchAllImagesWithProjection(filters: Filter[]) {
     let queryString: string = this.baseUrl + "/cell/?";
     queryString += "&filters=" + this.parseFilters(filters!) + "&all=[]";
+    console.log(queryString)
     try {
       const response = await fetch(queryString);
       const data = await response.json();
@@ -127,6 +128,28 @@ export default class Fetcher {
     }
   }
 
+/*   static  async FetchFromTimestamp() {
+    try {
+        const resp = await fetch(`https://localhost:5001/api/cell?filters=[{'type':'timestamprange','ids':['4'],'ranges':[['23-08-2016 10:00','23-08-2016 11:00']]}]&all=[]`)
+        const data = await resp.json()
+        console.log("timestamp data", data)
+        return data
+    } catch (error) {
+      console.error(error)
+    }
+  } */
+
+  static  async FetchFromTimestamp(id: number) {
+    try {
+        const resp = await fetch(`https://localhost:5001/api/cell?filters=[{'type':'timeline','ids':['${id}']}]&timeline=[]`)
+        const data = await resp.json()
+        console.log("timestamp data", data)
+        return data
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   
 
   static async SubmitImage(fileUri: string) {
@@ -196,7 +219,7 @@ export default class Fetcher {
    */
   static async FetchNode(nodeId: number) {
     try {
-      const response = await fetch(Fetcher.baseUrl + "/node/" + nodeId);
+      const response = await fetch(Fetcher.baseUrl + "/node/" + nodeId + "/tree");
       const data = await response.json();
       return data;
     } catch (error) {
@@ -298,7 +321,7 @@ export default class Fetcher {
         Fetcher.baseUrl + "/tag?cubeObjectId=" + cubeObjectId
       );
       const data = await response.json();
-      console.log("image tag data", data);
+      //console.log("image tag data", data);
       return data;
     } catch (error) {
       console.error(error);

@@ -108,9 +108,9 @@ namespace ObjectCubeServer.Services
                 return BaseQuery;
             }
 
-            var queryFront = new StringBuilder("select distinct O.id as Id, O.file_uri as fileURI, DT.name as D, TT.name as T from (select R1.object_id ");
+            var queryFront = new StringBuilder("select distinct O.id as Id, O.file_uri as fileURI, TS.name as T from (select R1.object_id ");
             var queryMiddle = new StringBuilder(" from (");
-            var queryEnd = new StringBuilder(") X join cubeobjects O on X.object_id = O.id join objecttagrelations R1 on O.id = R1.object_id join date_tags DT on R1.tag_id = DT.id join objecttagrelations R2 on O.id = R2.object_id join time_tags TT on R2.tag_id = TT.id order by DT.name, TT.name;");
+            var queryEnd = new StringBuilder(") X join cubeobjects O on X.object_id = O.id join objecttagrelations R2 on O.id = R2.object_id join timestamp_tags TS on R2.tag_id = TS.id order by TS.name;");
 
             if (filtersList != null)
             {
@@ -125,6 +125,36 @@ namespace ObjectCubeServer.Services
                         : (numberOfFilters == totalNumberOfFilters)
                         ? $" on R1.object_id = R{numberOfFilters}.object_id " // Not first, but nothing more
                         : $" on R1.object_id = R{numberOfFilters}.object_id join ("); // Not first, and something more
+                }
+            }
+
+            string SQLQuery = queryFront.Append(queryMiddle.Append(queryEnd)).ToString();
+            Console.WriteLine(SQLQuery);
+            return SQLQuery;
+        }
+
+        internal string generateSQLQueryForTimeline(IList<ParsedFilter>? filtersList)
+        {
+            numberOfAdditionalFilters = filtersList == null ? 0 : filtersList.Count;
+            totalNumberOfFilters = numberOfAdditionalFilters;
+            numberOfFilters = 0;
+
+            if (totalNumberOfFilters != 1)
+            {
+                // No ordering here, would be very expensive!
+                string BaseQuery = "select O.id as Id, O.file_uri as fileURI from cubeobjects O;";
+                return BaseQuery;
+            }
+
+            var queryFront = new StringBuilder("select O.id as Id, O.file_uri as fileURI, TS1.name as T ");
+            var queryMiddle = new StringBuilder("from cubeobjects O join objecttagrelations R1 on O.id = R1.object_id join timestamp_tags TS1 on R1.tag_id = TS1.id join timestamp_tags TS2 on TS1.name between TS2.name - interval '30 minutes' and TS2.name + interval '30 minutes' join objecttagrelations R2 on TS2.id = R2.tag_id where R2.object_id = ");
+            var queryEnd = new StringBuilder(" order by TS1.name;");
+
+            if (filtersList != null)
+            {
+                foreach (var filter in filtersList)
+                {
+                    queryMiddle.Append($"{ filter.Ids[0] }");
                 }
             }
 
@@ -159,12 +189,12 @@ namespace ObjectCubeServer.Services
                     if (filter.Ids.Count == 1)
                     {
                         query +=
-                            $" select N.object_id from nodes_taggings N where N.parentnode_id = {filter.Ids[0]}) R{numberOfFilters}";
+                            $" select N.object_id from nodes_taggings N where N.node_id = {filter.Ids[0]}) R{numberOfFilters}";
                     }
                     else
                     {
                         query +=
-                            $" select N.object_id from nodes_taggings N where N.parentnode_id in {generateIdList(filter)}) R{numberOfFilters}";
+                            $" select N.object_id from nodes_taggings N where N.node_id in {generateIdList(filter)}) R{numberOfFilters}";
                     }
                     break;
 
@@ -212,6 +242,10 @@ namespace ObjectCubeServer.Services
                 case "timerange":
                     query +=
                         $" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
+                case "timestamprange":
+                    query +=
+                        $" select R.object_id from timestamp_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
             }
 
@@ -280,6 +314,10 @@ namespace ObjectCubeServer.Services
                 case "timerange":
                     query +=
                         $" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
+                case "timestamprange":
+                    query +=
+                        $" select R.object_id from timestamp_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
                     break;
             }
 

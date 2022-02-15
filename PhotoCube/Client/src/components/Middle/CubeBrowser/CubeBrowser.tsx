@@ -44,6 +44,17 @@ export default class CubeBrowser extends React.Component<{
   ) => void;
   onDimensionChanged: (dimName: string, dimension: PickedDimension) => void;
   filters: Filter[];
+    //Props contract:
+    onFileCountChanged: (fileCount: number) => void;
+    previousBrowsingState: BrowsingState | null;
+    onOpenCubeInCardMode: (cubeObjects: CubeObject[]) => void;
+    onOpenCubeInGridMode: (
+        cubeObjects: CubeObject[],
+        projectedFilters: Filter[],
+        isProjected: boolean,
+        cleanFilters: Filter[]
+    ) => void;
+    filters: Filter[];
 }> {
   /* The state desides what is shown in the interface, and is changesd with a this.setState call. */
   state = {
@@ -233,6 +244,65 @@ export default class CubeBrowser extends React.Component<{
         this.camera,
         this.renderer.domElement
       );
+    private subscribeEventHandlers() {
+        //Resize canvas when resizing window:
+        window.addEventListener("resize", this.onBrowserResize);
+        //Add keydown handler:
+        document.addEventListener("keydown", this.onKeyPress);
+        //Mouse move event handler:
+        this.renderer.domElement.addEventListener(
+            "mousemove",
+            this.onMouseMove,
+            false
+        );
+        //If renderer crashes:
+        this.renderer.domElement.addEventListener(
+            "webglcontextlost",
+            this.onWebGLContextLost,
+            false
+        );
+        //Right click handler:
+        //change back to context menu to restore rightclick functionality
+        this.renderer.domElement.addEventListener(
+            //"contextmenu",
+            "dblclick",
+            this.onRightClick,
+            false
+        );
+        //Mouse click handler:
+        this.renderer.domElement.addEventListener(
+            //"contextmenu",
+            "click",
+            this.onMouseClick,
+            false
+        );
+    }
+
+    private unsubscribeEventHandlers() {
+        window.removeEventListener("resize", this.onBrowserResize);
+        document.removeEventListener("keydown", this.onKeyPress);
+        this.renderer.domElement.removeEventListener(
+            "mousemove",
+            this.onMouseMove,
+            false
+        );
+        this.renderer.domElement.removeEventListener(
+            "webglcontextlost",
+            this.onWebGLContextLost,
+            false
+        );
+        //change back to context menu to restore rightclick functionality
+        this.renderer.domElement.removeEventListener(
+            //"contextmenu",
+            "dblclick",
+            this.onRightClick,
+            false
+        );
+        this.renderer.domElement.removeEventListener(
+            "click",
+            this.onMouseClick,
+            false
+        );
     }
   }
 
@@ -414,6 +484,115 @@ export default class CubeBrowser extends React.Component<{
     );
     this.zAxis = newZAxis;
   }
+    /** Handler for right click */
+    //Its actually a doubleclick now. Can be changed back in the eventlistener.
+    private onRightClick = (me: MouseEvent) => {
+        me.preventDefault();
+        // calculate objects intersecting the picking ray:
+        // is updated in function onMouseMove
+        let intersects = this.raycaster.intersectObjects(this.boxMeshes);
+        //Only show contextMenu if on cube object:
+        if (intersects.length > 0) {
+            let conMenu: HTMLElement | null = document.getElementById("conMenu");
+            let x = me.clientX + 20 + "px";
+            let y = me.clientY + 20 + "px";
+            conMenu!.style.top = y;
+            conMenu!.style.left = x;
+            //this.setState({showContextMenu: true});
+            this.contextMenuCubeObjects = intersects[0].object.userData.cubeObjects;
+            //console.log("Userdata:", intersects[0].object.userData);
+            let xDefined: boolean = this.xAxis.TitleString !== "X";
+            let yDefined: boolean = this.yAxis.TitleString !== "Y";
+            let zDefined: boolean = this.zAxis.TitleString !== "Z";
+            let projectedFilter: Filter[] = [];
+            let filtersAreProjected = false;
+            if (xDefined) {
+                filtersAreProjected = true;
+                if (
+                    intersects[0].object.userData.x !== 0 &&
+                    this.xAxis.AxisType === AxisTypeEnum.Tagset
+                ) {
+                    const xfilter: Filter = createFilter(
+                        this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].name,
+                        this.xAxis.Tags[parseInt(intersects[0].object.userData.x) - 1].id,
+                        "tag"
+                    );
+                    projectedFilter.push(xfilter);
+                } else if (this.xAxis.AxisType === AxisTypeEnum.Hierarchy) {
+                    const xfilter: Filter = createFilter(
+                        this.xAxis.Hierarchies[
+                            parseInt(intersects[0].object.userData.x) - 1
+                        ].tag.name,
+                        this.xAxis.Hierarchies[
+                            parseInt(intersects[0].object.userData.x) - 1
+                        ].id,
+                        "node"
+                    );
+                    projectedFilter.push(xfilter);
+                } else if (this.xAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
+                    //what to do in this case, and what is this case??
+                }
+            }
+            if (yDefined) {
+                filtersAreProjected = true;
+                if (
+                    intersects[0].object.userData.y !== 0 &&
+                    this.yAxis.AxisType === AxisTypeEnum.Tagset
+                ) {
+                    const yfilter: Filter = createFilter(
+                        this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].name,
+                        this.yAxis.Tags[parseInt(intersects[0].object.userData.y) - 1].id,
+                        "tag"
+                    );
+                    projectedFilter.push(yfilter);
+                } else if (this.yAxis.AxisType === AxisTypeEnum.Hierarchy) {
+                    const yfilter: Filter = createFilter(
+                        this.yAxis.Hierarchies[
+                            parseInt(intersects[0].object.userData.y) - 1
+                        ].tag.name,
+                        this.yAxis.Hierarchies[
+                            parseInt(intersects[0].object.userData.y) - 1
+                        ].id,
+                        "node"
+                    );
+                    projectedFilter.push(yfilter);
+                } else if (this.yAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
+                    //what to do in this case, and what is this case??
+                }
+            }
+            if (zDefined) {
+                filtersAreProjected = true;
+                if (
+                    intersects[0].object.userData.z !== 0 &&
+                    this.zAxis.AxisType === AxisTypeEnum.Tagset
+                ) {
+                    const zfilter: Filter = createFilter(
+                        this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].name,
+                        this.zAxis.Tags[parseInt(intersects[0].object.userData.z) - 1].id,
+                        "tag"
+                    );
+                    projectedFilter.push(zfilter);
+                } else if (this.zAxis.AxisType === AxisTypeEnum.Hierarchy) {
+                    const zfilter: Filter = createFilter(
+                        this.zAxis.Hierarchies[
+                            parseInt(intersects[0].object.userData.z) - 1
+                        ].tag.name,
+                        this.zAxis.Hierarchies[
+                            parseInt(intersects[0].object.userData.z) - 1
+                        ].id,
+                        "node"
+                    );
+                    projectedFilter.push(zfilter);
+                } else if (this.zAxis.AxisType === AxisTypeEnum.HierarchyLeaf) {
+                    //what to do in this case, and what is this case??
+                }
+            }
+            this.setState({ projectedFilters: projectedFilter })
+            this.setState({isProjected : filtersAreProjected})
+        } 
+        this.onOpenCubeInGridMode();
+        return false;
+    };
 
   /* EVENT HANDLERS: */
   /** Handler for mouse left click. */
@@ -521,6 +700,23 @@ export default class CubeBrowser extends React.Component<{
       conMenu!.style.left = x;
       this.setState({ showContextMenu: true });
       this.contextMenuCubeObjects = intersects[0].object.userData.cubeObjects;
+    /**
+     * Handler to rightclick - Open cube in grid mode.
+     */
+    private onOpenCubeInGridMode() {
+        const cleanFilters: Filter[] = this.props.filters.filter(
+            (f) =>
+                f.id !== this.xAxis.Id &&
+                f.id !== this.yAxis.Id &&
+                f.id !== this.zAxis.Id
+        );
+
+        this.props.onOpenCubeInGridMode(
+            this.contextMenuCubeObjects,
+            this.state.projectedFilters,
+            this.state.isProjected,
+            cleanFilters,
+        );
     }
     return false;
   };

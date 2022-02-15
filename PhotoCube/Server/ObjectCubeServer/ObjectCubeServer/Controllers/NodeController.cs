@@ -31,10 +31,26 @@ namespace ObjectCubeServer.Controllers
             
             return Ok(allNodes);
         }
+        
+        [HttpGet("{id:int}", Name = "GetNodeById")]
+        public async Task<ActionResult<PublicNodeDetails>> GetNodeById(int id)
+        {
+            PublicNodeDetails nodeFound = await coContext.Nodes
+                .Where(n => n.Id == id)
+                .Include(n => n.Tag)
+                .Select(n => new PublicNodeDetails(n.Id,((AlphanumericalTag)n.Tag).Name, n.TagId,n.HierarchyId))
+                .FirstOrDefaultAsync();
+            
+            if (nodeFound == null) { return NotFound(); }
+            
+            nodeFound.ParentId = await GetParentNodeId(nodeFound.Id);
+
+            return Ok(nodeFound);
+        }
 
         // GET: api/Node/5
-        [HttpGet("{id:int}", Name = "GetNodes")]
-        public async Task<ActionResult<Node>> Get(int id)
+        [HttpGet("{id:int}/tree", Name = "GetNodeTree")]
+        public async Task<ActionResult<Node>> GetNodeByIdTree(int id)
         {
             Node nodeFound = await coContext.Nodes
                 .Where(n => n.Id == id)
@@ -52,7 +68,7 @@ namespace ObjectCubeServer.Controllers
 
         // GET: api/Node/name=wood
         [HttpGet("name={tag}")]
-        public async Task<ActionResult<IEnumerable<Node>>> GetNodeByName(string tag)
+        public async Task<ActionResult<IEnumerable<PublicNode>>> GetNodeByName(string tag)
         {
             List<Node> nodesFound = await coContext.Nodes
                     .Include(n => n.Tag)
@@ -99,6 +115,19 @@ namespace ObjectCubeServer.Controllers
         }
 
         #region HelperMethods:
+        
+        private async Task<int?> GetParentNodeId(int childId)
+        {
+            int parentId = await coContext.Nodes
+                .Where(n => n.Children.Any(c => c.Id == childId))
+                .Select(n => n.Id)
+                .FirstOrDefaultAsync();
+
+            if(parentId == 0) return null;
+            
+            return parentId;
+        }
+
         private async Task<PublicNode> GetParentNode(Node child)
         {
             PublicNode parentNode = await coContext.Nodes

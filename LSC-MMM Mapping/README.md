@@ -4,7 +4,7 @@ This directory contains Java programs, that transform Lifelog Search Challenge (
 
 The input files to the program are deleted from this repository based on the LSC data usage terms.
 
-To run this program, you need have a file named `config.properties` under `src` directory. The file should have the absolute filepath for the input files (mostly from LSC data set) in `key = filepath` format. No quotation marks needed for key and filepath.
+To run this program, you need have a file named `config.properties` under `src/main/resources` directory. The file should have the absolute filepath for the input files (mostly from LSC data set) in `key = filepath` format. No quotation marks needed for key and filepath.
 For this version, the keys are:
  - LSCVisualConcept
  - LSCMetadata
@@ -16,5 +16,6 @@ For this version, the keys are:
  - LSCImageTagsOutput
  - UniqueTagHierarchyOutput
  - OutputFolder
+ - OptionalExcludeFile
  
-To parse and build json, we use the gson library. Read more and find link to download here: https://github.com/google/gson
+To parse and build json, we use the gson library. Read more and find info here: https://github.com/google/gson
