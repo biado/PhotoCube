@@ -75,7 +75,9 @@ const BrowserNodeWithChildren =
             {childrenShown ? 
             <ul className="hierarchy children">
                 {(childNodes !== null && childNodes!.length > 0) ? childNodes!.map((node: Node) => 
-                    <BrowserNodeWithChildren parent={node} showChildren={false} onSelect={props.onSelect}/>)
+                    //key={node.id} should be specifed https://reactjs.org/docs/lists-and-keys.html#keys
+                    <BrowserNodeWithChildren key={node.id} parent={node} showChildren={false} onSelect={props.onSelect}/>)
+                    // <BrowserNodeWithChildren parent={node} showChildren={false} onSelect={props.onSelect}/>)
                     : <li key={0}><button disabled={true}>No further children</button></li>}
             </ul> : null }
         </div>
@@ -111,8 +113,8 @@ export const HierarchyBrowser =
         disableButton(props.activeFilters.some(af => af.id === node.id));
     }
 
-    const onButtonClick = () => { //""+ parse int to string
-        const filter: Filter = createFilter(""+selectedNode!.name, selectedNode!.id, "node");
+    const onButtonClick = () => {
+        const filter: Filter = createFilter(selectedNode!.name, selectedNode!.id, "node");
         if (!props.activeFilters.some(af => af.id === filter.id)) {
             props.onFiltersChanged(filter);
             disableButton(true);
@@ -131,7 +133,9 @@ export const HierarchyBrowser =
                 </li> 
                 : <li key={0} className="hierarchy node"><button disabled={true}>No further parent</button></li>}
                 <ul>
-                    <BrowserNodeWithChildren parent={props.startNode} showChildren={true} onSelect={onSelect}/> 
+                    {/*key={node.id} should be specifed https://reactjs.org/docs/lists-and-keys.html#keys */}
+                    <BrowserNodeWithChildren key={props.startNode.id} parent={props.startNode} showChildren={true} onSelect={onSelect}/> 
+                    {/* <BrowserNodeWithChildren parent={props.startNode} showChildren={true} onSelect={onSelect}/>  */}
                 </ul>
             </ul>
             <button className="add button hierarchy" disabled={buttonDisabled} onClick={() => onButtonClick()}>Add filter</button>
@@ -143,8 +147,8 @@ export const HierarchyBrowser =
 async function fetchChildNodes(nodeId: number){
     const response = await Fetcher.FetchChildNodes(nodeId);
     let children = [];
-        if (response.length > 0) { //""+ parse int to string
-            children = response.map((node: Node) => { return { id: node.id, name: ""+node.name}});
+        if (response.length > 0) {
+            children = response.map((node: Node) => { return { id: node.id, name: node.name}});
         }
 
     return children;

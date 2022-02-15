@@ -75,11 +75,13 @@ namespace ObjectCubeServer.Controllers
         public async Task<ActionResult<IEnumerable<Tag>>> GetTagByName(string name)
         {
             List<Tag> tagsFound = await coContext.Tags
+                    //.Where(t => t.GetTagName().ToLower().StartsWith(name.ToLower())) //*propably doesnt work
                     .Where(t => ((AlphanumericalTag)t).Name.ToLower().StartsWith(name.ToLower()))
                     .ToListAsync();
             
             if (tagsFound == null) return NotFound();
-            var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name, tag.TagsetId)).ToList();
+            var result = tagsFound.Select(tag => new PublicTag(tag.Id, tag.GetTagName(), tag.TagsetId)).ToList(); //*this should work for all tag types
+            //var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name, tag.TagsetId)).ToList();
             //var result = tagsFound.Select(tag => new PublicTag(tag.Id, ((AlphanumericalTag) tag).Name)).ToList();
             
             return Ok(result);

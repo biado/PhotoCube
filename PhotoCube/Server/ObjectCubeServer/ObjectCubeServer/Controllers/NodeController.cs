@@ -38,7 +38,8 @@ namespace ObjectCubeServer.Controllers
             PublicNodeDetails nodeFound = await coContext.Nodes
                 .Where(n => n.Id == id)
                 .Include(n => n.Tag)
-                .Select(n => new PublicNodeDetails(n.Id,((AlphanumericalTag)n.Tag).Name, n.TagId,n.HierarchyId))
+                .Select(n => new PublicNodeDetails(n.Id, n.Tag.GetTagName(), n.TagId,n.HierarchyId))
+                //.Select(n => new PublicNodeDetails(n.Id,((AlphanumericalTag)n.Tag).Name, n.TagId,n.HierarchyId))
                 .FirstOrDefaultAsync();
             
             if (nodeFound == null) { return NotFound(); }
@@ -61,7 +62,8 @@ namespace ObjectCubeServer.Controllers
             
             if (nodeFound == null) { return NotFound(); }
 
-            nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+            nodeFound.Children.OrderBy(n => n.Tag.GetTagName());
+            //nodeFound.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
             nodeFound = await RecursiveAddChildrenAndTags(nodeFound);
             return Ok(nodeFound);
         }
@@ -72,6 +74,7 @@ namespace ObjectCubeServer.Controllers
         {
             List<Node> nodesFound = await coContext.Nodes
                     .Include(n => n.Tag)
+                    //*Here it does not work with GetTagName()
                     .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tag.ToLower()))
                     .ToListAsync();
             
@@ -80,7 +83,8 @@ namespace ObjectCubeServer.Controllers
             var result = new List<PublicNode>();
             foreach (Node node in nodesFound)
             {
-                var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
+                var publicNode = new PublicNode(node.Id, node.Tag.GetTagName())
+                //var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
                 {
                     ParentNode = await GetParentNode(node)
                 };
@@ -108,7 +112,8 @@ namespace ObjectCubeServer.Controllers
         {
             IEnumerable<PublicNode> childNodes = await coContext.Nodes.Include(n => n.Children)
                 .Where(n => n.Id == nodeId)
-                .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag) cn.Tag).Name)))
+                .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, cn.Tag.GetTagName())))
+                //.Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag) cn.Tag).Name)))
                 .FirstOrDefaultAsync();
 
             return Ok(childNodes);
@@ -133,7 +138,8 @@ namespace ObjectCubeServer.Controllers
             PublicNode parentNode = await coContext.Nodes
                 .Where(n => n.Children.Contains(child))
                 .Include(n => n.Tag)
-                .Select(n => new PublicNode(n.Id,((AlphanumericalTag)n.Tag).Name))
+                .Select(n => new PublicNode(n.Id,n.Tag.GetTagName()))
+                //.Select(n => new PublicNode(n.Id,((AlphanumericalTag)n.Tag).Name))
                 .FirstOrDefaultAsync();
             
             return parentNode;
@@ -153,7 +159,8 @@ namespace ObjectCubeServer.Controllers
                         .ThenInclude(cn => cn.Tag)
                     .FirstOrDefaultAsync();
                 
-                childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+                childNodeWithTagAndChildren.Children.OrderBy(n => n.Tag.GetTagName());
+                //childNodeWithTagAndChildren.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = await RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }

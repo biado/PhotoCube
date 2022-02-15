@@ -71,7 +71,8 @@ namespace ObjectCubeServer.Controllers
                         .ThenInclude(cn => cn.Tag)
                     .FirstOrDefault();
                 
-                childNodeWithTagAndChildren?.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
+                childNodeWithTagAndChildren?.Children.OrderBy(n => n.Tag.GetTagName());
+                //childNodeWithTagAndChildren?.Children.OrderBy(n => ((AlphanumericalTag)n.Tag).Name);
                 childNodeWithTagAndChildren = RecursiveAddChildrenAndTags(childNodeWithTagAndChildren);
                 newChildNodes.Add(childNodeWithTagAndChildren);
             }
