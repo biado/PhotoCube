@@ -78,6 +78,7 @@ namespace ObjectCubeServer.Models.DomainClasses
             // Exclude tag that has same name as tagset (temporary fix - ideally need to fix the InsertSQLGenerator)
             var tags = tagset?.Tags.Where(t => !t.GetTagName().Equals(tagset.Name)).OrderBy(t => t.GetTagName()).ToList();
 
+            //this hack works on current db scheme. Optimally tagset should have a tagtype reference
             if(tags.FirstOrDefault().TagTypeId==5){ //numerical tag, sort as numbers
                 tags = tags.OrderBy(t => int.Parse(t.GetTagName())).ToList();
             }
