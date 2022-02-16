@@ -46,7 +46,6 @@ namespace ConsoleAppForInteractingWithDatabase
         private Dictionary<string, string> datatypes;
         private JSNode root;
 
-        private int missingfiles;
         private int missingThumbnail;
 
         public DatasetInsertSQLGenerator(int numOfImages)
@@ -109,7 +108,6 @@ namespace ConsoleAppForInteractingWithDatabase
                         {
                             //Don't add it again.
                             Console.WriteLine("Image " + filename + " is already in the database");
-                            missingfiles++;
                         }
 
                         String thumbnail = "";
@@ -188,7 +186,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"Time", "time"},
                 {"Date", "date"},
                 {"Timezone", "alphanumerical"},
-                {"Elevation", "integer"},
+                {"Elevation", "numerical"},
                 {"Speed", "numerical"},
                 {"Heart", "numerical"},
                 {"Calories", "numerical"},
@@ -327,6 +325,7 @@ namespace ConsoleAppForInteractingWithDatabase
                             {
                                 //Checking if tag exists, and creates it if it doesn't exist.
                                 Tag tag;
+                                //Console.WriteLine(tagName);
                                 string tagtype = datatypes[tagsetName];
                                 Dictionary<int, Tag> tagList;
                                 if (!tags.ContainsKey(tagName))
@@ -545,7 +544,6 @@ namespace ConsoleAppForInteractingWithDatabase
         private void WriteInsertStatementsToFile()
         {
             Console.WriteLine(SQLPath);
-            Console.WriteLine("duplicate sptify uri's "+missingfiles);
             Console.WriteLine("missing thumbnails "+missingThumbnail);
             // insert into [tableName]
             // (column1, column2, ..)
