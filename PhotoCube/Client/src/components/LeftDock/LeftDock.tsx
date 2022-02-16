@@ -6,10 +6,8 @@ import { DateTagDropdown } from './DateFilter';
 import DayOfWeekFilter from './DayOfWeekFilter';
 import { TagSearcher } from './TagFilter';
 //import { TimeFilter } from './TimeFilter';
-//import { Slider } from './Slider';
 import { SpotifyWidget } from './SpotifyWidget'
-import { Slider } from './Slider';
-import { Operation } from './Operation';
+import { Operation, Slider } from './Slider';
 
 /**
  * LeftDock is the left portion of the interface.
@@ -48,6 +46,8 @@ export default class LeftDock extends Component<{
                 <div className={visibility}>
                     <h4 className="Header">Track duration:</h4>
                     <Slider tagsetName={"sp_track_duration"} rangeDirection={Operation.LessThanOrEqual} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
+                    <h4 className="Header">Track popularity:</h4>
+                    <Slider tagsetName={"sp_track_popularity"} rangeDirection={Operation.GreaterThanOrEqual} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
                 </div>
                 <div className={visibility}>
                     <h4 className="Header">Release date filter:</h4>
