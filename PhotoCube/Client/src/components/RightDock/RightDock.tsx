@@ -6,6 +6,7 @@ import Dimensions from './Dimensions';
 import PickedDimension from './PickedDimension';
 import { FilterList } from './FilterList';
 import { Filter } from '../Filter';
+import { HierarchyExplorer } from '../Middle/BottomDock/HierarchyFilter';
 
 /**
  * RightDock is the right portion of the interface.
@@ -13,9 +14,10 @@ import { Filter } from '../Filter';
  */
 export default class RightDock extends React.Component<{
         //Props contract:
-        onDimensionChanged:(dimName: string, dimension:PickedDimension) => void,
         onBrowsingModeChanged:(browsingmode: BrowsingModes) => void,
+        onDimensionChanged:(dimName: string, dimension:PickedDimension) => void,
         onClearAxis:(axisName: string) => void,
+        onFiltersChanged : (filters: Filter) => void,
         hideControls: boolean,
         activeFilters: Filter[],
         onFilterRemoved: (filterId: number) => void
@@ -26,12 +28,17 @@ export default class RightDock extends React.Component<{
 
     render(){
         let visibility: string = this.props.hideControls ? "hide" : "";
+        let fileCountId: string = visibility + " fileCount"
         return(
             <div id="RightDock">
-                <FileCount className={visibility} ref={this.fileCount}/>
-                <BrowsingModeChanger ref={this.browsingModeChanger} onBrowsingModeChanged={this.props.onBrowsingModeChanged} />
-                <Dimensions className={visibility} activeFilters={this.props.activeFilters} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/>
-                <FilterList className ={visibility} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved} />
+                {/* <BrowsingModeChanger ref={this.browsingModeChanger} onBrowsingModeChanged={this.props.onBrowsingModeChanged} /> */}
+                {/* <Dimensions className={visibility} activeFilters={this.props.activeFilters} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/> */}
+                {/* <FilterList className ={visibility} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved} /> */}
+                <div className="hierarchy explorer">
+                    <h4 className="Header">Hierarchy filter:</h4>
+                    <HierarchyExplorer activeFilters={this.props.activeFilters.filter(af => af.type === 'hierarchy')} onFiltersChanged={this.props.onFiltersChanged}/>
+                </div>
+                <FileCount className={fileCountId} ref={this.fileCount}/>
             </div>
         );
     }

@@ -42,3 +42,11 @@
   color: rgb(200, 200, 200);
   align-self: center;
 }
+#node #clear-icon {
+  color: rgb(0, 0, 0);
+}
+
+#node {
+  background-color: rgb(197, 188, 162);
+  color: rgb(0, 0, 0);
+}

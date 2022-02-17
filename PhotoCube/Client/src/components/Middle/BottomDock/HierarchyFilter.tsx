@@ -40,7 +40,9 @@ const SearchResults = (props: {
  * Component for browsing hierarchies and adding filters.
  * Consists of a search field, a search results component and the hierarchy browser.
  */
-export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[]}) => {
+export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => void, 
+                                                            activeFilters: Filter[],
+                                                        }) => {
     const [input, updateInput] = useState<string>("");
     const [options, updateOptions] = useState<Option[]>([]);
     const [selectedNode, updateSelection] = useState<Node|null>(null);
@@ -70,11 +72,26 @@ export const HierarchyExplorer = (props: {onFiltersChanged: (filter: Filter) => 
         updateOptions(options);
     }
 
+    async function onEnterPressed(e: React.KeyboardEvent) {
+        if(e.charCode === 13) {
+            e.preventDefault();
+            const response = await Fetcher.FetchNodeByName(input);
+            const options = response.map((node: Node) => ({
+                NodeId: node.id,
+                NodeName: node.name,
+                ParentnodeName: node.parentNode !== null ? node.parentNode!.name : null
+            }) as Option);
+            const sorted = options.sort((a: Option,b: Option) => (a.NodeName > b.NodeName) ? 1 : ((b.NodeName > a.NodeName) ? -1 : 0))
+            console.log(options)
+            updateOptions(options); // a way to avoide duplicate code? (onEnterPressed & onSearch)
+        }
+    }
+
     return (
         <div className="Filter">
             <form method="get">
                 <input className="search field" type="text" placeholder="e.g. woman, coffee" 
-                    onChange={e => onInputGiven(e.target.value)}/>
+                    onChange={e => onInputGiven(e.target.value)} onKeyPress={(e) => onEnterPressed(e)}/>
             </form>
             <button disabled={input === ""} className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
             {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }

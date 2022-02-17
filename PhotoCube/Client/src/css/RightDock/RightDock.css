@@ -18,3 +18,7 @@
 .Content {
   margin: 3%;
 }
+
+.fileCount {
+  visibility: hidden;
+}

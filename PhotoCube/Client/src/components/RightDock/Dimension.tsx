@@ -20,6 +20,19 @@ export const FilterDropdown =
     }, [props.activeFilters, props.cleared])
 
     const createDimension = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if(e.currentTarget.value != "") {
+            updateSelection(e.currentTarget.value);
+            const filter: Filter = JSON.parse(e.currentTarget.value);
+            const dimension = ({
+                id: filter.id,
+                name: filter.name,
+                type: filter.type
+            }) as PickedDimension;
+            props.onDimensionPicked(dimension);
+        } // subject to further optimisation
+        // else {
+            
+        // }
         updateSelection(e.currentTarget.value);
         const filter: Filter = JSON.parse(e.currentTarget.value);
         const dimension = ({
@@ -71,7 +84,8 @@ class Dimension extends Component<{
                     <FilterDropdown 
                         cleared={this.state.DimensionName === null} 
                         activeFilters={this.props.activeFilters} 
-                        onDimensionPicked={this.dimensionPicked}/>
+                        onDimensionPicked={this.dimensionPicked}
+                        />
                     <button onClick={() => this.onClearAxis(this.props.xyz)}>
                         Clear
                     </button>
@@ -94,6 +108,7 @@ class Dimension extends Component<{
             DimensionId:    dimension.id, 
             DimensionName:  dimension.name
         });
+        console.log(dimension.name)
         this.props.onDimensionChanged(this.props.xyz, dimension);
     }
 

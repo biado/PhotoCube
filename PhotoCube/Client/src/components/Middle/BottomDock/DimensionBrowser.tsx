@@ -11,10 +11,10 @@ import '../../../css/BottomDock/DimensionBrowser.css'
 export const DimensionBrowser = (props: {onFiltersChanged: (filter: Filter) => void, activeFilters: Filter[] }) => {
     return (
         <div id="dimension-browser">
-            <div className="tagset dropdown">
+            {/* <div className="tagset dropdown">
                 <h4 className="Header">Tagset filter:</h4>
                 <TagsetDropdown activeFilters={props.activeFilters.filter(af => af.type === "tagset")} onFiltersChanged={props.onFiltersChanged}/>
-            </div>
+            </div> */}
             <div className="hierarchy explorer">
                 <h4 className="Header">Hierarchy filter:</h4>
                 <HierarchyExplorer activeFilters={props.activeFilters.filter(af => af.type === 'hierarchy')} onFiltersChanged={props.onFiltersChanged}/>

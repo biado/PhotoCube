@@ -62,6 +62,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
           hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
           onFiltersChanged={this.onFiltersChanged}
           activeFilters={this.state.filters}
+          onClearAxis={this.onClearAxis}
+          onDimensionChanged={this.onDimensionChanged}
           onFilterReplaced={this.onFilterReplaced}
           onFilterRemoved={this.onFilterRemoved}
           onFilterReplacedByType={this.onFilterReplacedByType}
@@ -76,6 +78,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
           </div>
           <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
             ref={this.rightDock}
+            onFiltersChanged={this.onFiltersChanged}
             onDimensionChanged={this.onDimensionChanged} 
             onBrowsingModeChanged={this.onBrowsingModeChanged}
             onClearAxis={this.onClearAxis}
