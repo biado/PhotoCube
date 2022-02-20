@@ -4,6 +4,6 @@
  */
  export interface Node {
     id: number,
-    name: string, //| number, //both alpha- and numerical tags
+    name: string, //both alpha- and numerical tags have a getTagName() that returns a string
     parentNode: Node|null
 }

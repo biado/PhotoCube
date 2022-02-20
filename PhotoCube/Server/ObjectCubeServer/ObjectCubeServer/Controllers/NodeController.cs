@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses.Tag_Types;
 using ObjectCubeServer.Models.PublicClasses;
+using System;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -74,11 +75,18 @@ namespace ObjectCubeServer.Controllers
         {
             List<Node> nodesFound = await coContext.Nodes
                     .Include(n => n.Tag)
-                    //*Here it does not work with GetTagName()
+                    //*Here it does not work with GetTagName() because the body of the lambda cannot be translated into SQL
                     .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tag.ToLower()))
                     .ToListAsync();
-            
-            if (nodesFound == null) return NotFound();
+
+            // List<Node> nodesFound = coContext.Nodes //seems slower?
+            //         .Include(n => n.Tag)
+            //         //*Here it does not work with GetTagName() because the body of the lambda cannot be translated into SQL
+            //         .AsEnumerable()
+            //         .Where(n => n.Tag.GetTagName().ToLower().StartsWith(tag.ToLower()))
+            //         .ToList();
+
+            if (nodesFound == null) {Console.WriteLine(nodesFound); return NotFound(); }
             
             var result = new List<PublicNode>();
             foreach (Node node in nodesFound)
