@@ -22,7 +22,8 @@ export const TagsetDropdown = (props: {onFiltersChanged: (filter: Filter) => voi
     async function fetchTagsets () {
         const response = await Fetcher.FetchTagsets();
         console.log("from tagsetfilter", response)
-        const tagsets = response.map((ts: Tagset) => {return {id: ts.id, name: ts.name }});
+        const tagsets = response.map((ts: Tagset) => {return {id: ts.id, name: ts.name }})
+                                .filter((ts: Tagset) => {return !ts.name.includes('thumbnail')})
         setDropdownOptions(tagsets.map((ts: Tagset) => {return {value: ts.id.toString(), label: ts.name}}));
     }
 
