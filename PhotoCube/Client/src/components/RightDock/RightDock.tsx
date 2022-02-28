@@ -6,6 +6,7 @@ import Dimensions from './Dimensions';
 import PickedDimension from './PickedDimension';
 import { FilterList } from './FilterList';
 import { Filter } from '../Filter';
+import { SpotifyWidget } from '../LeftDock/SpotifyWidget';
 
 /**
  * RightDock is the right portion of the interface.
@@ -20,6 +21,7 @@ export default class RightDock extends React.Component<{
         hideCount: boolean,
         activeFilters: Filter[],
         onFilterRemoved: (filterId: number) => void
+        // spotifyURI: String | null
     }>{
 
     private fileCount = React.createRef<FileCount>();
@@ -31,6 +33,9 @@ export default class RightDock extends React.Component<{
         return(
             <div id="RightDock">
                 <FileCount className={countVisibility} ref={this.fileCount}/>
+                {/* <div className={"spotify_widget"}>
+                    <SpotifyWidget spotifyURI={this.props.spotifyURI}/>
+                </div> */}
                 <BrowsingModeChanger ref={this.browsingModeChanger} onBrowsingModeChanged={this.props.onBrowsingModeChanged} />
                 <Dimensions className={visibility} activeFilters={this.props.activeFilters} onDimensionChanged={this.onDimensionChanged} onClearAxis={this.onClearAxis}/>
                 <FilterList className ={visibility} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved} />

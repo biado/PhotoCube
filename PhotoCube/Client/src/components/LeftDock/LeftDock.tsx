@@ -40,13 +40,13 @@ export default class LeftDock extends Component<{
         return (
             <div id={"LeftDock"} >
                 <div className={"spotify_widget"}>
-                    <h4 className="Header">Spotify widget:</h4>
+                    {/* <h4 className="Header">Spotify widget:</h4> */}
                     <SpotifyWidget spotifyURI={this.props.spotifyURI}/>
                 </div>
                 <div className={visibility}>
-                    <h4 className="Header">Track duration:</h4>
+                    {/* <h4 className="Header">Track duration:</h4> */}
                     <Slider tagsetName={"sp_track_duration"} rangeDirection={Operation.LessThanOrEqual} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
-                    <h4 className="Header">Track popularity:</h4>
+                    {/* <h4 className="Header">Track popularity:</h4> */}
                     <Slider tagsetName={"sp_track_popularity"} rangeDirection={Operation.GreaterThanOrEqual} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
                 </div>
                 <div className={visibility}>

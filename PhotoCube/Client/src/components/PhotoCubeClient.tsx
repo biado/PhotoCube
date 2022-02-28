@@ -98,7 +98,9 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
             onBrowsingModeChanged={this.onBrowsingModeChanged}
             onClearAxis={this.onClearAxis}
             activeFilters={this.state.filters}
-            onFilterRemoved={this.onFilterRemoved}/>
+            onFilterRemoved={this.onFilterRemoved}
+            // spotifyURI={this.state.spotifyURI}
+            />
         </div>
     );
   }

@@ -119,7 +119,8 @@ const onClear = () => {
 
   return (
     <div>
-      {props.tagsetName==="sp_track_duration" || props.tagsetName==="sp_track_popularity"? <span/>:<h5>{props.tagsetName}</h5>}
+      {/* {props.tagsetName==="sp_track_duration" || props.tagsetName==="sp_track_popularity"? <span/>:<h5>{props.tagsetName}</h5>} */}
+      <h5>{props.tagsetName}</h5>
       <input onChange={event => updateValue(event.currentTarget.valueAsNumber)}
       onMouseUp={ event => updateFilterValue(event.currentTarget.valueAsNumber)}
       type="range" min={min} max={max} value={displayValue}/>

@@ -22,7 +22,7 @@ class FileCount extends React.Component<{
                 <div className="Content">
                     <p>Showing: </p>
                     <p>{this.state.fileCount}</p>
-                    <p> photos</p>
+                    <p>{this.state.fileCount==1? " cube" : " cubes"}</p>
                 </div>
             </div>
         );

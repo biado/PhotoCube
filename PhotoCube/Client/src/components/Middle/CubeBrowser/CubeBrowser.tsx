@@ -403,15 +403,13 @@ export default class CubeBrowser extends React.Component<{
             if (intersects.length > 0) {
                 console.log(intersects[0].object.userData.cubeObjects[0])
                 let spotifyUri = intersects[0].object.userData.cubeObjects[0].fileURI
-                //play first song in cude
+                //play first song in cube
                 this.props.onSelectTrack(spotifyUri)
                 //window.open("https://open.spotify.com/track/"+spotifyUri)
-
             } 
             // else {
             //     alert("no cube to click here")
             // }
-
         }
     };
 
