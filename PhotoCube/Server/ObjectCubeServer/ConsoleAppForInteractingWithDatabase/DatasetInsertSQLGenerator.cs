@@ -118,15 +118,14 @@ namespace ConsoleAppForInteractingWithDatabase
                             thumbnail = "missing"; //what? null place holder, empty string
                             missingThumbnail ++;    
                         }
-                        int colorindex = Array.IndexOf(split, "color") + 1; 
-                        string color = split[colorindex]+".jpg";
+                        //int colorindex = Array.IndexOf(split, "color") + 1; 
+                        //string color = split[colorindex]+".jpg";
                         //string thumbnailURI = Path.Combine("Thumbnails", thumbnail);
 
                         CubeObject cubeObject = DomainClassFactory.NewCubeObject(
                             filename,
                             FileType.Photo,
-                            thumbnail,
-                            color
+                            thumbnail
                             );
                             //thumbnailURI);
                         cubeObjects[filename] = cubeObject;
@@ -565,9 +564,8 @@ namespace ConsoleAppForInteractingWithDatabase
             //Insert all CubeObjects
             foreach (var co in cubeObjects.Values)
             {
-                string insertStatement = "INSERT INTO cubeobjects(id, file_uri, file_type, thumbnail_uri, color) VALUES(" +
-                                         co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI +
-                                         "','" + co.Color + "'); \n";
+                string insertStatement = "INSERT INTO cubeobjects(id, file_uri, file_type, thumbnail_uri) VALUES(" +
+                                         co.Id + ",'" + co.FileURI + "'," + (int) co.FileType + ",'" + co.ThumbnailURI + "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
                 insertCount++;
                 if (insertCount % 100 == 0 && mssqlFormat)

@@ -407,9 +407,9 @@ export default class CubeBrowser extends React.Component<{
                 this.props.onSelectTrack(spotifyUri)
                 //window.open("https://open.spotify.com/track/"+spotifyUri)
             } 
-            // else {
-            //     alert("no cube to click here")
-            // }
+            else {
+                alert("no cube to click here")
+            }
         }
     };
 
@@ -880,7 +880,8 @@ export default class CubeBrowser extends React.Component<{
             zDefined ? this.zAxis : null,
             filters
         );
-        let useColor : boolean = ICells.length > 1500
+        //use color as thumbnail for big browsing states
+        let useColor : boolean = ICells.length > 1000
 
         ICells.forEach((c: ICell) =>
             newCells.push(

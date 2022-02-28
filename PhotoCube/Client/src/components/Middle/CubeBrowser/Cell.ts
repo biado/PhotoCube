@@ -66,7 +66,43 @@ export default class Cell{
             let spotifyURI: string = this.CubeObjects[0].fileURI
             let imgsrc :string = "";
             if(useColor){
-                imgsrc = "/colors/"+this.CubeObjects[0].color
+                // coloring based on filecount (power of 2)
+                if (this.count == 1){
+                    imgsrc = "/shades/00ff00.png"
+                }
+                if (this.count > 1 && this.count <= 2){
+                    imgsrc = "/shades/00ff80.png"
+                }
+                if (this.count > 2 && this.count <= 4){
+                    imgsrc = "/shades/00ffbf.png"
+                }
+                if (this.count > 4 && this.count <= 8){
+                    imgsrc = "/shades/00ffff.png"
+                }
+                if (this.count > 8 && this.count <= 16){
+                    imgsrc = "/shades/00bfff.png"
+                }
+                if (this.count > 16 && this.count <= 32){
+                    imgsrc = "/shades/0080ff.png"
+                }
+                if (this.count > 32 && this.count <= 64){
+                    imgsrc = "/shades/0040ff.png"
+                }
+                if (this.count > 64 && this.count <= 128){
+                    imgsrc = "/shades/0000ff.png"
+                }
+                if (this.count > 128 && this.count <= 256){
+                    imgsrc = "/shades/4000ff.png"
+                }
+                if (this.count > 256 && this.count <= 512){
+                    imgsrc = "/shades/8000ff.png"
+                }
+                if (this.count > 512 && this.count <= 1024){
+                    imgsrc = "/shades/bf00ff.png"
+                }
+                if (this.count > 1024){
+                    imgsrc = "/shades/ff00ff.png"
+                }
             }else{
                 imgsrc = this.CubeObjects[0].thumbnailURI
                 if (imgsrc.length==24) {
@@ -74,7 +110,7 @@ export default class Cell{
                 } else if (imgsrc.length>24) {
                     imgsrc = "https://i.scdn.co/image/"+imgsrc // odd path
                 } else if (imgsrc.length<24) {
-                    imgsrc = "/colors/"+this.CubeObjects[0].color // missing thumbnail - using color
+                    imgsrc = "/colors/"+"download.jpg" //*missing thumbnail - using replacement cat
                 }
             }
             this.threeObject = addCubeCallback(imgsrc, {x: this.x, y: this.y, z:this.z});

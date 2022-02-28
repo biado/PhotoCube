@@ -19,7 +19,7 @@ namespace ObjectCubeServer.Models.HelperClasses
         private static int tagtypeId = 0;
 
         //public static CubeObject NewCubeObject(string fileURI, FileType fileType, string thumbnailURI)
-        public static CubeObject NewCubeObject(string fileURI, FileType fileType, string thumbnailURI, string color)
+        public static CubeObject NewCubeObject(string fileURI, FileType fileType, string thumbnailURI)
         {
             if (fileURI == null) { throw new Exception("Given fileURI was null."); }
 
@@ -30,7 +30,6 @@ namespace ObjectCubeServer.Models.HelperClasses
                 FileURI = fileURI,
                 FileType = fileType,
                 ThumbnailURI =  thumbnailURI,
-                Color = color
             };
         }
 
