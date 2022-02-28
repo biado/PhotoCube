@@ -190,12 +190,12 @@ namespace ObjectCubeServer.Services
                     if (filter.Ids.Count == 1)
                     {
                         query +=
-                            $" select N.object_id from nodes_taggings N where N.node_id = {filter.Ids[0]}) R{numberOfFilters}";
+                            $" select N.object_id from nodes_taggings N where N.parentnode_id = {filter.Ids[0]}) R{numberOfFilters}";
                     }
                     else
                     {
                         query +=
-                            $" select N.object_id from nodes_taggings N where N.node_id in {generateIdList(filter)}) R{numberOfFilters}";
+                            $" select N.object_id from nodes_taggings N where N.parentnode_id in {generateIdList(filter)}) R{numberOfFilters}";
                     }
                     break;
 
@@ -262,12 +262,12 @@ namespace ObjectCubeServer.Services
                     if (filter.Ids.Count == 1)
                     {
                         query +=
-                            $" select N.object_id from nodes_taggings N where N.node_id = {filter.Ids[0]}) R{numberOfFilters}";
+                            $" select N.object_id from nodes_taggings N where N.parentnode_id = {filter.Ids[0]}) R{numberOfFilters}";
                     }
                     else
                     {
                         query +=
-                            $" select N.object_id from nodes_taggings N where N.node_id in {generateIdList(filter)}) R{numberOfFilters}";
+                            $" select N.object_id from nodes_taggings N where N.parentnode_id in {generateIdList(filter)}) R{numberOfFilters}";
                     }
                     break;
 
