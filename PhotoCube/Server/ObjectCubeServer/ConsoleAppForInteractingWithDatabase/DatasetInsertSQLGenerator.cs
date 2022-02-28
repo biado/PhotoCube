@@ -206,36 +206,50 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"sp_track_popularity", "numerical"},
                 {"sp_album_name", "alphanumerical"},
                 {"sp_artist_infos", "alphanumerical"},
-                {"x", "numerical"},
-                {"y", "numerical"},
-                {"z", "numerical"},
-                {"color", "alphanumerical"},
+                // {"x", "numerical"},
+                // {"y", "numerical"},
+                // {"z", "numerical"},
+                // {"color", "alphanumerical"},
                 {"happiness_percentage", "numerical"},
                 {"sadness_percentage", "numerical"},
                 {"anger_percentage", "numerical"},
                 {"fear_percentage", "numerical"},
                 {"emotion_code", "numerical"},
                 {"genre", "alphanumerical"},
+
                 {"semantic_tag", "alphanumerical"}, //ImgNet classifier
                 {"timestamp", "timestamp"}, //Björn suggest select current time as default
                 {"year", "alphanumerical"}, //from mtb timestamp
                 {"month", "alphanumerical"}, //from mtb timestamp -> parse number to name of month
                 {"day", "alphanumerical"}, //from mtb timestamp
-                {"thumbnail", "alphanumerical"},
+                {"thumbnail", "alphanumerical"}, //spotify image uri
+
+                // {"danceability", "numerical"}, //* 12 audio features
+                // {"energy", "numerical"},
+                // {"key", "numerical"},
+                // {"loudness", "numerical"},
+                // {"mode", "numerical"},
+                // {"speechiness", "numerical"},
+                // {"acousticness", "numerical"},
+                // {"instrumentalness", "numerical"},
+                // {"liveness", "numerical"},
+                // {"valence", "numerical"},
+                // {"tempo", "numerical"},
+                // {"time_signature", "numerical"},
                 
-                {"release_id", "numerical"},
-                {"release_title", "alphanumerical"},
-                {"artist_id", "numerical"},
-                {"artist","alphanumerical"},
+                // {"release_id", "numerical"},
+                // {"release_title", "alphanumerical"},
+                // {"artist_id", "numerical"},
+                // {"artist","alphanumerical"},
                 {"artist_gender", "alphanumerical"},
                 {"artist_country", "alphanumerical"},
-                {"release_year", "numerical"},
+                // {"release_year", "numerical"},
                 {"release_label", "alphanumerical"},
                 {"release_media", "alphanumerical"},
                 {"release_format", "alphanumerical"},
-                {"image_id", "numerical"},
-                {"image_sort_no", "numerical"},
-                {"image_path", "alphanumerical"},
+                // {"image_id", "numerical"},
+                // {"image_sort_no", "numerical"},
+                // {"image_path", "alphanumerical"},
             };
         }
 
