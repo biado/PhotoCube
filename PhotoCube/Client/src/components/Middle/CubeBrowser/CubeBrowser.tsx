@@ -124,7 +124,7 @@ export default class CubeBrowser extends React.Component<{
   //Reusing THREE Geometries and Materials to save memory, to speed things up, and to dispose them after:
   private boxGeometry: THREE.BoxGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
   private sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(
-    0.05,
+    0.1,
     20,
     20
   ); //NEW
@@ -195,6 +195,12 @@ export default class CubeBrowser extends React.Component<{
       MIDDLE: THREE.MOUSE.MIDDLE,
       RIGHT: THREE.MOUSE.LEFT,
     };
+    this.controls.keys = {
+      LEFT: 'ArrowLeft', //left arrow
+      UP: 'Space', // up arrow
+      RIGHT: 'ArrowRight', // right arrow
+      BOTTOM: 'ControlLeft' // down arrow
+    }
     this.controls.update();
 
     //Filling out available space with renderer:
@@ -731,15 +737,25 @@ export default class CubeBrowser extends React.Component<{
 
   /** Handler for keyboard presses. */
   private onKeyPress = (event: KeyboardEvent) => {
-    if (event.code === "Space") {
+    if (event.code === "ArrowDown") {
       //Move camera up in the y direction:
       this.camera.position.y += 0.1;
       this.controls.target.y += 0.1;
       this.controls.update();
-    } else if (event.code === "ControlLeft") {
+    } else if (event.code === "ArrowUp") {
       //Move camera down in the y direction:
       this.camera.position.y -= 0.1;
       this.controls.target.y -= 0.1;
+      this.controls.update();
+    }else if (event.code === "ArrowRight") {
+      //Move camera down in the y direction:
+      this.camera.position.x -= 0.1;
+      this.controls.target.x -= 0.1;
+      this.controls.update();
+    }else if (event.code === "ArrowLeft") {
+      //Move camera down in the y direction:
+      this.camera.position.x += 0.1;
+      this.controls.target.x += 0.1;
       this.controls.update();
     }
   };
