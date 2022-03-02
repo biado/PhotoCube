@@ -18,6 +18,7 @@ interface ClientState {
   BrowsingMode : BrowsingModes.Card | BrowsingModes.Cube | BrowsingModes.Grid,
   filters: Filter[]
   spotifyURI : String | null
+  useColor: boolean
 }
 
 /**
@@ -33,7 +34,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
   state: ClientState = {
     BrowsingMode: BrowsingModes.Cube, //Check selected value in BrowsingModeChanger, or pass down prop.
     filters: [], //Needs to be part of state to rerender CubeBrowser when changed
-    spotifyURI: null
+    spotifyURI: null,
+    useColor: false
   }
 
   CubeBrowserBrowsingState : BrowsingState|null = null;
@@ -48,12 +50,13 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     let currentBrowser = null;
     if(this.state.BrowsingMode == BrowsingModes.Cube){
       currentBrowser = <CubeBrowser ref={this.CubeBrowser} 
+        colorChange={this.state.useColor}
         onSelectTrack={spotifyURI => this.setState({spotifyURI:spotifyURI})}
         onFileCountChanged={this.onFileCountChanged} 
         previousBrowsingState={this.CubeBrowserBrowsingState}
         onOpenCubeInCardMode={this.onOpenCubeInCardMode}
         onOpenCubeInGridMode={this.onOpenCubeInGridMode}
-        filters={this.state.filters}/>
+        filters={this.state.filters} />
     }else if(this.state.BrowsingMode == BrowsingModes.Grid){
       currentBrowser = <GridBrowser cleanFilters={this.cleanFilters} 
         onSelectTrack={spotifyURI => this.setState({spotifyURI:spotifyURI})}
@@ -89,7 +92,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
             <BottomDock 
               hideControls={this.state.BrowsingMode != BrowsingModes.Cube} 
               activeFilters={this.state.filters} 
-              onFiltersChanged={this.onFiltersChanged}/>
+              onFiltersChanged={this.onFiltersChanged}
+            />
           </div>
           <RightDock hideControls={this.state.BrowsingMode != BrowsingModes.Cube}
             hideCount={this.state.BrowsingMode == BrowsingModes.Card}
@@ -99,7 +103,8 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
             onClearAxis={this.onClearAxis}
             activeFilters={this.state.filters}
             onFilterRemoved={this.onFilterRemoved}
-            // spotifyURI={this.state.spotifyURI}
+            //spotifyURI={this.state.spotifyURI}
+            onColorChange={color => this.setState({useColor:color})}
             />
         </div>
     );

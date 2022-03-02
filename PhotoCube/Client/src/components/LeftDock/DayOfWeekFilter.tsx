@@ -11,7 +11,7 @@ import '../../css/LeftDock/DayOfWeekFilter.css';
  * IMPORTANT: Tag filters applied from this section will result in OR search.
  */
 export default class DayOfWeekFilter extends React.Component<{
-    visibleSlider: (emotion: number) => void,
+    visibleSlider: (emotion: string) => void,
     onFiltersChanged: (filters: Filter) => void,
     activeFilters: Filter[],
     onFilterRemoved: (filterId: number) => void
@@ -19,7 +19,8 @@ export default class DayOfWeekFilter extends React.Component<{
     state = {
         daysOfWeek: [],
         //dayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        dayNames: ["h", "s", "a", "f"] //["happy", "sad ", "anger ", "fear"]
+        dayNames: ["happy\\", "sad\\", "anger\\", "fear"] ,
+        emotions:["h", "s", "a", "f"] //
     }
 
     render() {
@@ -46,9 +47,10 @@ export default class DayOfWeekFilter extends React.Component<{
         const response = await Fetcher.FetchTagsByTagsetName("emotion_code")
 
         const DOW: Tag[] = response;
-        console.log(DOW);
-        DOW.sort((a,b) => parseInt(a.name) - parseInt(b.name));
-        this.setState({daysOfWeek: DOW})
+        // console.log(DOW);
+        //DOW.sort((a,b) => parseInt(a.name) - parseInt(b.name));
+        const sortDOW = this.formatEmotions(DOW)
+        this.setState({daysOfWeek: sortDOW})
     }
 
     /**
@@ -60,14 +62,22 @@ export default class DayOfWeekFilter extends React.Component<{
             name={dowTag.name}
             value={dowTag.id}
             onChange={e => this.onChange(e)} />;
+        const emoRef = ["happy", "sad", "anger", "fear"];
         let result = <div className="dow checkbox">
                 {inputElement}
-                <p>{this.state.dayNames[parseInt(dowTag.name)]}</p>
+                <p>{this.state.dayNames[emoRef.indexOf(dowTag.name)]}</p>
+                {/* <p>{this.state.emotions[emoRef.indexOf(dowTag.name)]}</p> */}
                 {/*<p>{this.state.dayNames[parseInt(dowTag.name)-1].substring(0,1)}</p>*/}
             </div>
         return result;
     }
-
+    private formatEmotions = (emotions: Tag[]) => {
+        const emoRef = ["happy", "sad", "anger", "fear"];
+        emotions.sort(function(a, b) {
+            return emoRef.indexOf(a.name)- emoRef.indexOf(b.name);
+        })
+        return emotions
+    }
     /**
      * If a checkbox is checked or unchecked, this method is called.
      * When checked: Adds a filter corresponding to the tag, and calls this.props.onFiltersChanged.
@@ -80,14 +90,14 @@ export default class DayOfWeekFilter extends React.Component<{
             //Add filter
             if (!this.props.activeFilters.some(af => af.name === e.target.name)) {
                 this.props.onFiltersChanged(filter);
-                this.props.visibleSlider(parseInt(e.target.name))
+                this.props.visibleSlider(e.target.name)
             }
         } else {
             //Remove filter
             const filterId = parseInt(e.target.value);
             if (this.props.activeFilters.some(af => af.id === filterId)) {
                 this.props.onFilterRemoved(filterId);
-                this.props.visibleSlider(parseInt(e.target.name))
+                this.props.visibleSlider(e.target.name)
             }
         }
     }

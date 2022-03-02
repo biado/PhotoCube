@@ -1,24 +1,26 @@
+import { Console } from 'console';
 import React from 'react';
 import '../../css/RightDock/FileCount.css';
-
 /**
  * FileCount is a Component that shows how many unique photos the CubeBrowser is currently showing.
  */
 class FileCount extends React.Component<{
-        className: string
+        className: string,
     }>{
     state = {
         fileCount: 0,
     };
 
+
     componentDidMount(){
         
     }
+    handleClick = () =>{}
 
     render(){
         return(
             <div className={this.props.className} id="FileCount">
-                <h4 className="Header">File count</h4>
+                {/* <h4 className="Header">File count</h4> */}
                 <div className="Content">
                     <p>Showing: </p>
                     <p>{this.state.fileCount}</p>
@@ -38,3 +40,4 @@ class FileCount extends React.Component<{
 }
 
 export default FileCount;
+

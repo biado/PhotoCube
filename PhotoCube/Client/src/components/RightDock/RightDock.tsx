@@ -7,6 +7,7 @@ import PickedDimension from './PickedDimension';
 import { FilterList } from './FilterList';
 import { Filter } from '../Filter';
 import { SpotifyWidget } from '../LeftDock/SpotifyWidget';
+import { ColorToggle } from './ColorToggle';
 
 /**
  * RightDock is the right portion of the interface.
@@ -20,8 +21,9 @@ export default class RightDock extends React.Component<{
         hideControls: boolean,
         hideCount: boolean,
         activeFilters: Filter[],
-        onFilterRemoved: (filterId: number) => void
-        // spotifyURI: String | null
+        onFilterRemoved: (filterId: number) => void,
+        // spotifyURI: String | null,
+        onColorChange: (color:boolean) => void,
     }>{
 
     private fileCount = React.createRef<FileCount>();
@@ -32,7 +34,8 @@ export default class RightDock extends React.Component<{
         let countVisibility: string = this.props.hideCount ? "hide" : "";
         return(
             <div id="RightDock">
-                <FileCount className={countVisibility} ref={this.fileCount}/>
+                <FileCount className={countVisibility} ref={this.fileCount} />
+                <ColorToggle onColorChange={this.props.onColorChange}></ColorToggle>
                 {/* <div className={"spotify_widget"}>
                     <SpotifyWidget spotifyURI={this.props.spotifyURI}/>
                 </div> */}

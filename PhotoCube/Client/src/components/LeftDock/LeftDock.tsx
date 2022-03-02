@@ -25,10 +25,14 @@ export default class LeftDock extends Component<{
         
     }>{
         state = {
-            showSlider : [false, false, false, false]
+            showSlider : [false, false, false, false],
+            emotions : ["happy", "sad", "anger", "fear"]
         }
 
-    changeSliders(num: number) {
+    changeSliders(emotion: string) {
+        console.log(emotion)
+        const num = this.state.emotions.indexOf(emotion)
+
         console.log("visible emotion",num)
         var values = this.state.showSlider
         values[num] = ! values[num] 

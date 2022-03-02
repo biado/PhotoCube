@@ -68,40 +68,43 @@ export default class Cell{
             if(useColor){
                 // coloring based on filecount (power of 2)
                 if (this.count == 1){
-                    imgsrc = "/shades/00ff00.png"
+                    imgsrc = "/shades/0000b8.png"
                 }
                 if (this.count > 1 && this.count <= 2){
-                    imgsrc = "/shades/00ff80.png"
+                    imgsrc = "/shades/1515be.png"
                 }
                 if (this.count > 2 && this.count <= 4){
-                    imgsrc = "/shades/00ffbf.png"
+                    imgsrc = "/shades/2b2bc4.png"
                 }
                 if (this.count > 4 && this.count <= 8){
-                    imgsrc = "/shades/00ffff.png"
+                    imgsrc = "/shades/4040ca.png"
                 }
                 if (this.count > 8 && this.count <= 16){
-                    imgsrc = "/shades/00bfff.png"
+                    imgsrc = "/shades/5555d0.png"
                 }
                 if (this.count > 16 && this.count <= 32){
-                    imgsrc = "/shades/0080ff.png"
+                    imgsrc = "/shades/6a6ad6.png"
                 }
                 if (this.count > 32 && this.count <= 64){
-                    imgsrc = "/shades/0040ff.png"
+                    imgsrc = "/shades/8080db.png"
                 }
                 if (this.count > 64 && this.count <= 128){
-                    imgsrc = "/shades/0000ff.png"
+                    imgsrc = "/shades/9595e1.png"
                 }
                 if (this.count > 128 && this.count <= 256){
-                    imgsrc = "/shades/4000ff.png"
+                    imgsrc = "/shades/aaaae7.png"
                 }
                 if (this.count > 256 && this.count <= 512){
-                    imgsrc = "/shades/8000ff.png"
+                    imgsrc = "/shades/bfbfed.png"
                 }
                 if (this.count > 512 && this.count <= 1024){
-                    imgsrc = "/shades/bf00ff.png"
+                    imgsrc = "/shades/d4d4f3.png"
                 }
-                if (this.count > 1024){
-                    imgsrc = "/shades/ff00ff.png"
+                if (this.count > 1024 && this.count <= 2048){
+                    imgsrc = "/shades/eaeaf9.png"
+                }
+                if (this.count > 2048 ){
+                    imgsrc = "/shades/ffffff.png"
                 }
             }else{
                 imgsrc = this.CubeObjects[0].thumbnailURI

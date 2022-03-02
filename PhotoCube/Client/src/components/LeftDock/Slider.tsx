@@ -47,21 +47,28 @@ export enum Operation {
 async function FetchTagsByTagsetName () {
     const response = await Fetcher.FetchTagsByTagsetName(props.tagsetName);
     //console.log(response);
-    const tagsfromFetch: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name, tagset: t.tagset}});
+    //const tagsfromFetch: Tag[] = response.map((t: Tag) => {return {id: t.id, name: t.name, tagset: t.tagset}});
     //update state with tagset specific for slider instenace
-    updateTagset(tagsfromFetch[0].tagset)
+    //updateTagset(tagsfromFetch[0].tagset)
+    updateTagset(response[0].tagset)
+
     //filter hierarchy structure from tags
-    const tags = tagsfromFetch.filter((t:Tag) => !t.name.includes('sp_track_duration') && !t.name.includes(':'))
+    //const tags = tagsfromFetch.filter((t:Tag) => !t.name.includes('sp_track_duration') && !t.name.includes(':'))
     //sort tags
-    tags.sort((a,b) => parseInt(a.name) - parseInt(b.name));
+    //tags.sort((a,b) => parseInt(a.name) - parseInt(b.name));
+    
     //set min nand max state
-    updateMin(parseInt(tags[0].name))
-    const lastValue = tags.length-1 //find max value
-    updateMax(parseInt(tags[lastValue].name))
+    // updateMin(parseInt(tags[0].name))
+    // const lastValue = tags.length-1 //find max value
+    // updateMax(parseInt(tags[lastValue].name))
+    if(props.tagsetName === "sp_track_duration" ){
+      updateMax(1500) // 25:00 min 
+    }
 
     //console.log(parseInt(tags[0].name))
-    console.log(parseInt(tags[lastValue].name))
-    console.log(tags.length)
+    console.log(max)
+    //console.log(parseInt(tags[lastValue].name))
+    //console.log(tags.length)
 }
 
 /**

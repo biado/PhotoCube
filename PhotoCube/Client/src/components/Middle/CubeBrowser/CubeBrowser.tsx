@@ -25,6 +25,7 @@ const OrbitControls = require("three-orbitcontrols");
  */
 export default class CubeBrowser extends React.Component<{
     //Props contract:
+    colorChange: boolean,
     onSelectTrack: (spotifyURI: String) => void;
     onFileCountChanged: (fileCount: number) => void;
     previousBrowsingState: BrowsingState | null;
@@ -47,6 +48,7 @@ export default class CubeBrowser extends React.Component<{
         s: "",
         projectedFilters: [],
         isProjected: false,
+        useColorChange: this.props.colorChange
     };
 
     render() {
@@ -880,8 +882,8 @@ export default class CubeBrowser extends React.Component<{
             zDefined ? this.zAxis : null,
             filters
         );
-        //use color as thumbnail for big browsing states
-        let useColor : boolean = ICells.length > 1000
+        //use color as thumbnail for big browsing states OR if toggle in RightDock
+        let useColor : boolean = ICells.length > 1000 || this.state.useColorChange//this.props.useColorChange
 
         ICells.forEach((c: ICell) =>
             newCells.push(

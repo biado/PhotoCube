@@ -1,6 +1,6 @@
-REACT_APP_IMAGE_SERVER=http://bjth.itu.dk:5002/
-REACT_APP_BASE_URL=https://localhost:5001/api
-REACT_APP_SP_LARGE_URL=https://i.scdn.co/image/ab67616d0000b273
-REACT_APP_SP_MEDIUM_URL=https://i.scdn.co/image/ab67616d00001e02
-REACT_APP_SP_SMALL_URL=https://i.scdn.co/image/ab67616d00004851
-REACT_APP_SP_BASE=https://i.scdn.co/image/
+export REACT_APP_IMAGE_SERVER=http://bjth.itu.dk:5002/
+export REACT_APP_BASE_URL=https://localhost:5001/api
+export REACT_APP_SP_LARGE_URL=https://i.scdn.co/image/ab67616d0000b273
+export REACT_APP_SP_MEDIUM_URL=https://i.scdn.co/image/ab67616d00001e02
+export REACT_APP_SP_SMALL_URL=https://i.scdn.co/image/ab67616d00004851
+export REACT_APP_SP_BASE=https://i.scdn.co/image/
