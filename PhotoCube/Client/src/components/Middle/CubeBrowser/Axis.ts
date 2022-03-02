@@ -33,7 +33,7 @@ export default class Axis{
     LineThreeObject: THREE.Line|null = null;
     LabelThreeObjects: THREE.Mesh[] = [];
     IsReady: boolean = true;
-    
+    AxisSphere: THREE.Mesh[] = [];
     PickedDimension: PickedDimension|null = null;
     Id: number = 0;
     Tags: Tag[] = [];
@@ -100,8 +100,8 @@ export default class Axis{
     AddHierarchy(
         hierarchy: HierarchyNode,
         addTextCallback: (someText: string, aPosition:Position, aColor:Colors, aSize:number) => THREE.Mesh,
-        addLineCallback: (fromPosition: Position, toPosition: Position, aColor:Colors) => THREE.Line){
-        
+        addLineCallback: (fromPosition: Position, toPosition: Position, aColor:Colors) => THREE.Line,
+        addSphereCallback: (aPosition: Position, aColor:Colors) => THREE.Mesh ){
         this.IsReady = false;
         this.AxisType = AxisTypeEnum.Hierarchy;
         //Rootnode id
@@ -149,6 +149,19 @@ export default class Axis{
                 color,        
                 //Fontsize:
                 0.1           
+            )
+        });
+        this.AxisSphere = this.Hierarchies.map((hierarchy,index) => {
+            return addSphereCallback (
+            {
+            //Coordinate:
+                x:this.AxisDirection === AxisDirection.X ? index + 1 : 0,
+                y:this.AxisDirection === AxisDirection.Y ? index + 1 : 0,
+                z:this.AxisDirection === AxisDirection.Z ? index + 1 : 0,
+            },
+            //Color
+            color
+
             )
         });
         this.IsReady = true;
