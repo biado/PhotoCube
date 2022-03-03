@@ -79,14 +79,27 @@ export const TagSearcher = (props: { onFiltersChanged: (filter: Filter) => void,
     }
 
     const onOptionSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selected: Tag = JSON.parse(e.currentTarget.value);
-        updateSelection(selected);
+        if(e.currentTarget.value != "") {
+            const selected: Tag = JSON.parse(e.currentTarget.value);
+            updateSelection(selected);
+        }
+    }
+
+    async function onEnterPressed(e: React.KeyboardEvent) {
+        if(e.charCode === 13) {
+            e.preventDefault();
+            const response = await Fetcher.FetchTagByName(input);
+            const sorted = response.sort((a: Tag,b: Tag) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+            updateOptions(sorted);
+            if (selectedTag !== null) { updateSelection(null); }
+        } // a way to avoid duplicate code? (onEnterPressed & onSearch)
     }
 
     async function onSearch(e: React.MouseEvent<HTMLButtonElement, MouseEvent>){
         e.preventDefault();
         const response = await Fetcher.FetchTagByName(input);
-        updateOptions(response);
+        const sorted = response.sort((a: Tag,b: Tag) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+        updateOptions(sorted);
         if (selectedTag !== null) { updateSelection(null); }
     }
 
@@ -95,7 +108,7 @@ export const TagSearcher = (props: { onFiltersChanged: (filter: Filter) => void,
             <p>Search tags:</p>
             <form method="get">
                 <input className="tag search field" type="text" placeholder="e.g. computer" 
-                    onChange={e => onInputGiven(e.target.value)}/>
+                    onChange={e => onInputGiven(e.target.value)} onKeyPress={(e) => onEnterPressed(e)}/>
             </form>
             <button disabled={input === ""} className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
             {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }

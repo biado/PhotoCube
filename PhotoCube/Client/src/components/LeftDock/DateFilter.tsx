@@ -72,9 +72,14 @@ import { set } from 'mobx';
     }
 
     const updateDropdown = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        updateDisplay(e.currentTarget.value);
-        const selected: Tag = JSON.parse(e.currentTarget.value);
-        previousFilter === null ? addFilter(selected) : replaceFilter(selected);
+        if(e.currentTarget.value === ""){
+            onClear();
+        }
+        else {
+            updateDisplay(e.currentTarget.value);
+            const selected: Tag = JSON.parse(e.currentTarget.value);
+            previousFilter === null ? addFilter(selected) : replaceFilter(selected);
+        }
     }
 
     const onClear = () => {

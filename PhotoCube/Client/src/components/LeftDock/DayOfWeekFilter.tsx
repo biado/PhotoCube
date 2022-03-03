@@ -45,9 +45,8 @@ export default class DayOfWeekFilter extends React.Component<{
      private async renderDaysOfWeek() {
         //const response = await Fetcher.FetchTagsByTagsetName("Day of week (number)")
         const response = await Fetcher.FetchTagsByTagsetName("emotion_code")
-
         const DOW: Tag[] = response;
-        // console.log(DOW);
+        //console.log(DOW);
         //DOW.sort((a,b) => parseInt(a.name) - parseInt(b.name));
         const sortDOW = this.formatEmotions(DOW)
         this.setState({daysOfWeek: sortDOW})
@@ -71,6 +70,7 @@ export default class DayOfWeekFilter extends React.Component<{
             </div>
         return result;
     }
+
     private formatEmotions = (emotions: Tag[]) => {
         const emoRef = ["happy", "sad", "anger", "fear"];
         emotions.sort(function(a, b) {

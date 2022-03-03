@@ -214,7 +214,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 {"sadness_percentage", "numerical"},
                 {"anger_percentage", "numerical"},
                 {"fear_percentage", "numerical"},
-                {"emotion_code", "numerical"},
+                {"emotion_code", "alphanumerical"},
                 {"genre", "alphanumerical"},
 
                 {"semantic_tag", "alphanumerical"}, //ImgNet classifier
@@ -237,19 +237,19 @@ namespace ConsoleAppForInteractingWithDatabase
                 // {"tempo", "numerical"},
                 // {"time_signature", "numerical"},
                 
-                // {"release_id", "numerical"},
-                // {"release_title", "alphanumerical"},
-                // {"artist_id", "numerical"},
-                // {"artist","alphanumerical"},
-                {"artist_gender", "alphanumerical"},
-                {"artist_country", "alphanumerical"},
-                // {"release_year", "numerical"},
-                {"release_label", "alphanumerical"},
-                {"release_media", "alphanumerical"},
-                {"release_format", "alphanumerical"},
-                // {"image_id", "numerical"},
-                // {"image_sort_no", "numerical"},
-                // {"image_path", "alphanumerical"},
+                // {"dr_release_id", "numerical"},
+                // {"dr_release_title", "alphanumerical"},
+                // {"dr_artist_id", "numerical"},
+                // {"dr_artist","alphanumerical"},
+                {"dr_artist_gender", "alphanumerical"},
+                {"dr_artist_country", "alphanumerical"},
+                // {"dr_release_year", "numerical"},
+                {"dr_release_label", "alphanumerical"},
+                {"dr_release_media", "alphanumerical"},
+                {"dr_release_format", "alphanumerical"},
+                // {"dr_image_id", "numerical"},
+                // {"dr_image_sort_no", "numerical"},
+                // {"dr_image_path", "alphanumerical"},
             };
         }
 

@@ -115,7 +115,7 @@ export default class CubeBrowser extends React.Component<{
     private contextMenuCubeObjects: CubeObject[] = [];
 
     //Reusing THREE Geometries and Materials to save memory, to speed things up, and to dispose them after:
-    private boxGeometry: THREE.BoxGeometry = new THREE.BoxGeometry(1, 1, 1);
+    private boxGeometry: THREE.BoxGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
     private boxTextures: Map<string, THREE.MeshBasicMaterial> = new Map<
         string,
         THREE.MeshBasicMaterial
@@ -630,7 +630,7 @@ export default class CubeBrowser extends React.Component<{
 
     /** Handler for keyboard presses. */
     private onKeyPress = (event: KeyboardEvent) => {
-        if (event.code === "Space") {
+        if (event.code === "ControlRight") {
             //Move camera up in the y direction:
             this.camera.position.y += 0.1;
             this.controls.target.y += 0.1;

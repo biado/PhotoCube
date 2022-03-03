@@ -23,6 +23,7 @@ namespace ObjectCubeServer.Models.DomainClasses
         [Column("tagset_id")]
         public int TagsetId { get; set; }
         public Tagset Tagset { get; set; }
+        //public string StrName 
 
         public List<ObjectTagRelation> ObjectTagRelations { get; set; }
 

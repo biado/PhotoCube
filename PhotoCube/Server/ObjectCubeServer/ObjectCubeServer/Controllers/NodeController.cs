@@ -76,15 +76,9 @@ namespace ObjectCubeServer.Controllers
             List<Node> nodesFound = await coContext.Nodes
                     .Include(n => n.Tag)
                     //*Here it does not work with GetTagName() because the body of the lambda cannot be translated into SQL
+                    .Where(n => n.Tag is AlphanumericalTag)
                     .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tag.ToLower()))
                     .ToListAsync();
-
-            // List<Node> nodesFound = coContext.Nodes //seems slower?
-            //         .Include(n => n.Tag)
-            //         //*Here it does not work with GetTagName() because the body of the lambda cannot be translated into SQL
-            //         .AsEnumerable()
-            //         .Where(n => n.Tag.GetTagName().ToLower().StartsWith(tag.ToLower()))
-            //         .ToList();
 
             if (nodesFound == null) {Console.WriteLine(nodesFound); return NotFound(); }
             

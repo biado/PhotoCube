@@ -8,8 +8,8 @@ import { Filter } from "../../Filter";
  * Method calls are reused, and if the server address changes, we only need the change the baseUrl.
  */
 export default class Fetcher {
-  //static baseUrl = "https://localhost:5001/api";
-  static baseUrl = "http://localhost:5000/api";
+  static baseUrl = "https://localhost:5001/api";
+  //static baseUrl = "http://localhost:5000/api";
   static latestQuery = "";
   /**
    * Fetches Cells from the PhotoCube Server. See CellController.cs in server implementation.
@@ -210,7 +210,7 @@ export default class Fetcher {
       const response = await fetch(
         Fetcher.baseUrl + "/tagset/name=" + tagsetName
       );
-      //alert(Fetcher.baseUrl + "/tagset/name=" + tagsetName) 
+      //console.log(Fetcher.baseUrl + "/tagset/name=" + tagsetName) 
       const data = await response.json();
       return data;
     } catch (error) {
