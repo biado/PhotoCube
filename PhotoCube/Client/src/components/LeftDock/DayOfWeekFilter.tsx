@@ -19,7 +19,7 @@ export default class DayOfWeekFilter extends React.Component<{
     state = {
         daysOfWeek: [],
         //dayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        dayNames: ["happy\\", "sad\\", "anger\\", "fear"] ,
+        dayNames: ["happy", "sad", "anger", "fear"] ,
         emotions:["h", "s", "a", "f"] //
     }
 
@@ -64,7 +64,7 @@ export default class DayOfWeekFilter extends React.Component<{
         const emoRef = ["happy", "sad", "anger", "fear"];
         let result = <div className="dow checkbox">
                 {inputElement}
-                <p>{this.state.dayNames[emoRef.indexOf(dowTag.name)]}</p>
+                <p>{this.state.dayNames[emoRef.indexOf(dowTag.name)]}&nbsp;&nbsp;&nbsp;</p>
                 {/* <p>{this.state.emotions[emoRef.indexOf(dowTag.name)]}</p> */}
                 {/*<p>{this.state.dayNames[parseInt(dowTag.name)-1].substring(0,1)}</p>*/}
             </div>

@@ -88,6 +88,7 @@ export const TagSearcher = (props: { onFiltersChanged: (filter: Filter) => void,
     async function onEnterPressed(e: React.KeyboardEvent) {
         if(e.charCode === 13) {
             e.preventDefault();
+            if(input==""){return;}
             const response = await Fetcher.FetchTagByName(input);
             const sorted = response.sort((a: Tag,b: Tag) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
             updateOptions(sorted);

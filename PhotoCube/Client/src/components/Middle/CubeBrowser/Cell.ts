@@ -63,7 +63,7 @@ export default class Cell{
         this.CubeObjects = cubeObjectData;
         this.useColor = useColor;
         if(cubeObjectData.length > 0){
-            let spotifyURI: string = this.CubeObjects[0].fileURI
+            //let spotifyURI: string = this.CubeObjects[0].fileURI
             let imgsrc :string = "";
             if(useColor){
                 // coloring based on filecount (power of 2)

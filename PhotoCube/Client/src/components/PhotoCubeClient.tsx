@@ -50,7 +50,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
     let currentBrowser = null;
     if(this.state.BrowsingMode == BrowsingModes.Cube){
       currentBrowser = <CubeBrowser ref={this.CubeBrowser} 
-        colorChange={this.state.useColor}
+        useColor={this.state.useColor}
         onSelectTrack={spotifyURI => this.setState({spotifyURI:spotifyURI})}
         onFileCountChanged={this.onFileCountChanged} 
         previousBrowsingState={this.CubeBrowserBrowsingState}
@@ -104,7 +104,7 @@ export default class PhotoCubeClient extends React.Component<ClientState> {
             activeFilters={this.state.filters}
             onFilterRemoved={this.onFilterRemoved}
             //spotifyURI={this.state.spotifyURI}
-            onColorChange={color => this.setState({useColor:color})}
+            onColorChange={color => {this.setState({useColor:color}); console.log(this.state.useColor)}}
             />
         </div>
     );

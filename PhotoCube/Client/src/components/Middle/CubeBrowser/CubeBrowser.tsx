@@ -25,7 +25,7 @@ const OrbitControls = require("three-orbitcontrols");
  */
 export default class CubeBrowser extends React.Component<{
     //Props contract:
-    colorChange: boolean,
+    useColor: boolean,
     onSelectTrack: (spotifyURI: String) => void;
     onFileCountChanged: (fileCount: number) => void;
     previousBrowsingState: BrowsingState | null;
@@ -48,7 +48,6 @@ export default class CubeBrowser extends React.Component<{
         s: "",
         projectedFilters: [],
         isProjected: false,
-        useColorChange: this.props.colorChange
     };
 
     render() {
@@ -206,6 +205,13 @@ export default class CubeBrowser extends React.Component<{
         this.mount!.removeChild(this.renderer.domElement);
         this.disposeWhatCanBeDisposed();
     }
+
+    componentDidUpdate(prevProps: any) {
+        if(! this.props.useColor == prevProps.useColor) // Check if it's a new colorRendering
+        {
+            this.computeCells()
+        }
+      } 
 
     private subscribeEventHandlers() {
         //Resize canvas when resizing window:
@@ -882,8 +888,9 @@ export default class CubeBrowser extends React.Component<{
             zDefined ? this.zAxis : null,
             filters
         );
+        console.log(this.props.useColor)
         //use color as thumbnail for big browsing states OR if toggle in RightDock
-        let useColor : boolean = ICells.length > 1000 || this.state.useColorChange//this.props.useColorChange
+        let useColor : boolean = ICells.length > 1000 || this.props.useColor
 
         ICells.forEach((c: ICell) =>
             newCells.push(

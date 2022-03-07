@@ -15,20 +15,16 @@ import React, { useEffect, useState } from 'react';
   
     //when opDirection and FilterValue changes a new filter is applied
     useEffect(() => {
-      console.log(color, '- Has changed')
+      //console.log(color, '- Has changed')
       props.onColorChange(color)
     },[color])
   
-  // initializes component
-  async function FetchTagsByTagsetName () {
-
-  }
   const handleClick = () =>{
     color ? updateColor(false) : updateColor(true) 
   }
       return (
         <div>
-            <p> color </p>
+            <p> &nbsp;&nbsp;heatmap </p>
             <button onClick={handleClick}>        
                 {color ? 'ON' : 'OFF'}
             </button>
