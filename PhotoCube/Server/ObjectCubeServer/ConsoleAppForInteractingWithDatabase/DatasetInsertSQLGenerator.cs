@@ -20,6 +20,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private int numOfImages;
         private string pathToDataset;
         private string pathToTagFile;
+        private string pathToDataTypeTagTypeFile;
         private string pathToErrorLogFile;
         private string resultPath;
         private bool mssqlFormat;
@@ -54,6 +55,7 @@ namespace ConsoleAppForInteractingWithDatabase
             this.SQLPath = sAll.Get("SQLPath");
 
             this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
+            this.pathToDataTypeTagTypeFile = Path.Combine(pathToDataset, @sAll.Get("LscTagsetFilePath"));
             this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
             this.mssqlFormat = Convert.ToBoolean(sAll.Get("mssqlFormat"));
 
@@ -163,30 +165,19 @@ namespace ConsoleAppForInteractingWithDatabase
 
         private Dictionary<string, string> MapDataTypestoTagTypes()
         {
-            return new Dictionary<string, string>()
+            Dictionary<string, string> dataTypeToTagTypeMap = new Dictionary<string, string>();
+            using (StreamReader reader = new StreamReader(pathToDataTypeTagTypeFile))
             {
-                {"Entity", "alphanumerical"},
-                {"Location name", "alphanumerical"},
-                {"Timestamp", "timestamp"},
-                {"Time", "time"},
-                {"Date", "date"},
-                {"Timezone", "alphanumerical"},
-                {"Elevation", "numerical"},
-                {"Speed", "numerical"},
-                {"Heart", "numerical"},
-                {"Calories", "numerical"},
-                {"Activity type", "alphanumerical"},
-                {"Steps", "numerical"},
-                {"Day of week (number)", "numerical"},
-                {"Day of week (string)", "alphanumerical"},
-                {"Day within month", "numerical"},
-                {"Day within year", "numerical"},
-                {"Month (number)", "numerical"},
-                {"Month (string)", "alphanumerical"},
-                {"Year", "numerical"},
-                {"Hour", "numerical"},
-                {"Minute", "numerical"}
-            };
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string dataType = line.Split(delimiter)[0];
+                    string tagType = line.Split(delimiter)[1];
+                    dataTypeToTagTypeMap.Add(dataType, tagType);
+                }
+            }
+
+            return dataTypeToTagTypeMap;
         }
 
         private void BuildTagTypes()
