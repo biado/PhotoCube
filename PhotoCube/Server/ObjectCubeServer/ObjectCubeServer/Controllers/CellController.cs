@@ -43,7 +43,7 @@ namespace ObjectCubeServer.Controllers
             if (allDefined)
             {
                 List<PublicCubeObject> cubeobjects = 
-                    await coContext.PublicCubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForObjects(filtersList)).ToListAsync();
+                    await coContext.PublicCubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCell(axisX.Type, axisX.Id, axisY.Type, axisY.Id, axisZ.Type, axisZ.Id, filtersList)).ToListAsync();
                 return Ok(cubeobjects);
             }
 
@@ -110,7 +110,7 @@ namespace ObjectCubeServer.Controllers
             // Need to run the query, extract the results, and convert the coordinates
             //coContext.CubeObjects.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.AxisType, axisX.Id, axisY.AxisType, axisY.Id, axisZ.AxisType, axisZ.Id)).ToList();
             List<SingleObjectCell> singlecells = await
-                coContext.SingleObjectCells.FromSqlRaw(queryGenerationService.generateSQLQueryForCells(axisX.Type, axisX.Id, axisY.Type, axisY.Id, axisZ.Type, axisZ.Id, filtersList)).ToListAsync();
+                coContext.SingleObjectCells.FromSqlRaw(queryGenerationService.generateSQLQueryForState(axisX.Type, axisX.Id, axisY.Type, axisY.Id, axisZ.Type, axisZ.Id, filtersList)).ToListAsync();
             result = singlecells.Select(c =>
                 new PublicCell(axisX.Ids[c.x], axisY.Ids[c.y], axisZ.Ids[c.z], c.count, c.id, c.fileURI)).ToList();
 
