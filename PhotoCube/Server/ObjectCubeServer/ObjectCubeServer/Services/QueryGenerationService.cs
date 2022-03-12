@@ -74,7 +74,7 @@ namespace ObjectCubeServer.Services
                 foreach (var filter in filtersList)
                 {
                     numberOfFilters++;
-                    queryMiddle.Append(generateFilterQuery(filter));
+                    queryMiddle.Append(generateFilterQueryForState(filter));
                     queryMiddle.Append(((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
                         ? ""  // This is the first entry, and there is nothing more
                         : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
@@ -146,7 +146,7 @@ namespace ObjectCubeServer.Services
                 foreach (var filter in filtersList)
                 {
                     numberOfFilters++;
-                    queryMiddle.Append(generateFilterQuery(filter));
+                    queryMiddle.Append(generateFilterQueryForCell(filter));
                     queryMiddle.Append(((numberOfFilters == 1) && (numberOfFilters == totalNumberOfFilters))
                         ? ""  // This is the first entry, and there is nothing more
                         : ((numberOfFilters == 1) && (numberOfFilters < totalNumberOfFilters))
@@ -226,7 +226,7 @@ namespace ObjectCubeServer.Services
             return query;
         }
 
-        private string generateFilterQuery(ParsedFilter filter)
+        private string generateFilterQueryForState(ParsedFilter filter)
         {
             string query = "";
             switch (filter.type)
@@ -241,6 +241,78 @@ namespace ObjectCubeServer.Services
                     {
                         query +=
                             $" select N.object_id from nodes_taggings N where N.parentnode_id in {generateIdList(filter)}) R{numberOfFilters}";
+                    }
+                    break;
+
+                case "tagset":
+                    if (filter.Ids.Count == 1)
+                    {
+                        query +=
+                            $" select T.object_id from tagsets_taggings T where T.tagset_id = {filter.Ids[0]}) R{numberOfFilters}";
+                    }
+                    else
+                    {
+                        query +=
+                            $" select T.object_id from tagsets_taggings T where T.tagset_id in {generateIdList(filter)}) R{numberOfFilters}";
+                    }
+                    break;
+
+                case "tag":
+                    if (filter.Ids.Count == 1)
+                    {
+                        query +=
+                            $" select R.object_id from objecttagrelations R where R.tag_id = {filter.Ids[0]}) R{numberOfFilters}";
+                    }
+                    else
+                    {
+                        query +=
+                            $" select R.object_id from objecttagrelations R where R.tag_id in {generateIdList(filter)}) R{numberOfFilters}";
+                    }
+                    break;
+
+                case "numrange":
+                    query +=
+                        $" select R.object_id from numerical_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "")}) R{numberOfFilters}";
+                    break;
+
+                case "alpharange":
+                    query +=
+                        $" select R.object_id from alphanumerical_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
+
+                case "daterange":
+                    query +=
+                        $" select R.object_id from date_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
+
+                case "timerange":
+                    query +=
+                        $" select R.object_id from time_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
+                case "timestamprange":
+                    query +=
+                        $" select R.object_id from timestamp_tags T join objecttagrelations R on T.id = R.tag_id where {generateRangeList(filter, "'")}) R{numberOfFilters}";
+                    break;
+            }
+
+            return query;
+        }
+
+        private string generateFilterQueryForCell(ParsedFilter filter)
+        {
+            string query = "";
+            switch (filter.type)
+            {
+                case "node":
+                    if (filter.Ids.Count == 1)
+                    {
+                        query +=
+                            $" select N.object_id from nodes_taggings N where N.node_id = {filter.Ids[0]}) R{numberOfFilters}";
+                    }
+                    else
+                    {
+                        query +=
+                            $" select N.object_id from nodes_taggings N where N.node_id in {generateIdList(filter)}) R{numberOfFilters}";
                     }
                     break;
 
