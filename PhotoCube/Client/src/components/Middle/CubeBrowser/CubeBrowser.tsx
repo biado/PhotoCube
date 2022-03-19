@@ -416,7 +416,7 @@ export default class CubeBrowser extends React.Component<{
                 //window.open("https://open.spotify.com/track/"+spotifyUri)
             } 
             else {
-                alert("no cube to click here")
+                //alert("no cube to click here")
             }
         }
     };
@@ -890,7 +890,7 @@ export default class CubeBrowser extends React.Component<{
         );
         console.log(this.props.useColor)
         //use color as thumbnail for big browsing states OR if toggle in RightDock
-        let useColor : boolean = ICells.length > 1000 || this.props.useColor
+        let useColor : boolean = ICells.length > 2000 || this.props.useColor
 
         ICells.forEach((c: ICell) =>
             newCells.push(

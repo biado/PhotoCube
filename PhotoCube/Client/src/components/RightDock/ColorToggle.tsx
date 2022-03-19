@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
  * functional slider component
  */
  export const ColorToggle : any = (props:{
+    className: string, 
     onColorChange: (color:boolean) => void,
    }) => {
 
@@ -23,7 +24,7 @@ import React, { useEffect, useState } from 'react';
     color ? updateColor(false) : updateColor(true) 
   }
       return (
-        <div>
+        <div className={props.className}>
             <p> &nbsp;&nbsp;heatmap </p>
             <button onClick={handleClick}>        
                 {color ? 'ON' : 'OFF'}

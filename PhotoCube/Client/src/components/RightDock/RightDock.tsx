@@ -35,7 +35,7 @@ export default class RightDock extends React.Component<{
         return(
             <div id="RightDock">
                 <FileCount className={countVisibility} ref={this.fileCount} />
-                <ColorToggle onColorChange={this.props.onColorChange}></ColorToggle>
+                <ColorToggle className={visibility} onColorChange={this.props.onColorChange}></ColorToggle>
                 {/* <div className={"spotify_widget"}>
                     <SpotifyWidget spotifyURI={this.props.spotifyURI}/>
                 </div> */}

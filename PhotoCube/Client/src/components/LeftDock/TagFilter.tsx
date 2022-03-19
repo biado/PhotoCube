@@ -114,6 +114,8 @@ export const TagSearcher = (props: { onFiltersChanged: (filter: Filter) => void,
             <button disabled={input === ""} className="submit button" type="submit" onClick={e => onSearch(e)}>Search</button>
             {(options.length > 0) ? <SearchResults options={options} onOptionSelected={onOptionSelected}/> : null }
             {(selectedTag !== null) ? <TagFilter selectedTag={selectedTag} activeFilters={props.activeFilters} onFiltersChanged={props.onFiltersChanged}/> : null }
+            <br></br>
+            <br></br>
         </div>
     )
 }
