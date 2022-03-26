@@ -83,7 +83,7 @@ export default class CubeBrowser extends React.Component<{
     return (
       <div className="grid-item" id="CubeBrowser">
         <div
-          style={{ width: "400px", height: "400px" }}
+          style={{width: "400px", height: "400px" }}
           ref={(mount) => {
             this.mount = mount;
           }}
@@ -607,8 +607,8 @@ export default class CubeBrowser extends React.Component<{
       }
       this.setState({ projectedFilters: projectedFilter });
       this.setState({ isProjected: filtersAreProjected });
+      this.onOpenCubeInGridMode();
     }
-    this.onOpenCubeInGridMode();
     return false;
   };
 
@@ -737,7 +737,34 @@ export default class CubeBrowser extends React.Component<{
 
   /** Handler for keyboard presses. */
   private onKeyPress = (event: KeyboardEvent) => {
-    if (event.code === "ArrowDown") {
+    let e : String = event.code;
+    switch (e) {
+      case "ArrowDown": 
+      //Move camera up in the y direction:
+      this.camera.position.y += 0.1;
+      this.controls.target.y += 0.1;
+      this.controls.update();
+        break;
+      case "ArrowUp": 
+      this.camera.position.y -= 0.1;
+      this.controls.target.y -= 0.1;
+      this.controls.update();
+        break;
+      case "ArrowRight": 
+      this.camera.position.x -= 0.1;
+      this.controls.target.x -= 0.1;
+      this.controls.update();
+        break;
+      case "ArrowLeft": 
+       //Move camera down in the y direction:
+       this.camera.position.x += 0.1;
+       this.controls.target.x += 0.1;
+       this.controls.update();
+        break;
+      default:
+        break;
+    }
+    /* if (event.code === "ArrowDown") {
       //Move camera up in the y direction:
       this.camera.position.y += 0.1;
       this.controls.target.y += 0.1;
@@ -757,7 +784,7 @@ export default class CubeBrowser extends React.Component<{
       this.camera.position.x += 0.1;
       this.controls.target.x += 0.1;
       this.controls.update();
-    }
+    } */
   };
 
   /** Handler to rightclick - open cube in Card mode. */

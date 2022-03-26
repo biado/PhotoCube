@@ -2,6 +2,7 @@
   background-color: black;
   margin: 0;
   padding: 0;
+  position: static;
   /*background-color: black;*/
   overflow: hidden;
   text-align: center;
