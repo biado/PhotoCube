@@ -1,23 +1,9 @@
 # Thesis
-PhotoCube and Lifelog Data | Thesis | Spring 2021 | MSc Software Design | IT University of Copenhagen
+AudioCube: Exploring Music Collections with the M3 Model | Thesis | Spring 2022 | MSc Software Design | IT University of Copenhagen
 
-Contributors: Jihye Shin (@jish) | Alexandra Waldau (@alew)
+Contributors: Estrid Kärk (@estk)
 
-This repository contains 3 directories:
-- LSC-MMM Mapping
-- PhotoCube
-- Server performance measurement
+## AudioCube
 
-## LSC-MMM Mapping
-
-This directory contains Java programs, that transform Lifelog Search Challenge (LSC) dataset. The goal is to map the LSC data to Multi-dimensional Media Model (M-cube).
-
-The input files are deleted based on the LSC data usage terms.
-
-## PhotoCube
-
-This version of PhotoCube is implemented to better support the participation in the Lifelog Search Challenge (LSC).
-
-## Server performance measurement
-
-This directory contains a python script to measure the performance of PhotoCube's server.
+This version of PhotoCube is named AudioCube and implemented to support explortaion in a music collection.
+It contains three new components: a SpotifyWidget to play audio, a Slider to range filter a numerical tagset and a ColorToggle that renders the browsing state with color. The used color scale is logaritmic based on track densisty in cubes.
