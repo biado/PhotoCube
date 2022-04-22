@@ -82,7 +82,7 @@ namespace ObjectCubeServer.Controllers
             {
                 var publicNode = new PublicNode(node.Id, ((AlphanumericalTag)node.Tag).Name)
                 {
-                    ParentNode = await GetParentNode(node)
+                    ParentId = await GetParentNodeId(node.Id)
                 };
                 result.Add(publicNode);
             }
@@ -98,7 +98,8 @@ namespace ObjectCubeServer.Controllers
             PublicNode parentNode = await GetParentNode(childNode);
 
             if (parentNode == null) return NotFound();
-            
+            parentNode.ParentId = await GetParentNodeId(parentNode.Id);
+
             return Ok(parentNode);
         }
 
@@ -108,7 +109,7 @@ namespace ObjectCubeServer.Controllers
         {
             IEnumerable<PublicNode> childNodes = await coContext.Nodes.Include(n => n.Children)
                 .Where(n => n.Id == nodeId)
-                .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag) cn.Tag).Name)))
+                .Select(n => n.Children.Select(cn => new PublicNode(cn.Id, ((AlphanumericalTag) cn.Tag).Name, nodeId)))
                 .FirstOrDefaultAsync();
 
             return Ok(childNodes);
