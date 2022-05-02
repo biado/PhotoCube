@@ -24,11 +24,11 @@ export default class LeftDock extends Component<{
         let visibility: string = this.props.hideControls ? " hide" : "";
         return (
             <div id={"LeftDock"} >
-                <div className={visibility}>
+                <div className={"hide"}>
                     <h4 className="Header">Day of week filter:</h4>
                     <DayOfWeekFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterRemoved={this.props.onFilterRemoved}></DayOfWeekFilter>
                 </div>
-                <div className={visibility}>
+                <div className={"hide"}>
                     <h4 className="Header">Date filter:</h4>
                     <div className="date dropdowns">
                         <DateTagDropdown tagsetName={"Day within month"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
@@ -36,7 +36,7 @@ export default class LeftDock extends Component<{
                         <DateTagDropdown tagsetName={"Year"} onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplaced={this.props.onFilterReplaced} onFilterRemoved={this.props.onFilterRemoved}/>
                     </div>
                 </div>
-                <div className={visibility}>
+                <div className={"hide"}>
                     <h4 className="Header">Time range filter:</h4>
                     <TimeFilter onFiltersChanged={this.props.onFiltersChanged} activeFilters={this.props.activeFilters} onFilterReplacedByType={this.props.onFilterReplacedByType} onFilterRemovedByType={this.props.onFilterRemovedByType}/>
                 </div>
