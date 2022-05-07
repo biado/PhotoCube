@@ -94,7 +94,6 @@ namespace ConsoleAppForInteractingWithDatabase
                     string line = reader.ReadLine(); // Skipping the first line
                     while ((line = reader.ReadLine()) != null && !line.Equals("") && fileCount <= numOfImages)
                     {
-                        Console.WriteLine("CubeObject line: " + fileCount);
 
                         //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
                         string filename = line.Split(delimiter)[0];
@@ -106,7 +105,8 @@ namespace ConsoleAppForInteractingWithDatabase
                             Console.WriteLine("Image " + filename + " is already in the database");
                         }
 
-                        string thumbnailURI = Path.Combine("Thumbnails", filename);
+                        //string thumbnailURI = Path.Combine("Thumbnails", filename);
+                        string thumbnailURI = filename;
 
                         CubeObject cubeObject = DomainClassFactory.NewCubeObject(
                             filename,
@@ -117,6 +117,7 @@ namespace ConsoleAppForInteractingWithDatabase
                         if (fileCount % batchSize == 0)
                         {
                             LogTimeToFile("CubeObject", fileCount);
+                            Console.WriteLine("CubeObject line: " + fileCount);
                         }
 
                         fileCount++;
@@ -124,6 +125,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 }
 
                 LogTimeToFile("CubeObject", fileCount - 1);
+                Console.WriteLine("CubeObject line: " + (fileCount-1));
             }
             catch (Exception e)
             {
@@ -241,8 +243,6 @@ namespace ConsoleAppForInteractingWithDatabase
                     string line = reader.ReadLine(); // Skipping the first line
                     while ((line = reader.ReadLine()) != null && !line.Equals("") && lineCount <= numOfImages)
                     {
-                        Console.WriteLine("Tagset & Tag line: " + lineCount);
-
                         //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
                         string[] split = line.Split(delimiter);
                         string fileName = split[0];
@@ -329,6 +329,7 @@ namespace ConsoleAppForInteractingWithDatabase
 
                         if (lineCount % batchSize == 0)
                         {
+                            Console.WriteLine("Tagset & Tag line: " + lineCount);
                             LogTimeToFile("Tagset & Tag", lineCount);
                         }
 
@@ -336,6 +337,7 @@ namespace ConsoleAppForInteractingWithDatabase
                     }
                 }
 
+                Console.WriteLine("Tagset & Tag line: " + (lineCount-1));
                 LogTimeToFile("Tagset & Tag", lineCount - 1);
             }
             catch (Exception e)
@@ -368,7 +370,7 @@ namespace ConsoleAppForInteractingWithDatabase
             int rootnodeCount = 0;
             foreach (JSNode rootChild in root.children)
             {
-                string tagsetName = rootChild.name;
+                string tagsetName = rootChild.tagset;
                 string hierarchyName = rootChild.name;
 
                 // Finding Tagset;
@@ -493,7 +495,9 @@ namespace ConsoleAppForInteractingWithDatabase
             // values
             // (value1, value2, ..);
             int insertCount = 0;
-            
+
+            Console.WriteLine("Writing SQL queries");
+
             //SQL server specific requirement
             if (mssqlFormat)
             {
@@ -513,12 +517,14 @@ namespace ConsoleAppForInteractingWithDatabase
                                          "'); \n";
                 File.AppendAllText(SQLPath, insertStatement);
                 insertCount++;
-                if (insertCount % 100 == 0 && mssqlFormat)
+                if (insertCount % 1000 == 0 && mssqlFormat)
                 {
                     File.AppendAllText(SQLPath, "GO\n");
-                } else if (insertCount % 100 == 0)
+                } else if (insertCount % 1000 == 0)
                 {
                     File.AppendAllText(SQLPath,"COMMIT;\n");
+                    if (insertCount % 10000 == 0)
+                        Console.WriteLine("Created objects: " + insertCount);
                 }
             }
 
@@ -529,6 +535,7 @@ namespace ConsoleAppForInteractingWithDatabase
             }
             else
             {
+                Console.WriteLine("Created objects: " + insertCount);
                 File.AppendAllText(SQLPath, "COMMIT;\n");
             }
             
@@ -599,15 +606,18 @@ namespace ConsoleAppForInteractingWithDatabase
 
                     File.AppendAllText(SQLPath, insertStatement);
                     insertCount++;
-                    if (insertCount % 100 == 0 && mssqlFormat)
+                    if (insertCount % 1000 == 0 && mssqlFormat)
                     {
                         File.AppendAllText(SQLPath, "GO\n");
-                    } else if (insertCount % 100 == 0)
+                    } else if (insertCount % 1000 == 0)
                     {
+                        if (insertCount % 10000 == 0)
+                            Console.WriteLine("Created tags: " + insertCount);
                         File.AppendAllText(SQLPath,"COMMIT;\n");
                     }
                 }
             }
+            Console.WriteLine("Created tags: " + insertCount);
 
             if (mssqlFormat)
             {
@@ -624,11 +634,13 @@ namespace ConsoleAppForInteractingWithDatabase
                                              otr.ObjectId + "," + otr.TagId + "); \n";
                     File.AppendAllText(SQLPath, insertStatement);
                     insertCount++;
-                    if (insertCount % 100 == 0 && mssqlFormat)
+                    if (insertCount % 1000 == 0 && mssqlFormat)
                     {
                         File.AppendAllText(SQLPath, "GO\n");
-                    } else if (insertCount % 100 == 0)
+                    } else if (insertCount % 1000 == 0)
                     {
+                        if (insertCount % 10000 == 0)
+                            Console.WriteLine("Created taggings: " + insertCount);
                         File.AppendAllText(SQLPath,"COMMIT;\n");
                     }
                 }
@@ -640,6 +652,7 @@ namespace ConsoleAppForInteractingWithDatabase
             }
             else
             {
+                Console.WriteLine("Created taggings: " + insertCount);
                 File.AppendAllText(SQLPath, "COMMIT;\n");
             }
 
@@ -669,11 +682,13 @@ namespace ConsoleAppForInteractingWithDatabase
                                          "," + n.HierarchyId + "); \n";
                 File.AppendAllText(SQLPath, insertStatement);
                 insertCount++;
-                if (insertCount % 100 == 0 && mssqlFormat)
+                if (insertCount % 1000 == 0 && mssqlFormat)
                 {
                     File.AppendAllText(SQLPath, "GO\n");
-                } else if (insertCount % 100 == 0)
+                } else if (insertCount % 1000 == 0)
                 {
+                    if (insertCount % 10000 == 0)
+                        Console.WriteLine("Created nodes: " + insertCount);
                     File.AppendAllText(SQLPath,"COMMIT;\n");
                 }
             }
@@ -696,6 +711,7 @@ namespace ConsoleAppForInteractingWithDatabase
             }
             else
             {
+                Console.WriteLine("Created nodes: " + insertCount);
                 File.AppendAllText(SQLPath, "COMMIT;\n");
                 File.AppendAllText(SQLPath,"\\set AUTOCOMMIT on\n");
                 File.AppendAllText(SQLPath,"SELECT NOW();\n");

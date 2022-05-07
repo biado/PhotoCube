@@ -6,6 +6,7 @@ import java.util.Objects;
  */
 public class JSTag {
     private String name;
+    private String tagset;
     private Integer id; // -1 if this tag is not used as actual tag for an image. Not int but Integer to force null when writing to json file. (If int it writes 0)
     private JSTag[] children;
 
@@ -32,6 +33,26 @@ public class JSTag {
     @Override
     public int hashCode() {
         return Objects.hash(name, id);
+    }
+
+    /**
+     * Returns the name of this tagset
+     * @return the name of this tagset
+     */
+    public String getTagset() {
+        if (this.tagset != null)
+            return this.tagset;
+        else
+            return "";
+    }
+
+    /**
+     * Sets the name as the given parameter
+     * @param newName
+     */
+    public void setTagset(String newName) {
+        if (this.tagset != null)
+            this.tagset = newName;
     }
 
     /**

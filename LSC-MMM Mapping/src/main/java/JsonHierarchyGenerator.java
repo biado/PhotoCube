@@ -45,9 +45,12 @@ public class JsonHierarchyGenerator {
     private void buildTagNameDuplicateTagsetsMapRecursive(JSTag current) {
         // traverse children of "root" tree and collect duplicate tags
         // This method also cleans up the name, such that it replaces "_" to " ".
-        String tagsetName = StringBeautifier.toPrettyTagsetName(current);
-        current.setName(tagsetName);
-        putInTagNameDuplicateTagsetListMap(tagsetName, current);
+        //String tagsetName = StringBeautifier.toPrettyTagsetName(current);
+        current.setName(StringBeautifier.toPrettyFeatureName(current.getName()));
+        if (current.getTagset() == null) {
+            current.setTagset(StringBeautifier.toPrettyFeatureName(current.getTagset()));
+        }
+        putInTagNameDuplicateTagsetListMap(current.getName(), current);
         if (current.getChildren() != null) { // if it has children (not a leaf)
             for (JSTag child : current.getChildren()) {
                 buildTagNameDuplicateTagsetsMapRecursive(child);
@@ -101,7 +104,7 @@ public class JsonHierarchyGenerator {
         // ROOT - [timezone, day of week, enity]
         // We do not include "ROOT"
         for (JSTag child : this.root.getChildren()) {
-            String tagsetName = child.getName().replaceAll("_", " ");
+            String tagsetName = child.getTagset().replaceAll("_", " ");
             buildTagTagsetMapRecursive(tagsetName, child);
         }
     }
@@ -121,7 +124,7 @@ public class JsonHierarchyGenerator {
         Set<JSTag> fatherset = new HashSet<>(fathers);
         System.out.println(jshg.getHomonyms().contains("Father"));
         for (JSTag jsTagset : fathers) {
-            System.out.println(jsTagset.getName() + ": " + jsTagset.getId());
+            System.out.println(jsTagset.getTagset() + ": " + jsTagset.getId());
         }
     }
 }

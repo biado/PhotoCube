@@ -7,6 +7,7 @@ namespace ConsoleAppForInteractingWithDatabase
     class JSNode
     {
         public string name { get; set; }
+        public string? tagset { get; set; }
         public int? id { get; set; }
         public JSNode[] children { get; set; }
         public JSNode parentJSNode { get; set; }
