@@ -45,8 +45,9 @@ namespace ConsoleAppForInteractingWithDatabase
 
         private void buildRoot()
         {
-            string LscJsonHierarchyPath = sAll.Get("LscJsonHierarchyPath");
-            using (StreamReader reader = new StreamReader(LscJsonHierarchyPath))
+            string pathToDataset =  @sAll.Get("M3_LOADER_PATH");
+            string lscJsonHierarchyPath = Path.Combine(pathToDataset ?? string.Empty, @sAll.Get("LscJsonHierarchyPath") ?? "hierarchyOutput.json");
+            using (StreamReader reader = new StreamReader(lscJsonHierarchyPath))
             {
                 string json = reader.ReadToEnd();
                 root = JsonConvert.DeserializeObject<JSNode>(json);

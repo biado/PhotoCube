@@ -24,6 +24,7 @@ namespace ConsoleAppForInteractingWithDatabase
         private string pathToErrorLogFile;
         private string resultPath;
         private bool mssqlFormat;
+        private bool appendcommands;
         private Stopwatch stopwatch;
         private int batchSize = 10000;
         private string SQLPath;
@@ -50,16 +51,29 @@ namespace ConsoleAppForInteractingWithDatabase
         public DatasetInsertSQLGenerator(int numOfImages)
         {
             this.numOfImages = numOfImages;
-            this.pathToDataset = sAll.Get("pathToLscData");
-            this.resultPath = sAll.Get("resultPath");
-            this.SQLPath = sAll.Get("SQLPath");
+            this.pathToDataset = sAll.Get("M3_LOADER_PATH");
+            this.resultPath = Path.Combine(pathToDataset,@sAll.Get("resultPath"));
+            this.SQLPath = Path.Combine(pathToDataset,@sAll.Get("SQLPath"));
 
             this.pathToTagFile = Path.Combine(pathToDataset, @sAll.Get("LscTagFilePath"));
             this.pathToDataTypeTagTypeFile = Path.Combine(pathToDataset, @sAll.Get("LscTagsetFilePath"));
             this.pathToErrorLogFile = Path.Combine(pathToDataset, @sAll.Get("LscErrorfilePath"));
             this.mssqlFormat = Convert.ToBoolean(sAll.Get("mssqlFormat"));
+            this.appendcommands = Convert.ToBoolean(sAll.Get("appendcommands"));
+
+            if (!appendcommands)
+            {
+                File.Create(resultPath).Close();
+                File.Create(SQLPath).Close();
+                File.Create(pathToErrorLogFile).Close();
+            }
 
             File.AppendAllText(pathToErrorLogFile, "Errors goes here:\n");
+            if (string.IsNullOrEmpty(pathToDataset))
+            {
+                File.AppendAllText(pathToErrorLogFile, "WARNING: M3_LOADER_PATH IS NOT SET\n");
+            }
+
             datatypes = MapDataTypestoTagTypes();
             root = new JsonHierarchyParser().root;
 
@@ -96,7 +110,6 @@ namespace ConsoleAppForInteractingWithDatabase
                     string line = reader.ReadLine(); // Skipping the first line
                     while ((line = reader.ReadLine()) != null && !line.Equals("") && fileCount <= numOfImages)
                     {
-
                         //File format: "FileName,,TagSet,,Tag,,TagSet,,Tag:(...)"
                         string filename = line.Split(delimiter)[0];
 
@@ -127,7 +140,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 }
 
                 LogTimeToFile("CubeObject", fileCount - 1);
-                Console.WriteLine("CubeObject line: " + (fileCount-1));
+                Console.WriteLine("CubeObject line: " + (fileCount - 1));
             }
             catch (Exception e)
             {
@@ -328,7 +341,7 @@ namespace ConsoleAppForInteractingWithDatabase
                     }
                 }
 
-                Console.WriteLine("Tagset & Tag line: " + (lineCount-1));
+                Console.WriteLine("Tagset & Tag line: " + (lineCount - 1));
                 LogTimeToFile("Tagset & Tag", lineCount - 1);
             }
             catch (Exception e)
@@ -400,7 +413,8 @@ namespace ConsoleAppForInteractingWithDatabase
                 //If parentTag does not exist, create it:
                 if (!tags.ContainsKey(parentTagName))
                 {
-                    parentTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset, parentTagName);
+                    parentTag = DomainClassFactory.NewAlphanumericalTag(tagtypes["alphanumerical"], tagset,
+                        parentTagName);
                     tagList = new Dictionary<int, Tag>();
                     tagList[parentTag.TagsetId] = parentTag;
                     tags[parentTagName] = tagList;
@@ -497,7 +511,7 @@ namespace ConsoleAppForInteractingWithDatabase
             }
             else
             {
-                File.AppendAllText(SQLPath,"SELECT NOW();\n\\set AUTOCOMMIT off\nCOMMIT;\n");
+                File.AppendAllText(SQLPath, "SELECT NOW();\n\\set AUTOCOMMIT off\nCOMMIT;\n");
             }
 
             //Insert all CubeObjects
@@ -511,9 +525,10 @@ namespace ConsoleAppForInteractingWithDatabase
                 if (insertCount % 1000 == 0 && mssqlFormat)
                 {
                     File.AppendAllText(SQLPath, "GO\n");
-                } else if (insertCount % 1000 == 0)
+                }
+                else if (insertCount % 1000 == 0)
                 {
-                    File.AppendAllText(SQLPath,"COMMIT;\n");
+                    File.AppendAllText(SQLPath, "COMMIT;\n");
                     if (insertCount % 10000 == 0)
                         Console.WriteLine("Created objects: " + insertCount);
                 }
@@ -529,7 +544,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 Console.WriteLine("Created objects: " + insertCount);
                 File.AppendAllText(SQLPath, "COMMIT;\n");
             }
-            
+
 
             //Insert all Tagsets
             foreach (var ts in tagsets.Values)
@@ -543,7 +558,7 @@ namespace ConsoleAppForInteractingWithDatabase
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tagsets OFF;\n");
                 File.AppendAllText(SQLPath, "SET IDENTITY_INSERT tag_types ON;\n");
             }
-            
+
 
             //Insert all TagTypes
             foreach (var tt in tagtypes.Values)
@@ -580,8 +595,9 @@ namespace ConsoleAppForInteractingWithDatabase
                                                nt.Name + "," + nt.TagsetId + "); \n";
                             break;
                         case TimestampTag tst:
-                            String timestamp = tst.Name.ToString("yyyy-MM-dd HH:mm:ss").Replace('.',':');
-                            insertStatement += "INSERT INTO timestamp_tags(id, name, tagset_id) VALUES(" + tst.Id + ",'" +
+                            String timestamp = tst.Name.ToString("yyyy-MM-dd HH:mm:ss").Replace('.', ':');
+                            insertStatement += "INSERT INTO timestamp_tags(id, name, tagset_id) VALUES(" + tst.Id +
+                                               ",'" +
                                                timestamp + "'," + tst.TagsetId + "); \n";
                             break;
                         case DateTag dt:
@@ -600,14 +616,16 @@ namespace ConsoleAppForInteractingWithDatabase
                     if (insertCount % 1000 == 0 && mssqlFormat)
                     {
                         File.AppendAllText(SQLPath, "GO\n");
-                    } else if (insertCount % 1000 == 0)
+                    }
+                    else if (insertCount % 1000 == 0)
                     {
                         if (insertCount % 10000 == 0)
                             Console.WriteLine("Created tags: " + insertCount);
-                        File.AppendAllText(SQLPath,"COMMIT;\n");
+                        File.AppendAllText(SQLPath, "COMMIT;\n");
                     }
                 }
             }
+
             Console.WriteLine("Created tags: " + insertCount);
 
             if (mssqlFormat)
@@ -628,11 +646,12 @@ namespace ConsoleAppForInteractingWithDatabase
                     if (insertCount % 1000 == 0 && mssqlFormat)
                     {
                         File.AppendAllText(SQLPath, "GO\n");
-                    } else if (insertCount % 1000 == 0)
+                    }
+                    else if (insertCount % 1000 == 0)
                     {
                         if (insertCount % 10000 == 0)
                             Console.WriteLine("Created taggings: " + insertCount);
-                        File.AppendAllText(SQLPath,"COMMIT;\n");
+                        File.AppendAllText(SQLPath, "COMMIT;\n");
                     }
                 }
             }
@@ -676,11 +695,12 @@ namespace ConsoleAppForInteractingWithDatabase
                 if (insertCount % 1000 == 0 && mssqlFormat)
                 {
                     File.AppendAllText(SQLPath, "GO\n");
-                } else if (insertCount % 1000 == 0)
+                }
+                else if (insertCount % 1000 == 0)
                 {
                     if (insertCount % 10000 == 0)
                         Console.WriteLine("Created nodes: " + insertCount);
-                    File.AppendAllText(SQLPath,"COMMIT;\n");
+                    File.AppendAllText(SQLPath, "COMMIT;\n");
                 }
             }
 
@@ -704,8 +724,8 @@ namespace ConsoleAppForInteractingWithDatabase
             {
                 Console.WriteLine("Created nodes: " + insertCount);
                 File.AppendAllText(SQLPath, "COMMIT;\n");
-                File.AppendAllText(SQLPath,"\\set AUTOCOMMIT on\n");
-                File.AppendAllText(SQLPath,"SELECT NOW();\n");
+                File.AppendAllText(SQLPath, "\\set AUTOCOMMIT on\n");
+                File.AppendAllText(SQLPath, "SELECT NOW();\n");
             }
         }
     }
