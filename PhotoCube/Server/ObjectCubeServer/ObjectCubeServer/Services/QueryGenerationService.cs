@@ -104,7 +104,7 @@ namespace ObjectCubeServer.Services
 
             var queryFront = new StringBuilder("select distinct O.id as Id, O.file_uri as fileURI, TS.name as T from (select R1.object_id ");
             var queryMiddle = new StringBuilder(" from (");
-            var queryEnd = new StringBuilder(") X join cubeobjects O on X.object_id = O.id join objecttagrelations R2 on O.id = R2.object_id join timestamp_tags TS on R2.tag_id = TS.id order by TS.name;");
+            var queryEnd = new StringBuilder(") X join cubeobjects O on X.object_id = O.id join objecttagrelations R2 on O.id = R2.object_id join timestamp_tags TS on R2.tag_id = TS.id join tagsets S on TS.tagset_id = S.id where S.name = 'Timestamp UTC' order by TS.name;");
 
             numberOfFilters += (xType == "") ? 0 : 1;
 
@@ -176,7 +176,7 @@ namespace ObjectCubeServer.Services
             }
 
             var queryFront = new StringBuilder("select O.id as Id, O.file_uri as fileURI, TS1.name as T ");
-            var queryMiddle = new StringBuilder("from cubeobjects O join objecttagrelations R1 on O.id = R1.object_id join timestamp_tags TS1 on R1.tag_id = TS1.id join timestamp_tags TS2 on TS1.name between TS2.name - interval '30 minutes' and TS2.name + interval '30 minutes' join objecttagrelations R2 on TS2.id = R2.tag_id where R2.object_id = ");
+            var queryMiddle = new StringBuilder("from cubeobjects O join objecttagrelations R1 on O.id = R1.object_id join timestamp_tags TS1 on R1.tag_id = TS1.id join tagsets S on TS1.tagset_id = S.id join timestamp_tags TS2 on TS1.tagset_id = TS2.tagset_id and TS1.name between TS2.name - interval '30 minutes' and TS2.name + interval '30 minutes' join objecttagrelations R2 on TS2.id = R2.tag_id where S.name = 'Timestamp UTC' and R2.object_id = ");
             var queryEnd = new StringBuilder(" order by TS1.name;");
 
             if (filtersList != null)
