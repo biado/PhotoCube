@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ObjectCubeServer.Models.Contexts;
 using ObjectCubeServer.Models.DomainClasses;
+using ObjectCubeServer.Models.PublicClasses;
 
 namespace ObjectCubeServer.Controllers
 {
@@ -35,12 +36,34 @@ namespace ObjectCubeServer.Controllers
         public async Task<ActionResult<CubeObject>> Get(int id)
         {
             CubeObject cubeObjectFound = await coContext.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
-            
+
             if (cubeObjectFound == null)
             {
                 return NotFound();
             }
             return Ok(cubeObjectFound);
+        }
+
+        // GET : api/CubeObject/5/tags
+        [HttpGet("{id:int}/tags")]
+        public async Task<ActionResult<IEnumerable<PublicTagTagset>>> GetTags(int id)
+        {
+            var cubeObjectFound = await coContext.CubeObjects.FirstOrDefaultAsync(co => co.Id == id);
+
+            if (cubeObjectFound == null)
+            {
+                return NotFound();
+            }
+
+            var tags = await coContext.ObjectTagRelations
+                .Include(otr => otr.Tag.Tagset)
+                .Where(otr => otr.ObjectId == id)
+                .OrderBy(otr => otr.Tag.Tagset.Id)
+                .ThenBy(otr => otr.Tag.Id)
+                .Select(otr => new PublicTagTagset(otr.TagId, otr.Tag.GetTagName(), otr.Tag.TagsetId, otr.Tag.Tagset.Name))
+                .ToListAsync();
+
+            return Ok(tags);
         }
 
         // GET: api/CubeObject/fromTagId/1 (currently not in use)
