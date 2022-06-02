@@ -65,6 +65,18 @@ namespace ObjectCubeServer.Controllers
             return Ok(tagFound);
         }
 
+        // GET: api/Tag/123/nodes
+        [HttpGet("{tagId:int}/nodes")]
+        public async Task<ActionResult<IEnumerable<PublicNode>>> GetTagNodes(int tagId)
+        {
+            IEnumerable<Node> tagNodes = await coContext.Nodes
+                .Where(n => n.TagId == tagId)
+                .ToListAsync();
+
+            //var result = tagNodes.Select(n => new PublicNode(n.Id, n.Tag.GetTagName())).ToList();
+            return Ok(tagNodes);
+        }
+
         // GET: api/Tag/name=computer
         /// <summary>
         /// Returns single tag (of alphanumerical type) where Tag.name == name.
