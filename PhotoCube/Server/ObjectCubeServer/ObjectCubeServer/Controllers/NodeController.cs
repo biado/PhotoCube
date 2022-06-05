@@ -72,6 +72,7 @@ namespace ObjectCubeServer.Controllers
         {
             List<Node> nodesFound = await coContext.Nodes
                     .Include(n => n.Tag)
+                    .OrderBy(n => ((AlphanumericalTag)n.Tag).Name.ToLower())
                     .Where(n => ((AlphanumericalTag)n.Tag).Name.ToLower().StartsWith(tag.ToLower()))
                     .ToListAsync();
             
